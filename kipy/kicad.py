@@ -37,6 +37,7 @@ from kipy.project import Project
 from kipy.server import KiCadServer, find_kicad_cli
 from kipy.proto.common import commands
 from kipy.proto.common.types import base_types_pb2, DocumentType, DocumentSpecifier
+from kipy.proto.common.types.base_types_pb2 import FrameType
 from kipy.proto.common.commands import base_commands_pb2, project_commands_pb2
 from kipy.kicad_api_version import KICAD_API_VERSION
 
@@ -283,6 +284,34 @@ class KiCad:
         """
         command = project_commands_pb2.CloseDocument()
         command.document.CopyFrom(document)
+        self._client.send(command, Empty)
+
+    def open_editor(self, frame: FrameType.ValueType, path: str = "") -> DocumentSpecifier:
+        """Opens a KiCad editor window (pcbnew, eeschema, symbol_editor, footprint_editor).
+
+        Sends OpenEditor via IPC to a running KiCad Manager.
+        If path is given, the editor will load that file.
+
+        :param frame: FrameType enum value, e.g. FrameType.FT_PCB_EDITOR
+        :param path: Optional file path to open in the editor
+        :return: DocumentSpecifier for the opened document (may be empty for some frame types)
+        """
+        command = project_commands_pb2.OpenEditor()
+        command.frame = frame
+        if path:
+            command.path = path
+        response = self._client.send(command, project_commands_pb2.OpenEditorResponse)
+        return response.document
+
+    def close_editor(self, frame: FrameType.ValueType, force: bool = False) -> None:
+        """Closes a KiCad editor window.
+
+        :param frame: FrameType enum value, e.g. FrameType.FT_PCB_EDITOR
+        :param force: If True, close without prompting to save
+        """
+        command = project_commands_pb2.CloseEditor()
+        command.frame = frame
+        command.force = force
         self._client.send(command, Empty)
 
     def get_project(self, document: DocumentSpecifier) -> Project:
