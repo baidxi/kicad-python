@@ -3,9 +3,8 @@
 `kicad-python` is the official Python bindings for the [KiCad](https://kicad.org) IPC API.  This
 library makes it possible to develop scripts and tools that interact with a running KiCad session.
 
-The KiCad IPC API can be considered in "public beta" state with the release of KiCad 9 (currently
-planned for on or around February 1, 2025).  The existing SWIG-based Python bindings for KiCad's
-PCB editor still exist in KiCad 9, but are in maintenance mode and will not be expanded.
+The KiCad IPC API replaces the legacy SWIG-based Python bindings for KiCad's PCB editor.
+The SWIG bindings still exist in KiCad 9 and 10, but are removed in KiCad 11.
 
 For more information about the IPC API, please see the
 [KiCad developer documentation](https://dev-docs.kicad.org/en/apis-and-binding/ipc-api/index.html).
@@ -77,6 +76,10 @@ plugins, copy or symlink them into the appropriate plugins path in order for KiC
 
 ## Release History
 
+### 0.7.1 (April 17, 2026)
+
+- Fix `KiCad.run_action` (leommxj)
+
 ### 0.7.0 (April 17, 2026)
 
 - Add `Board.get_items_by_id` and groups support via `Board.get_groups` (requires KiCad 10) (Anthonypark, !15)
@@ -86,7 +89,6 @@ plugins, copy or symlink them into the appropriate plugins path in order for KiC
 - Add `Board.get_connected_items`, `Board.get_items_by_net`, and `Board.get_items_by_netclass` (requires KiCad 10.0.1)
 - Fix several bounding box calculation bugs
 - Support building with older versions of protoc
-- Fix `KiCad.run_action` (leommxj)
 
 ### 0.6.0 (March 15, 2026)
 
