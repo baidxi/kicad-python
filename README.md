@@ -77,7 +77,7 @@ plugins, copy or symlink them into the appropriate plugins path in order for KiC
 
 ## Release History
 
-### 0.7.0 (TBD)
+### 0.7.0 (April 17, 2026)
 
 - Add `Board.get_items_by_id` and groups support via `Board.get_groups` (requires KiCad 10) (Anthonypark, !15)
 - Add support for barcodes and `Board.get_barcodes` (requires KiCad 10.0.1)
@@ -86,6 +86,7 @@ plugins, copy or symlink them into the appropriate plugins path in order for KiC
 - Add `Board.get_connected_items`, `Board.get_items_by_net`, and `Board.get_items_by_netclass` (requires KiCad 10.0.1)
 - Fix several bounding box calculation bugs
 - Support building with older versions of protoc
+- Fix `KiCad.run_action` (leommxj)
 
 ### 0.6.0 (March 15, 2026)
 
