@@ -18,12 +18,14 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from typing import Iterable, List, Sequence, Union, cast
+from pathlib import Path
+from typing import Iterable, List, Optional, Sequence, Union, cast
 
 from google.protobuf.empty_pb2 import Empty
 
 from kipy.client import KiCadClient
 from kipy.common_types import Commit, PageSettings, TitleBlockInfo
+from kipy.schematic_jobs import JobResult, PlotSettings
 from kipy.project import Project
 from kipy.schematic_types import (
     Group,
@@ -64,7 +66,9 @@ from kipy.proto.common.types import (
     KIID,
     KiCadObjectType,
     base_types_pb2,
+    jobs_pb2,
 )
+from kipy.proto.schematic import schematic_jobs_pb2
 from kipy.proto.schematic.schematic_commands_pb2 import (
     GetSchematicHierarchy,
     GetSchematicNetlist,
@@ -121,6 +125,122 @@ class Schematic:
         command = editor_commands_pb2.RevertDocument()
         command.document.CopyFrom(self._doc)
         self._kicad.send(command, Empty)
+
+    @staticmethod
+    def _validate_export_target(
+        output_path: str,
+        *,
+        argument_name: str,
+        format_name: str,
+        output_kind: str,
+    ) -> str:
+        normalized_output_path = output_path.strip()
+        if not normalized_output_path:
+            raise ValueError(f"{argument_name} must be a non-empty path")
+
+        target = Path(normalized_output_path)
+        if output_kind == "directory":
+            expected_suffix = f".{format_name.lower()}"
+            if target.exists() and not target.is_dir():
+                raise ValueError(
+                    f"{argument_name} must point to a directory for schematic {format_name.upper()} export"
+                )
+            if target.suffix.lower() == expected_suffix:
+                raise ValueError(
+                    f"{argument_name} must point to an output directory for schematic {format_name.upper()} export, "
+                    f"not a {expected_suffix} file path"
+                )
+            return normalized_output_path
+
+        if output_kind == "file":
+            if target.exists() and target.is_dir():
+                raise ValueError(
+                    f"{argument_name} must point to an output file for schematic {format_name.upper()} export"
+                )
+            if normalized_output_path.endswith(("/", "\\")):
+                raise ValueError(
+                    f"{argument_name} must point to an output file for schematic {format_name.upper()} export, "
+                    "not a directory path"
+                )
+            return normalized_output_path
+
+        raise ValueError(f"Unsupported schematic export output kind: {output_kind!r}")
+
+    def export_svg(
+        self, output_dir: str, plot_settings: Optional[PlotSettings] = None
+    ) -> JobResult:
+        """Plots the schematic to SVG files in an output directory."""
+        normalized_output_dir = self._validate_export_target(
+            output_dir,
+            argument_name="output_dir",
+            format_name="svg",
+            output_kind="directory",
+        )
+        command = schematic_jobs_pb2.RunSchematicJobExportSvg()
+        if plot_settings is not None:
+            command.plot_settings.CopyFrom(plot_settings.proto)
+        command.job_settings.document.CopyFrom(self._doc)
+        command.job_settings.output_path = normalized_output_dir
+        return JobResult(self._kicad.send(command, jobs_pb2.RunJobResponse))
+
+    def export_dxf(
+        self, output_dir: str, plot_settings: Optional[PlotSettings] = None
+    ) -> JobResult:
+        """Plots the schematic to DXF files in an output directory."""
+        normalized_output_dir = self._validate_export_target(
+            output_dir,
+            argument_name="output_dir",
+            format_name="dxf",
+            output_kind="directory",
+        )
+        command = schematic_jobs_pb2.RunSchematicJobExportDxf()
+        if plot_settings is not None:
+            command.plot_settings.CopyFrom(plot_settings.proto)
+        command.job_settings.document.CopyFrom(self._doc)
+        command.job_settings.output_path = normalized_output_dir
+        return JobResult(self._kicad.send(command, jobs_pb2.RunJobResponse))
+
+    def export_pdf(
+        self,
+        output_file: str,
+        plot_settings: Optional[PlotSettings] = None,
+        property_popups: bool = False,
+        hierarchical_links: bool = False,
+        include_metadata: bool = True,
+    ) -> JobResult:
+        """Plots the schematic to a PDF file."""
+        normalized_output_file = self._validate_export_target(
+            output_file,
+            argument_name="output_file",
+            format_name="pdf",
+            output_kind="file",
+        )
+        command = schematic_jobs_pb2.RunSchematicJobExportPdf()
+        if plot_settings is not None:
+            command.plot_settings.CopyFrom(plot_settings.proto)
+        command.property_popups = property_popups
+        command.hierarchical_links = hierarchical_links
+        command.include_metadata = include_metadata
+        command.job_settings.document.CopyFrom(self._doc)
+        command.job_settings.output_path = normalized_output_file
+        return JobResult(self._kicad.send(command, jobs_pb2.RunJobResponse))
+
+    def export_ps(
+        self, output_dir: str, plot_settings: Optional[PlotSettings] = None
+    ) -> JobResult:
+        """Plots the schematic to PostScript files in an output directory."""
+        normalized_output_dir = self._validate_export_target(
+            output_dir,
+            argument_name="output_dir",
+            format_name="ps",
+            output_kind="directory",
+        )
+        command = schematic_jobs_pb2.RunSchematicJobExportPs()
+        if plot_settings is not None:
+            command.plot_settings.CopyFrom(plot_settings.proto)
+        command.job_settings.document.CopyFrom(self._doc)
+        command.job_settings.output_path = normalized_output_dir
+        return JobResult(self._kicad.send(command, jobs_pb2.RunJobResponse))
 
     def begin_commit(self) -> Commit:
         command = BeginCommit()
