@@ -77,6 +77,14 @@ source code) is hosted at https://docs.kicad.org/kicad-python-main
 Many things are still not documented or underdocumented -- contributions that expand the
 documentation or add docstrings are welcomed.
 
+## Schematic export jobs
+
+Schematic plot export uses format-specific output target names in the public Python API.
+
+- `Schematic.export_svg`, `Schematic.export_dxf`, and `Schematic.export_ps` take `output_dir` because KiCad writes one file per plotted sheet into a directory.
+- `Schematic.export_pdf` takes `output_file` because KiCad writes a single PDF file.
+- When exporting all sheets, `plot_all=True` with omitted `plot_pages` is the safest default unless you already know the exact sheet-instance paths to filter.
+
 ## Examples
 
 Check out the repository for some example scripts that may serve as a starting point.  Some of the
@@ -91,7 +99,7 @@ plugins, copy or symlink them into the appropriate plugins path in order for KiC
 - Add support for launching `kicad-cli api-server` (headless mode) automatically
 - Add board output jobs support
 - Add footprint wizards support
-- Add initial schematic support (`KiCad.get_schematic`, `schematic_types`, etc)
+- Add initial schematic support (`KiCad.get_schematic`, `schematic_types`, page and title block access, and schematic plot export jobs)
 
 ### 0.7.1 (April 17, 2026)
 
