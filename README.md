@@ -83,6 +83,7 @@ Schematic plot export uses format-specific output target names in the public Pyt
 
 - `Schematic.export_svg`, `Schematic.export_dxf`, and `Schematic.export_ps` take `output_dir` because KiCad writes one file per plotted sheet into a directory.
 - `Schematic.export_pdf` takes `output_file` because KiCad writes a single PDF file.
+- `Schematic.export_netlist` and `Schematic.export_bom` take `output_file` because they produce file outputs rather than directory-style plot jobs.
 - When exporting all sheets, `plot_all=True` with omitted `plot_pages` is the safest default unless you already know the exact sheet-instance paths to filter.
 
 ## Examples
@@ -99,7 +100,7 @@ plugins, copy or symlink them into the appropriate plugins path in order for KiC
 - Add support for launching `kicad-cli api-server` (headless mode) automatically
 - Add board output jobs support
 - Add footprint wizards support
-- Add initial schematic support (`KiCad.get_schematic`, `schematic_types`, page and title block access, and schematic plot export jobs)
+- Add initial schematic support (`KiCad.get_schematic`, `schematic_types`, page and title block access, schematic plot export jobs, and netlist/BOM export wrappers)
 
 ### 0.7.1 (April 17, 2026)
 

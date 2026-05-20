@@ -25,7 +25,12 @@ from google.protobuf.empty_pb2 import Empty
 
 from kipy.client import KiCadClient
 from kipy.common_types import Commit, PageSettings, TitleBlockInfo
-from kipy.schematic_jobs import JobResult, PlotSettings
+from kipy.schematic_jobs import (
+    BOMFieldSettings,
+    BOMFormatSettings,
+    JobResult,
+    PlotSettings,
+)
 from kipy.project import Project
 from kipy.schematic_types import (
     Group,
@@ -240,6 +245,54 @@ class Schematic:
             command.plot_settings.CopyFrom(plot_settings.proto)
         command.job_settings.document.CopyFrom(self._doc)
         command.job_settings.output_path = normalized_output_dir
+        return JobResult(self._kicad.send(command, jobs_pb2.RunJobResponse))
+
+    def export_netlist(
+        self,
+        output_file: str,
+        format: schematic_jobs_pb2.SchematicNetlistFormat.ValueType = schematic_jobs_pb2.SNF_KICAD_SEXPR,
+        variant_name: str = "",
+    ) -> JobResult:
+        """Exports the schematic netlist to one output file."""
+        normalized_output_file = self._validate_export_target(
+            output_file,
+            argument_name="output_file",
+            format_name="netlist",
+            output_kind="file",
+        )
+        command = schematic_jobs_pb2.RunSchematicJobExportNetlist()
+        command.format = format
+        command.variant_name = variant_name
+        command.job_settings.document.CopyFrom(self._doc)
+        command.job_settings.output_path = normalized_output_file
+        return JobResult(self._kicad.send(command, jobs_pb2.RunJobResponse))
+
+    def export_bom(
+        self,
+        output_file: str,
+        format_settings: Optional[BOMFormatSettings] = None,
+        field_settings: Optional[BOMFieldSettings] = None,
+        exclude_dnp: bool = False,
+        group_symbols: bool = False,
+        variant_name: str = "",
+    ) -> JobResult:
+        """Exports the schematic bill of materials to one output file."""
+        normalized_output_file = self._validate_export_target(
+            output_file,
+            argument_name="output_file",
+            format_name="bom",
+            output_kind="file",
+        )
+        command = schematic_jobs_pb2.RunSchematicJobExportBOM()
+        if format_settings is not None:
+            command.format.CopyFrom(format_settings.proto)
+        if field_settings is not None:
+            command.fields.CopyFrom(field_settings.proto)
+        command.exclude_dnp = exclude_dnp
+        command.group_symbols = group_symbols
+        command.variant_name = variant_name
+        command.job_settings.document.CopyFrom(self._doc)
+        command.job_settings.output_path = normalized_output_file
         return JobResult(self._kicad.send(command, jobs_pb2.RunJobResponse))
 
     def begin_commit(self) -> Commit:

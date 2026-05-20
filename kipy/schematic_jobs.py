@@ -24,7 +24,13 @@ from kipy.board_jobs import JobResult
 from kipy.proto.schematic import schematic_jobs_pb2
 from kipy.wrapper import Wrapper
 
-__all__ = ("JobResult", "PlotSettings")
+__all__ = (
+    "JobResult",
+    "PlotSettings",
+    "BOMFormatSettings",
+    "BOMField",
+    "BOMFieldSettings",
+)
 
 
 class PlotSettings(Wrapper):
@@ -139,3 +145,167 @@ class PlotSettings(Wrapper):
     @theme.setter
     def theme(self, value: str):
         self._proto.theme = value
+
+
+class BOMFormatSettings(Wrapper):
+    """Formatting settings for schematic BOM export jobs."""
+
+    def __init__(
+        self,
+        proto: Optional[schematic_jobs_pb2.BOMFormatSettings] = None,
+        proto_ref: Optional[schematic_jobs_pb2.BOMFormatSettings] = None,
+    ):
+        self._proto = (
+            proto_ref if proto_ref is not None else schematic_jobs_pb2.BOMFormatSettings()
+        )
+        if proto is not None:
+            self._proto.CopyFrom(proto)
+
+    @property
+    def preset_name(self) -> str:
+        return self._proto.preset_name
+
+    @preset_name.setter
+    def preset_name(self, value: str):
+        self._proto.preset_name = value
+
+    @property
+    def field_delimiter(self) -> str:
+        return self._proto.field_delimiter
+
+    @field_delimiter.setter
+    def field_delimiter(self, value: str):
+        self._proto.field_delimiter = value
+
+    @property
+    def string_delimiter(self) -> str:
+        return self._proto.string_delimiter
+
+    @string_delimiter.setter
+    def string_delimiter(self, value: str):
+        self._proto.string_delimiter = value
+
+    @property
+    def ref_delimiter(self) -> str:
+        return self._proto.ref_delimiter
+
+    @ref_delimiter.setter
+    def ref_delimiter(self, value: str):
+        self._proto.ref_delimiter = value
+
+    @property
+    def ref_range_delimiter(self) -> str:
+        return self._proto.ref_range_delimiter
+
+    @ref_range_delimiter.setter
+    def ref_range_delimiter(self, value: str):
+        self._proto.ref_range_delimiter = value
+
+    @property
+    def keep_tabs(self) -> bool:
+        return self._proto.keep_tabs
+
+    @keep_tabs.setter
+    def keep_tabs(self, value: bool):
+        self._proto.keep_tabs = value
+
+    @property
+    def keep_line_breaks(self) -> bool:
+        return self._proto.keep_line_breaks
+
+    @keep_line_breaks.setter
+    def keep_line_breaks(self, value: bool):
+        self._proto.keep_line_breaks = value
+
+
+class BOMField(Wrapper):
+    """One exported field column definition for schematic BOM jobs."""
+
+    def __init__(
+        self,
+        proto: Optional[schematic_jobs_pb2.BOMField] = None,
+        proto_ref: Optional[schematic_jobs_pb2.BOMField] = None,
+    ):
+        self._proto = proto_ref if proto_ref is not None else schematic_jobs_pb2.BOMField()
+        if proto is not None:
+            self._proto.CopyFrom(proto)
+
+    @property
+    def name(self) -> str:
+        return self._proto.name
+
+    @name.setter
+    def name(self, value: str):
+        self._proto.name = value
+
+    @property
+    def label(self) -> str:
+        return self._proto.label
+
+    @label.setter
+    def label(self, value: str):
+        self._proto.label = value
+
+    @property
+    def group_by(self) -> bool:
+        return self._proto.group_by
+
+    @group_by.setter
+    def group_by(self, value: bool):
+        self._proto.group_by = value
+
+
+class BOMFieldSettings(Wrapper):
+    """Field-selection settings for schematic BOM export jobs."""
+
+    def __init__(
+        self,
+        proto: Optional[schematic_jobs_pb2.BOMFieldSettings] = None,
+        proto_ref: Optional[schematic_jobs_pb2.BOMFieldSettings] = None,
+    ):
+        self._proto = (
+            proto_ref if proto_ref is not None else schematic_jobs_pb2.BOMFieldSettings()
+        )
+        if proto is not None:
+            self._proto.CopyFrom(proto)
+
+    @property
+    def preset_name(self) -> str:
+        return self._proto.preset_name
+
+    @preset_name.setter
+    def preset_name(self, value: str):
+        self._proto.preset_name = value
+
+    @property
+    def fields(self) -> list[BOMField]:
+        return [BOMField(proto_ref=field) for field in self._proto.fields]
+
+    @fields.setter
+    def fields(self, value: Sequence[BOMField]):
+        del self._proto.fields[:]
+        self._proto.fields.extend(field.proto for field in value)
+
+    @property
+    def sort_field(self) -> str:
+        return self._proto.sort_field
+
+    @sort_field.setter
+    def sort_field(self, value: str):
+        self._proto.sort_field = value
+
+    @property
+    def sort_direction(self) -> schematic_jobs_pb2.BOMSortDirection.ValueType:
+        return self._proto.sort_direction
+
+    @sort_direction.setter
+    def sort_direction(self, value: schematic_jobs_pb2.BOMSortDirection.ValueType):
+        self._proto.sort_direction = value
+
+    @property
+    def filter(self) -> str:
+        return self._proto.filter
+
+    @filter.setter
+    def filter(self, value: str):
+        self._proto.filter = value
