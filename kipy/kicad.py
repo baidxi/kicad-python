@@ -38,7 +38,11 @@ from kipy.schematic import Schematic
 from kipy.server import KiCadServer, find_kicad_cli
 from kipy.proto.common import commands
 from kipy.proto.common.types import base_types_pb2, DocumentType, DocumentSpecifier
-from kipy.proto.common.commands import base_commands_pb2, project_commands_pb2
+from kipy.proto.common.commands import (
+    base_commands_pb2,
+    editor_commands_pb2,
+    project_commands_pb2,
+)
 from kipy.kicad_api_version import KICAD_API_VERSION
 
 
@@ -286,6 +290,27 @@ class KiCad:
         """
         command = project_commands_pb2.CloseDocument()
         command.document.CopyFrom(document)
+        self._client.send(command, Empty)
+
+    def open_library_item(
+        self,
+        library: str,
+        name: str,
+        type: DocumentType.ValueType,
+    ):
+        """Loads a library item (e.g. a footprint) into the matching editor.
+
+        At present, only ``DOCTYPE_FOOTPRINT`` is supported by KiCad; the
+        footprint editor must already be open.
+
+        :param library: The library nickname.
+        :param name: The entry name within the library.
+        :param type: The document type of the item to load.
+        """
+        command = editor_commands_pb2.OpenLibraryItem()
+        command.type = type
+        command.identifier.library_nickname = library
+        command.identifier.entry_name = name
         self._client.send(command, Empty)
 
     def get_project(self, document: DocumentSpecifier) -> Project:
