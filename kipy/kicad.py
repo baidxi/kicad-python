@@ -34,11 +34,16 @@ from kipy.common_types import Text, TextBox, CompoundShape
 from kipy.errors import FutureVersionError
 from kipy.geometry import Box2
 from kipy.project import Project
+from kipy.schematic import Schematic
 from kipy.server import KiCadServer, find_kicad_cli
 from kipy.proto.common import commands
 from kipy.proto.common.types import base_types_pb2, DocumentType, DocumentSpecifier
 from kipy.proto.common.types.base_types_pb2 import FrameType
-from kipy.proto.common.commands import base_commands_pb2, project_commands_pb2
+from kipy.proto.common.commands import (
+    base_commands_pb2,
+    editor_commands_pb2,
+    project_commands_pb2,
+)
 from kipy.kicad_api_version import KICAD_API_VERSION
 
 
@@ -257,7 +262,9 @@ class KiCad:
         :param action: the name of a KiCad TOOL_ACTION
         :return: a value from the KIAPI.COMMON.COMMANDS.RUN_ACTION_STATUS enum
         """
-        return self._client.send(commands.RunAction(), commands.RunActionResponse)
+        command = commands.RunAction()
+        command.action = action
+        return self._client.send(command, commands.RunActionResponse)
 
     def get_open_documents(self, doc_type: DocumentType.ValueType) -> Sequence[DocumentSpecifier]:
         """Retrieves a list of open documents matching the given type"""
@@ -286,25 +293,23 @@ class KiCad:
         command.document.CopyFrom(document)
         self._client.send(command, Empty)
 
-    def open_editor(self, frame: FrameType.ValueType, path: str = "") -> DocumentSpecifier:
+    def open_editor(self, frame: FrameType.ValueType) -> DocumentSpecifier:
         """Opens a KiCad editor window (pcbnew, eeschema, symbol_editor, footprint_editor).
 
-        Sends OpenEditor via IPC to a running KiCad Manager.
-        If path is given, the editor will load that file.
+        Only available in GUI project mode.
 
         :param frame: FrameType enum value, e.g. FrameType.FT_PCB_EDITOR
-        :param path: Optional file path to open in the editor
         :return: DocumentSpecifier for the opened document (may be empty for some frame types)
         """
         command = project_commands_pb2.OpenEditor()
         command.frame = frame
-        if path:
-            command.path = path
         response = self._client.send(command, project_commands_pb2.OpenEditorResponse)
         return response.document
 
     def close_editor(self, frame: FrameType.ValueType, force: bool = False) -> None:
         """Closes a KiCad editor window.
+
+        Only available in GUI project mode.
 
         :param frame: FrameType enum value, e.g. FrameType.FT_PCB_EDITOR
         :param force: If True, close without prompting to save
@@ -312,6 +317,27 @@ class KiCad:
         command = project_commands_pb2.CloseEditor()
         command.frame = frame
         command.force = force
+        self._client.send(command, Empty)
+
+    def open_library_item(
+        self,
+        library: str,
+        name: str,
+        type: DocumentType.ValueType,
+    ):
+        """Loads a library item (e.g. a footprint) into the matching editor.
+
+        At present, only ``DOCTYPE_FOOTPRINT`` is supported by KiCad; the
+        footprint editor must already be open.
+
+        :param library: The library nickname.
+        :param name: The entry name within the library.
+        :param type: The document type of the item to load.
+        """
+        command = editor_commands_pb2.OpenLibraryItem()
+        command.type = type
+        command.identifier.library_nickname = library
+        command.identifier.entry_name = name
         self._client.send(command, Empty)
 
     def get_project(self, document: DocumentSpecifier) -> Project:
@@ -324,6 +350,15 @@ class KiCad:
         if len(docs) == 0:
             raise ApiError("Expected to be able to retrieve at least one board")
         return Board(self._client, docs[0])
+
+    def get_schematic(self) -> Schematic:
+        """
+        .. versionadded:: 0.x.y (KiCad 11)
+        """
+        docs = self.get_open_documents(DocumentType.DOCTYPE_SCHEMATIC)
+        if len(docs) == 0:
+            raise ApiError("Expected to be able to retrieve at least one schematic")
+        return Schematic(self._client, docs[0])
 
     # Utility functions
 
