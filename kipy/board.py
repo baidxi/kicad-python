@@ -18,6 +18,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import reprlib
 from time import sleep
 from typing import List, Dict, Union, Iterable, Optional, Sequence, cast, overload
 from google.protobuf.empty_pb2 import Empty
@@ -154,11 +155,28 @@ class ImportNetlistResult(Wrapper):
             self._proto.CopyFrom(proto)
 
     def __repr__(self) -> str:
-        return f"<ImportNetlistResult report={self.report!r}>"
+        return (
+            f"<ImportNetlistResult error_count={self.error_count} "
+            f"warning_count={self.warning_count} "
+            f"new_footprint_count={self.new_footprint_count} "
+            f"report={reprlib.repr(self.report)}>"
+        )
 
     @property
     def report(self) -> str:
         return self._proto.report
+
+    @property
+    def error_count(self) -> int:
+        return self._proto.error_count
+
+    @property
+    def warning_count(self) -> int:
+        return self._proto.warning_count
+
+    @property
+    def new_footprint_count(self) -> int:
+        return self._proto.new_footprint_count
 
 class BoardLayerGraphicsDefaults(Wrapper):
     """The default properties for graphic items added on a given class of board layer"""
