@@ -18,6 +18,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import reprlib
 from time import sleep
 from typing import List, Dict, Union, Iterable, Optional, Sequence, cast, overload
 from google.protobuf.empty_pb2 import Empty
@@ -94,6 +95,7 @@ from kipy.proto.board.board_types_pb2 import ( #noqa
 from kipy.proto.board.board_commands_pb2 import ( #noqa
     BoardOriginType,
     CustomRulesStatus,
+    NetlistMatchMode,
 )
 from kipy.proto.board.board_jobs_pb2 import (  # noqa
     PlotDrillMarks,
@@ -135,6 +137,46 @@ BoardJobCommand = Union[
     board_jobs_pb2.RunBoardJobExportODB,
     board_jobs_pb2.RunBoardJobExportStats,
 ]
+
+class ImportNetlistResult(Wrapper):
+    """Result of importing a schematic netlist into the board."""
+
+    def __init__(
+        self,
+        proto: Optional[board_commands_pb2.ImportNetlistResponse] = None,
+        proto_ref: Optional[board_commands_pb2.ImportNetlistResponse] = None,
+    ):
+        self._proto = (
+            proto_ref
+            if proto_ref is not None
+            else board_commands_pb2.ImportNetlistResponse()
+        )
+        if proto is not None:
+            self._proto.CopyFrom(proto)
+
+    def __repr__(self) -> str:
+        return (
+            f"<ImportNetlistResult error_count={self.error_count} "
+            f"warning_count={self.warning_count} "
+            f"new_footprint_count={self.new_footprint_count} "
+            f"report={reprlib.repr(self.report)}>"
+        )
+
+    @property
+    def report(self) -> str:
+        return self._proto.report
+
+    @property
+    def error_count(self) -> int:
+        return self._proto.error_count
+
+    @property
+    def warning_count(self) -> int:
+        return self._proto.warning_count
+
+    @property
+    def new_footprint_count(self) -> int:
+        return self._proto.new_footprint_count
 
 class BoardLayerGraphicsDefaults(Wrapper):
     """The default properties for graphic items added on a given class of board layer"""
@@ -560,6 +602,30 @@ class Board:
         command.job_settings.document.CopyFrom(self._doc)
         command.job_settings.output_path = output_path
         return JobResult(self._kicad.send(command, jobs_pb2.RunJobResponse))
+
+    def import_netlist(
+        self,
+        netlist_path: str,
+        dry_run: bool = False,
+        match_mode: board_commands_pb2.NetlistMatchMode.ValueType = NetlistMatchMode.NMM_UUID,
+        delete_extra_footprints: bool = True,
+        update_footprints: bool = True,
+        transfer_groups: bool = True,
+        override_locks: bool = False,
+    ) -> ImportNetlistResult:
+        """Imports a netlist exported from the schematic and updates the board."""
+        command = board_commands_pb2.ImportNetlist()
+        command.board.CopyFrom(self._doc)
+        command.netlist_path = netlist_path
+        command.match_mode = match_mode
+        command.delete_extra_footprints = delete_extra_footprints
+        command.update_footprints = update_footprints
+        command.transfer_groups = transfer_groups
+        command.override_locks = override_locks
+        command.dry_run = dry_run
+        return ImportNetlistResult(
+            self._kicad.send(command, board_commands_pb2.ImportNetlistResponse)
+        )
 
     def export_odb(
         self,
