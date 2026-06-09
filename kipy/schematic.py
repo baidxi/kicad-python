@@ -18,7 +18,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from typing import Iterable, List, Sequence, Union, cast
+from typing import Iterable, List, Optional, Sequence, Union, cast
 
 from google.protobuf.empty_pb2 import Empty
 
@@ -358,3 +358,65 @@ class Schematic:
         return self._kicad.send(
             command, editor_commands_pb2.SavedSelectionResponse
         ).contents
+
+    def get_selection(
+        self,
+        types: Optional[
+            Union[KiCadObjectType.ValueType, Sequence[KiCadObjectType.ValueType]]
+        ] = None,
+    ) -> Sequence[SchematicItem]:
+        command = editor_commands_pb2.GetSelection()
+        command.header.document.CopyFrom(self._doc)
+
+        if isinstance(types, int):
+            command.types.append(types)
+        else:
+            command.types.extend(types or [])
+
+        return [
+            cast(SchematicItem, unwrap(item))
+            for item in self._kicad.send(
+                command, editor_commands_pb2.SelectionResponse
+            ).items
+        ]
+
+    def add_to_selection(
+        self, items: Union[SchematicItem, Sequence[SchematicItem]]
+    ) -> Sequence[SchematicItem]:
+        command = editor_commands_pb2.AddToSelection()
+        command.header.document.CopyFrom(self._doc)
+
+        if isinstance(items, SchematicItem):
+            command.items.append(items.id)
+        else:
+            command.items.extend(item.id for item in items)
+
+        return [
+            cast(SchematicItem, unwrap(item))
+            for item in self._kicad.send(
+                command, editor_commands_pb2.SelectionResponse
+            ).items
+        ]
+
+    def remove_from_selection(
+        self, items: Union[SchematicItem, Sequence[SchematicItem]]
+    ) -> Sequence[SchematicItem]:
+        command = editor_commands_pb2.RemoveFromSelection()
+        command.header.document.CopyFrom(self._doc)
+
+        if isinstance(items, SchematicItem):
+            command.items.append(items.id)
+        else:
+            command.items.extend(item.id for item in items)
+
+        return [
+            cast(SchematicItem, unwrap(item))
+            for item in self._kicad.send(
+                command, editor_commands_pb2.SelectionResponse
+            ).items
+        ]
+
+    def clear_selection(self):
+        command = editor_commands_pb2.ClearSelection()
+        command.header.document.CopyFrom(self._doc)
+        self._kicad.send(command, Empty)
