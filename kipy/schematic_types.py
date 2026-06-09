@@ -1673,6 +1673,15 @@ class SchematicSymbolInstance(SchematicItem):
         del self._proto.variants[:]
         self._proto.variants.extend(v.proto for v in value)
 
+    @property
+    def user_fields(self) -> Sequence[SchematicField]:
+        return [SchematicField(proto_ref=f) for f in self._proto.user_fields]
+
+    @user_fields.setter
+    def user_fields(self, value: Sequence[SchematicField]):
+        del self._proto.user_fields[:]
+        self._proto.user_fields.extend(f.proto for f in value)
+
 
 class SheetInstance(Wrapper):
     """
