@@ -1203,14 +1203,68 @@ class GerberExportSettings(Wrapper):
             self._proto.CopyFrom(proto)
 
     @property
-    def layers(self) -> list[board_types_pb2.BoardLayer.ValueType]:
-        return list(self._proto.layers)
+    def plot_settings(self) -> PlotSettings:
+        return PlotSettings(proto_ref=self._proto.plot_settings)
 
-    @layers.setter
-    def layers(self, value: Sequence[board_types_pb2.BoardLayer.ValueType]):
-        del self._proto.layers[:]
-        self._proto.layers.extend(value)
+    @plot_settings.setter
+    def plot_settings(self, value: PlotSettings):
+        self._proto.plot_settings.CopyFrom(value.proto)
 
+    @property
+    def use_board_plot_params(self) -> bool:
+        return self._proto.use_board_plot_params
+
+    @use_board_plot_params.setter
+    def use_board_plot_params(self, value: bool):
+        self._proto.use_board_plot_params = value
+
+    @property
+    def create_gerber_job_file(self) -> bool:
+        return self._proto.create_gerber_job_file
+
+    @create_gerber_job_file.setter
+    def create_gerber_job_file(self, value: bool):
+        self._proto.create_gerber_job_file = value
+
+    @property
+    def include_netlist_attributes(self) -> bool:
+        return self._proto.include_netlist_attributes
+
+    @include_netlist_attributes.setter
+    def include_netlist_attributes(self, value: bool):
+        self._proto.include_netlist_attributes = value
+
+    @property
+    def use_x2_format(self) -> bool:
+        return self._proto.use_x2_format
+
+    @use_x2_format.setter
+    def use_x2_format(self, value: bool):
+        self._proto.use_x2_format = value
+
+    @property
+    def disable_aperture_macros(self) -> bool:
+        return self._proto.disable_aperture_macros
+
+    @disable_aperture_macros.setter
+    def disable_aperture_macros(self, value: bool):
+        self._proto.disable_aperture_macros = value
+
+    @property
+    def use_protel_file_extensions(self) -> bool:
+        return self._proto.use_protel_file_extensions
+
+    @use_protel_file_extensions.setter
+    def use_protel_file_extensions(self, value: bool):
+        self._proto.use_protel_file_extensions = value
+
+    @property
+    def precision(self) -> board_jobs_pb2.GerberPrecision.ValueType:
+        return self._proto.precision
+
+    @precision.setter
+    def precision(self, value: board_jobs_pb2.GerberPrecision.ValueType):
+        self._proto.precision = value
 
 class ExcellonFormatOptions(Wrapper):
     """Excellon-specific options for drill export."""

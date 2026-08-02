@@ -99,6 +99,7 @@ from kipy.proto.board.board_commands_pb2 import ( #noqa
 )
 from kipy.proto.board.board_jobs_pb2 import (  # noqa
     PlotDrillMarks,
+    GerberPrecision,
     Board3DFormat,
     RenderFormat,
     RenderQuality,
@@ -526,11 +527,26 @@ class Board:
     def export_gerbers(
         self,
         output_path: str,
-        layers: Sequence[board_types_pb2.BoardLayer.ValueType],
+        plot_settings: Optional[PlotSettings] = None,
+        use_board_plot_params: bool = False,
+        create_gerber_job_file: bool = False,
+        include_netlist_attributes: bool = True,
+        use_x2_format: bool = True,
+        disable_aperture_macros: bool = False,
+        use_protel_file_extensions: bool = True,
+        precision: board_jobs_pb2.GerberPrecision.ValueType = GerberPrecision.GP_5,
     ) -> JobResult:
         """Plots the board to Gerber files."""
         command = board_jobs_pb2.RunBoardJobExportGerbers()
-        command.layers.extend(layers)
+        if plot_settings is not None:
+            command.plot_settings.CopyFrom(plot_settings.proto)
+        command.use_board_plot_params = use_board_plot_params
+        command.create_gerber_job_file = create_gerber_job_file
+        command.include_netlist_attributes = include_netlist_attributes
+        command.use_x2_format = use_x2_format
+        command.disable_aperture_macros = disable_aperture_macros
+        command.use_protel_file_extensions = use_protel_file_extensions
+        command.precision = precision
         command.job_settings.document.CopyFrom(self._doc)
         command.job_settings.output_path = output_path
         return JobResult(self._kicad.send(command, jobs_pb2.RunJobResponse))

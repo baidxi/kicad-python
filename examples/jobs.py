@@ -28,6 +28,7 @@ from kipy.board import (
     Board3DFormat,
     BoardJobPaginationMode,
     DrillFormat,
+    GerberPrecision,
     Ipc2581Version,
     OdbCompression,
     PositionFormat,
@@ -139,7 +140,14 @@ def main() -> None:
         ),
         (
             "export_gerbers",
-            lambda: board.export_gerbers(str(out / f"{board_name}-gerbers"), layers=enabled_layers),
+            lambda: board.export_gerbers(
+                str(out / f"{board_name}-gerbers"),
+                plot_settings=plot,
+                create_gerber_job_file=False,
+                include_netlist_attributes=True,
+                use_x2_format=True,
+                precision=GerberPrecision.GP_5,
+            ),
         ),
         (
             "export_drill",
