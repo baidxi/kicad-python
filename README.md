@@ -92,13 +92,14 @@ plugins, copy or symlink them into the appropriate plugins path in order for KiC
 - Add board output jobs support
 - Add footprint wizards support
 - Add initial schematic support (`KiCad.get_schematic`, `schematic_types`, etc)
+- Add `Board.get_plot_settings` and `Board.set_plot_settings`
+- Add `Board.get_layer_by_name`
 
 ### 0.8.0 (TBD)
 
 - Add `Item.clone` method to simplify creation of new items based on existing ones
 - Add `parent` property to board types that can have a parent (e.g. board or footprint)
 - Make "solder_paste_margin" and "solder_paste_margin_ratio" properties optional (Mark Hämmerling, !42)
-- Add `Board.get_layer_by_name`
 
 ### 0.7.1 (April 17, 2026)
 

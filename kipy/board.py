@@ -1552,3 +1552,23 @@ class Board:
         cmd = board_commands_pb2.SetBoardEditorAppearanceSettings()
         cmd.settings.CopyFrom(settings.proto)
         self._kicad.send(cmd, Empty)
+
+    def get_plot_settings(self) -> PlotSettings:
+        """Retrieves the board plot settings stored in the board file.
+
+        .. versionadded:: 0.x.0
+        """
+        cmd = board_commands_pb2.GetBoardPlotSettings()
+        cmd.board.CopyFrom(self._doc)
+        response = self._kicad.send(cmd, board_commands_pb2.BoardPlotSettingsResponse)
+        return PlotSettings(response.plot_settings)
+
+    def set_plot_settings(self, plot_settings: PlotSettings):
+        """Sets the board plot settings stored in the board file.
+
+        .. versionadded:: 0.x.0
+        """
+        cmd = board_commands_pb2.SetBoardPlotSettings()
+        cmd.board.CopyFrom(self._doc)
+        cmd.plot_settings.CopyFrom(plot_settings.proto)
+        self._kicad.send(cmd, Empty)
