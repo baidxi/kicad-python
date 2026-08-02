@@ -213,6 +213,10 @@ class Track(BoardItem):
     def width(self, width: int):
         self._proto.width.value_nm = width
 
+    @property
+    def parent(self) -> Optional[KIID]:
+        return self._proto.parent if self._proto.HasField("parent") else None
+
     def length(self) -> float:
         """Calculates track length in nanometers"""
         return (self.end - self.start).length()
@@ -295,6 +299,10 @@ class ArcTrack(BoardItem):
     @mid.setter
     def mid(self, point: Vector2):
         self._proto.mid.CopyFrom(point.proto)
+
+    @property
+    def parent(self) -> Optional[KIID]:
+        return self._proto.parent if self._proto.HasField("parent") else None
 
     def center(self) -> Optional[Vector2]:
         """
@@ -396,6 +404,10 @@ class BoardShape(BoardItem):
     @attributes.setter
     def attributes(self, attributes: GraphicAttributes):
         self._proto.shape.attributes.CopyFrom(attributes.proto)
+
+    @property
+    def parent(self) -> Optional[KIID]:
+        return self._proto.parent if self._proto.HasField("parent") else None
 
     def move(self, delta: Vector2):
         raise NotImplementedError(f"move() not implemented for {self.__class__.__name__}")
@@ -743,6 +755,11 @@ class BoardText(BoardItem):
     @attributes.setter
     def attributes(self, attributes: TextAttributes):
         self._proto.text.attributes.CopyFrom(attributes.proto)
+        self._proto.text.attributes.CopyFrom(attributes.proto)
+
+    @property
+    def parent(self) -> Optional[KIID]:
+        return self._proto.parent if self._proto.HasField("parent") else None
 
 class BoardTextBox(BoardItem):
     """Represents a text box on a board"""
@@ -814,6 +831,10 @@ class BoardTextBox(BoardItem):
     @value.setter
     def value(self, text: str):
         self._proto.textbox.text = text
+
+    @property
+    def parent(self) -> Optional[KIID]:
+        return self._proto.parent if self._proto.HasField("parent") else None
 
 
 class Barcode(BoardItem):
@@ -942,6 +963,10 @@ class Barcode(BoardItem):
             LockedState.LS_LOCKED if locked else LockedState.LS_UNLOCKED
         )
 
+    @property
+    def parent(self) -> Optional[KIID]:
+        return self._proto.parent if self._proto.HasField("parent") else None
+
 
 class ReferenceImage(BoardItem):
     """Represents a reference image on a board (a non-plotting bitmap)
@@ -1015,6 +1040,10 @@ class ReferenceImage(BoardItem):
         self._proto.locked = (
             LockedState.LS_LOCKED if locked else LockedState.LS_UNLOCKED
         )
+
+    @property
+    def parent(self) -> Optional[KIID]:
+        return self._proto.parent if self._proto.HasField("parent") else None
 
 
 class Field(BoardItem):
@@ -1604,6 +1633,10 @@ class Pad(BoardItem):
     def pad_to_die_length(self, length: int):
         self._proto.pad_to_die_length.value_nm = length
 
+    @property
+    def parent(self) -> Optional[KIID]:
+        return self._proto.parent if self._proto.HasField("parent") else None
+
 
 class Via(BoardItem):
     def __init__(self, proto: Optional[board_types_pb2.Via] = None,
@@ -1704,6 +1737,10 @@ class Via(BoardItem):
     @drill_diameter.setter
     def drill_diameter(self, diameter: int):
         self.padstack.drill.diameter = Vector2.from_xy(diameter, diameter)
+
+    @property
+    def parent(self) -> Optional[KIID]:
+        return self._proto.parent if self._proto.HasField("parent") else None
 
 
 class FootprintAttributes(Wrapper):
@@ -2186,6 +2223,10 @@ class FootprintInstance(BoardItem):
         """
         return SheetPath(self._proto.symbol_path)
 
+    @property
+    def parent(self) -> Optional[KIID]:
+        return self._proto.parent if self._proto.HasField("parent") else None
+
 
 class ZoneFilledPolygons(Wrapper):
     """Represents the set of filled polygons of a zone on a single board layer"""
@@ -2412,6 +2453,10 @@ class Zone(BoardItem):
     def border_hatch_pitch(self, value: int):
         self._proto.border.pitch.value_nm = value
 
+    @property
+    def parent(self) -> Optional[KIID]:
+        return self._proto.parent if self._proto.HasField("parent") else None
+
     def bounding_box(self) -> Box2:
         return self.outline.bounding_box()
 
@@ -2579,6 +2624,10 @@ class Dimension(BoardItem):
     @keep_text_aligned.setter
     def keep_text_aligned(self, aligned: bool):
         self._proto.keep_text_aligned = aligned
+
+    @property
+    def parent(self) -> Optional[KIID]:
+        return self._proto.parent if self._proto.HasField("parent") else None
 
 
 class AlignedDimension(Dimension):
@@ -2899,6 +2948,10 @@ class Group(BoardItem):
 
     def __repr__(self) -> str:
         return f"Group(id={self.id}, items={self.items})"
+
+    @property
+    def parent(self) -> Optional[KIID]:
+        return self._proto.parent if self._proto.HasField("parent") else None
 
 
 _proto_to_object: Dict[type[Message], type[Wrapper]] = {
