@@ -1442,13 +1442,35 @@ class Board:
 
         self._kicad.send(cmd, Empty)
 
-    def refill_zones(self, block=True, max_poll_seconds: float = 30.0,
-                     poll_interval_seconds: float = 0.5):
+    def refill_zones(
+        self,
+        zones: Optional[Union[KIID, Iterable[KIID]]]=None,
+        block=True,
+        max_poll_seconds: float = 30.0,
+        poll_interval_seconds: float = 0.5
+    ):
         """Refills all zones on the board.  If block is True, this function will block until the
         refill operation is complete.  If block is False, this function will return immediately,
-        and future API calls will return AS_BUSY until the refill operation is complete."""
+        and future API calls will return AS_BUSY until the refill operation is complete.
+
+        :param zones: An optional list of zone IDs to fill.  If empty or absent, all zones will be
+                      filled (Since: 0.x.0 / KiCad 11.0)
+        :param block: When True (default), this call will block until the zone fill completes
+                      (which could take many seconds or even minutes in some cases).  When False,
+                      this call will return immediately, but the KiCad API server will not handle
+                      any more requests until the zone fill has been completed.
+        :param max_poll_seconds: How long to wait (when block is True) for the zone fill to finish.
+        :param poll_interval_seconds: How often to check (when block is True) for the fill to have
+                                      finished.
+        """
         cmd = board_commands_pb2.RefillZones()
         cmd.board.CopyFrom(self._doc)
+
+        if isinstance(zones, KIID):
+            cmd.zones.append(zones)
+        elif zones is not None:
+            cmd.zones.extend(zones)
+
         self._kicad.send(cmd, Empty)
 
         if not block:
