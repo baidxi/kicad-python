@@ -1263,6 +1263,17 @@ class Board:
         cmd.layer = layer
         return self._kicad.send(cmd, board_commands_pb2.BoardLayerNameResponse).name
 
+    def get_layer_by_name(self, layer_name: str) -> board_types_pb2.BoardLayer.ValueType:
+        """Retrieves a board layer ID from the given name, which may be either a KiCad standard
+        layer name (e.g. `In1.Cu`) or a user-defined name in the current board.  Returns
+        BL_UNDEFINED if the given name doesn't map to any layer in the current board.
+
+        .. versionadded:: 0.8.0 (KiCad 10.0.6)"""
+        cmd = board_commands_pb2.GetBoardLayerByName()
+        cmd.board.CopyFrom(self._doc)
+        cmd.name = layer_name
+        return self._kicad.send(cmd, board_commands_pb2.BoardLayerResponse).layer
+
     @overload
     def expand_text_variables(self, text: str) -> str:
         ...
