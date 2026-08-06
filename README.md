@@ -100,6 +100,7 @@ plugins, copy or symlink them into the appropriate plugins path in order for KiC
 - Add `Item.clone` method to simplify creation of new items based on existing ones
 - Add `parent` property to board types that can have a parent (e.g. board or footprint)
 - Make "solder_paste_margin" and "solder_paste_margin_ratio" properties optional (Mark Hämmerling, !42)
+- Add `Board.flip_items` and `Board.flip_items_by_id`
 
 ### 0.7.1 (April 17, 2026)
 
