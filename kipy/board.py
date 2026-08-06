@@ -75,7 +75,8 @@ from kipy.proto.board.board_types_pb2 import ( #noqa
     BoardLayer
 )
 from kipy.proto.board.board_commands_pb2 import ( #noqa
-    BoardOriginType
+    BoardOriginType,
+    BoardFlipDirection
 )
 
 class BoardLayerGraphicsDefaults(Wrapper):
@@ -641,6 +642,85 @@ class Board:
             return
 
         self._kicad.send(command, DeleteItemsResponse)
+
+    def flip_items(
+        self,
+        items: Union[BoardItem, Sequence[BoardItem]],
+        direction: board_commands_pb2.BoardFlipDirection.ValueType = BoardFlipDirection.BFD_LEFT_RIGHT,
+    ) -> List[BoardItem]:
+        """Flips one or more board items to the opposite side of the board.
+
+        The given items must already exist on the board; each is flipped in place and the
+        Python item passed in is updated with the new state from KiCad.  Returns the set
+        of items that were successfully flipped.
+
+        :param items: one or more board items to flip
+        :param direction: ``BFD_LEFT_RIGHT`` (mirror around the Y axis) or
+                          ``BFD_TOP_BOTTOM`` (mirror around the X axis)
+
+        .. versionadded:: 0.8.0 (KiCad 10.0.6)"""
+        command = board_commands_pb2.FlipItems()
+        command.header.document.CopyFrom(self._doc)
+        command.direction = direction
+
+        if isinstance(items, BoardItem):
+            items = [items]
+        else:
+            items = list(items)
+
+        command.items.extend([item.id for item in items])
+
+        if len(command.items) == 0:
+            return []
+
+        response = self._kicad.send(command, board_commands_pb2.FlipItemsResponse)
+
+        flipped: List[BoardItem] = []
+        for item, result in zip(items, response.flipped_items):
+            if result.status.code != editor_commands_pb2.ItemStatusCode.ISC_OK:
+                continue
+            updated = self._to_concrete_items([unwrap(result.item)])[0]
+            item.proto.CopyFrom(updated.proto)
+            flipped.append(updated)
+        return flipped
+
+    def flip_items_by_id(
+        self,
+        items: Union[KIID, Sequence[KIID]],
+        direction: board_commands_pb2.BoardFlipDirection.ValueType = BoardFlipDirection.BFD_LEFT_RIGHT,
+    ) -> List[BoardItem]:
+        """Flips one or more board items to the opposite side of the board by their unique IDs.
+
+        Returns the flipped items as returned by KiCad.  Items that could not be flipped (for
+        example because the ID doesn't exist or the type is not a flippable board item) will be
+        omitted.
+
+        :param items: one or more item IDs (KIID) to flip
+        :param direction: ``BFD_LEFT_RIGHT`` (mirror around the Y axis) or
+                          ``BFD_TOP_BOTTOM`` (mirror around the X axis)
+
+        .. versionadded:: 0.8.0 (KiCad 10.0.6)"""
+        command = board_commands_pb2.FlipItems()
+        command.header.document.CopyFrom(self._doc)
+        command.direction = direction
+
+        if isinstance(items, KIID):
+            command.items.append(items)
+        else:
+            command.items.extend(items)
+
+        if len(command.items) == 0:
+            return []
+
+        response = self._kicad.send(command, board_commands_pb2.FlipItemsResponse)
+
+        return self._to_concrete_items(
+            [
+                unwrap(result.item)
+                for result in response.flipped_items
+                if result.status.code == editor_commands_pb2.ItemStatusCode.ISC_OK
+            ]
+        )
 
     def get_nets(
         self, netclass_filter: Optional[Union[str, Sequence[str]]] = None

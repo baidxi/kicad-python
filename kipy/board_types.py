@@ -2129,7 +2129,10 @@ class FootprintInstance(BoardItem):
 
     @property
     def layer(self) -> BoardLayer.ValueType:
-        """The layer on which the footprint is placed (BoardLayer.BL_F_Cu or BoardLayer.BL_B_Cu)"""
+        """The layer on which the footprint is placed (BoardLayer.BL_F_Cu or BoardLayer.BL_B_Cu)
+
+        NOTE: Do not use this property to try to flip an existing footprint to the other side
+        of a board.  Use ``Board.flip_items`` or ``Board.flip_items_by_id`` instead."""
         return self._proto.layer
 
     @layer.setter
