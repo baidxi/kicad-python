@@ -1,0 +1,19 @@
+variables:
+  GIT_SUBMODULE_STRATEGY: recursive
+  GIT_SUBMODULE_DEPTH: 1
+
+  UV_VERSION: "0.11.14"
+  BASE_LAYER: trixie-slim
+  UV_LINK_MODE: copy
+
+build:
+  stage: build
+  parallel:
+    matrix:
+      - PYTHON_VERSION: ["3.9", "3.10", "3.11", "3.12", "3.13", "3.14"]
+  image: ghcr.io/astral-sh/uv:$UV_VERSION-python$PYTHON_VERSION-$BASE_LAYER
+  before_script:
+    - apt-get update && apt-get install -y --no-install-recommends git
+    - uv sync
+  script:
+    - uv run pytest tests

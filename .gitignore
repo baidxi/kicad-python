@@ -22,7 +22,7 @@ MANIFEST
 .idea/
 
 # We don't want to lock dependency versions for this library right now
-poetry.lock
+uv.lock
 
 # These should be generated, not checked in
 kipy/proto/**/*_pb2.py
@@ -30,7 +30,6 @@ kipy/proto/**/*_pb2.pyi
 kipy/kicad_api_version.py
 
 # Tooling
-.nox
 .ruff_cache
 
 # Documentation

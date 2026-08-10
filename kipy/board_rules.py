@@ -18,7 +18,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from typing import Dict, List, Optional, Self, Sequence
+import sys
+from typing import Dict, List, Optional, Sequence
 
 from kipy.proto.board import board_pb2, board_commands_pb2, board_types_pb2
 from kipy.proto.common.types import base_types_pb2
@@ -35,6 +36,11 @@ from kipy.proto.common.types.base_types_pb2 import ( #noqa
     MinOptMax,
     RuleSeverity
 )
+
+if sys.version_info >= (3, 11):
+    from typing import Self
+else:
+    from typing_extensions import Self
 
 
 class MinimumConstraints(Wrapper):

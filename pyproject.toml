@@ -2,9 +2,7 @@
 name = "kicad-python"
 version = "0.8.0.dev0"
 description = "KiCad API Python Bindings"
-authors = [
-    { name = "The KiCad Development Team" },
-]
+authors = [{ name = "The KiCad Development Team" }]
 license = "MIT"
 readme = "README.md"
 classifiers = [
@@ -15,13 +13,13 @@ classifiers = [
 ]
 requires-python = ">=3.9"
 dependencies = [
-    "protobuf >=5.29, <6",
-    "pynng >=0.9.0, <0.10.0",
-    "jsonschema >=4.23.0, <5",
-    # 3.10: TypeAlias (mypy-protobuf generated code)
+    "protobuf>=6.33.6",
+    "pynng>=0.9.0,<0.10.0",
+    "jsonschema>=4.23.0,<5",
+    # 3.10: TypeAlias, Never (mypy-protobuf generated code)
     # 3.11: Self
     # 3.13: @deprecated
-    "typing_extensions >=4.13.2 ; python_version < '3.13'",
+    "typing-extensions>=4.13.2",
 ]
 
 [project.scripts]
@@ -33,61 +31,39 @@ documentation = "https://docs.kicad.org/kicad-python-main/"
 repository = "https://gitlab.com/kicad/code/kicad-python"
 issues = "https://gitlab.com/kicad/code/kicad-python/-/issues"
 
-[tool.poetry]
-packages = [
-    { include = "kipy" },
+[dependency-groups]
+dev = [
+    "furo>=2025.12.19",
+    "grpcio-tools>=1.80.0",
+    "hatchling>=1.27.0",
+    "mypy>=1.19.1",
+    "mypy-protobuf>=5.1.0",
+    "pytest>=8.4.2",
+    "ruff>=0.15.12",
+    "sphinx>=7.4.7",
 ]
-include = [
-    "**/kipy/**/*.py",
-    "**/kipy/**/*.pyi",
-    "kipy/packaging/schemas/*.json",
-]
-
-[tool.poetry.dependencies]
-python = "<4.0,>=3.9"
-
-[tool.poetry.group.dev.dependencies]
-nox = "^2025.2.9"
-ruff = "^0.9"
-protoletariat = "^3.3"
-mypy-protobuf = "^3.6"
-mypy = "^1.14.0"
-setuptools = "^75.6.0"
-sphinx = "7.4"
-furo = "^2024.8.6"
-pytest = "^8.3.4"
-
-[tool.poetry.requires-plugins]
-poetry-plugin-export = ">=1.8"
 
 [build-system]
-requires = [
-    "poetry-core>=2.0.0,<3.0.0",
-    "protoletariat == 3.3.*",
-    "setuptools",
-    "mypy-protobuf == 3.6.*"
-]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
-[tool.poetry.build]
-generate-setup-file = true
-script = "build.py"
+[tool.hatch.build.targets.sdist]
+include = ["kipy"]
 
-[tool.ruff]
-exclude = [
-    "kipy/proto"
-]
+[tool.hatch.build.targets.wheel]
+packages = ["kipy"]
+artifacts = ["kipy/proto/**/*_pb2.py*", "kipy/kicad_api_version.py"]
 
-[tool.mypy]
-exclude = [
-    "kipy/proto"
-]
+[tool.hatch.build.hooks.custom]
+dependencies = ["grpcio-tools", "mypy-protobuf"]
+proto_path = "kicad/api/proto"
+output_path = "kipy/proto"
 
-[[tool.mypy.overrides]]
-module = "pynng"
-ignore_missing_imports = true
-
-[tool.pytest.ini_options]
-testpaths = [
-    "tests",
+[tool.uv]
+cache-keys = [
+    { file = "pyproject.toml" },
+    { file = "hatch_build.py" },
+    { file = "kicad/api/proto/**/*.proto" },
+    { file = "kipy/proto/**/*_pb2.py*" },
+    { file = "kipy/kicad_api_version.py" },
 ]
