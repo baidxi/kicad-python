@@ -88,6 +88,7 @@ plugins, copy or symlink them into the appropriate plugins path in order for KiC
 - Make "solder_paste_margin" and "solder_paste_margin_ratio" properties optional (Mark Hämmerling, !42)
 - Add `Board.get_layer_by_name`
 - Add `Board.flip_items` and `Board.flip_items_by_id`
+- Expand wrappers for board stackup data
 
 ### 0.7.1 (April 17, 2026)
 

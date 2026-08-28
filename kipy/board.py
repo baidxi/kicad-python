@@ -69,7 +69,10 @@ from kipy.proto.board import board_commands_pb2
 
 # Re-exported protobuf enum types
 from kipy.proto.board.board_pb2 import (    # noqa
-    BoardLayerClass
+    BoardLayerClass,
+    BoardEdgeConnectorType,
+    DielectricModel,
+    BoardStackupDielectricType,
 )
 from kipy.proto.board.board_types_pb2 import ( #noqa
     BoardLayer
@@ -145,6 +148,47 @@ class BoardStackupDielectricProperties(Wrapper):
     def thickness(self, thickness: int):
         self._proto.thickness.value_nm = thickness
 
+    @property
+    def thickness_locked(self) -> bool:
+        """Whether the layer thickness is locked (for impedance controlled layers)
+
+        .. versionadded:: 0.8.0 (KiCad 10.0.6)
+        """
+        return self._proto.thickness_locked
+
+    @thickness_locked.setter
+    def thickness_locked(self, locked: bool):
+        self._proto.thickness_locked = locked
+
+    @property
+    def spec_frequency(self) -> Optional[float]:
+        """The frequency at which the dielectric properties were measured, in Hz
+
+        .. versionadded:: 0.8.0 (KiCad 11.0)
+        """
+        if self._proto.HasField("spec_frequency"):
+            return self._proto.spec_frequency
+        return None
+
+    @spec_frequency.setter
+    def spec_frequency(self, frequency: Optional[float]):
+        if frequency is None:
+            self._proto.ClearField("spec_frequency")
+        else:
+            self._proto.spec_frequency = frequency
+
+    @property
+    def dielectric_model(self) -> board_pb2.DielectricModel.ValueType:
+        """The model used to extrapolate dielectric properties across frequency
+
+        .. versionadded:: 0.8.0 (KiCad 11.0)
+        """
+        return self._proto.dielectric_model
+
+    @dielectric_model.setter
+    def dielectric_model(self, model: board_pb2.DielectricModel.ValueType):
+        self._proto.dielectric_model = model
+
 
 class BoardStackupDielectricLayer(Wrapper):
     def __init__(self, proto: Optional[board_pb2.BoardStackupDielectricLayer] = None):
@@ -156,6 +200,80 @@ class BoardStackupDielectricLayer(Wrapper):
     def layers(self) -> List[BoardStackupDielectricProperties]:
         """Each dielectric layer may be made up of one or more sub-layers with different properties"""
         return [BoardStackupDielectricProperties(layer) for layer in self._proto.layer]
+
+    @property
+    def type(self) -> board_pb2.BoardStackupDielectricType.ValueType:
+        """The physical type of this dielectric slot (e.g. core or prepreg)
+
+        .. versionadded:: 0.8.0 (KiCad 10.0.6)
+        """
+        return self._proto.type
+
+    @type.setter
+    def type(self, value: board_pb2.BoardStackupDielectricType.ValueType):
+        self._proto.type = value
+
+
+class BoardStackupSoldermaskLayer(Wrapper):
+    """Properties of a soldermask layer
+
+    .. versionadded:: 0.8.0 (KiCad 10.0.6)"""
+
+    def __init__(self, proto: Optional[board_pb2.BoardStackupSoldermaskLayer] = None):
+        self._proto = board_pb2.BoardStackupSoldermaskLayer()
+        if proto:
+            self._proto.CopyFrom(proto)
+
+    @property
+    def epsilon_r(self) -> float:
+        return self._proto.epsilon_r
+
+    @epsilon_r.setter
+    def epsilon_r(self, value: float):
+        self._proto.epsilon_r = value
+
+    @property
+    def loss_tangent(self) -> float:
+        return self._proto.loss_tangent
+
+    @loss_tangent.setter
+    def loss_tangent(self, value: float):
+        self._proto.loss_tangent = value
+
+    @property
+    def material_name(self) -> str:
+        return self._proto.material_name
+
+    @material_name.setter
+    def material_name(self, value: str):
+        self._proto.material_name = value
+
+    @property
+    def thickness(self) -> int:
+        return self._proto.thickness.value_nm
+
+    @thickness.setter
+    def thickness(self, value: int):
+        self._proto.thickness.value_nm = value
+
+
+class BoardStackupSilkscreenLayer(Wrapper):
+    """Properties of a silkscreen layer
+
+    .. versionadded:: 0.8.0 (KiCad 10.0.6)"""
+
+    def __init__(self, proto: Optional[board_pb2.BoardStackupSilkscreenLayer] = None):
+        self._proto = board_pb2.BoardStackupSilkscreenLayer()
+        if proto:
+            self._proto.CopyFrom(proto)
+
+    @property
+    def material_name(self) -> str:
+        return self._proto.material_name
+
+    @material_name.setter
+    def material_name(self, value: str):
+        self._proto.material_name = value
 
 
 class BoardStackupLayer(Wrapper):
@@ -208,12 +326,46 @@ class BoardStackupLayer(Wrapper):
         self._proto.type = value
 
     @property
-    def dielectric(self) -> BoardStackupDielectricLayer:
-        return BoardStackupDielectricLayer(self._proto.dielectric)
+    def dielectric(self) -> Optional[BoardStackupDielectricLayer]:
+        """Dielectric details, if this layer is a dielectric layer
+
+        .. versionadded:: 0.8.0 (KiCad 10.0.6)
+        """
+        if self._proto.WhichOneof("details") == "dielectric":
+            return BoardStackupDielectricLayer(self._proto.dielectric)
+        return None
 
     @dielectric.setter
     def dielectric(self, value: BoardStackupDielectricLayer):
         self._proto.dielectric.CopyFrom(value.proto)
+
+    @property
+    def soldermask(self) -> Optional[BoardStackupSoldermaskLayer]:
+        """Soldermask details, if this layer is a soldermask layer
+
+        .. versionadded:: 0.8.0 (KiCad 10.0.6)
+        """
+        if self._proto.WhichOneof("details") == "soldermask":
+            return BoardStackupSoldermaskLayer(self._proto.soldermask)
+        return None
+
+    @soldermask.setter
+    def soldermask(self, value: BoardStackupSoldermaskLayer):
+        self._proto.soldermask.CopyFrom(value.proto)
+
+    @property
+    def silkscreen(self) -> Optional[BoardStackupSilkscreenLayer]:
+        """Silkscreen details, if this layer is a silkscreen layer
+
+        .. versionadded:: 0.8.0 (KiCad 10.0.6)
+        """
+        if self._proto.WhichOneof("details") == "silkscreen":
+            return BoardStackupSilkscreenLayer(self._proto.silkscreen)
+        return None
+
+    @silkscreen.setter
+    def silkscreen(self, value: BoardStackupSilkscreenLayer):
+        self._proto.silkscreen.CopyFrom(value.proto)
 
     @property
     def color(self) -> Color:
@@ -241,6 +393,116 @@ class BoardStackupLayer(Wrapper):
     def user_name(self, value: str):
         self._proto.user_name = value
 
+
+class BoardFinish(Wrapper):
+    """The board finish (e.g. ENIG, HASL, OSP) applied to exposed copper
+
+    .. versionadded:: 0.8.0 (KiCad 10.0.6)"""
+
+    def __init__(self, proto: Optional[board_pb2.BoardFinish] = None):
+        self._proto = board_pb2.BoardFinish()
+        if proto:
+            self._proto.CopyFrom(proto)
+
+    def __repr__(self) -> str:
+        return f"BoardFinish(type_name={self.type_name!r})"
+
+    @property
+    def type_name(self) -> str:
+        """The finish type name"""
+        return self._proto.type_name
+
+    @type_name.setter
+    def type_name(self, value: str):
+        self._proto.type_name = value
+
+
+class BoardImpedanceControl(Wrapper):
+    """Whether impedance-controlled routing is enabled for this board
+
+    .. versionadded:: 0.8.0 (KiCad 10.0.6)"""
+
+    def __init__(self, proto: Optional[board_pb2.BoardImpedanceControl] = None):
+        self._proto = board_pb2.BoardImpedanceControl()
+        if proto:
+            self._proto.CopyFrom(proto)
+
+    @property
+    def is_controlled(self) -> bool:
+        """True if the board uses impedance-controlled widths"""
+        return self._proto.is_controlled
+
+    @is_controlled.setter
+    def is_controlled(self, value: bool):
+        self._proto.is_controlled = value
+
+
+class BoardEdgeConnector(Wrapper):
+    """The type of edge connector present on the board
+
+    .. versionadded:: 0.8.0 (KiCad 10.0.6)"""
+
+    def __init__(self, proto: Optional[board_pb2.BoardEdgeConnector] = None):
+        self._proto = board_pb2.BoardEdgeConnector()
+        if proto:
+            self._proto.CopyFrom(proto)
+
+    @property
+    def type(self) -> board_pb2.BoardEdgeConnectorType.ValueType:
+        return self._proto.type
+
+    @type.setter
+    def type(self, value: board_pb2.BoardEdgeConnectorType.ValueType):
+        self._proto.type = value
+
+
+class EdgePlating(Wrapper):
+    """Whether the board edges are plated
+
+    .. versionadded:: 0.8.0 (KiCad 10.0.6)"""
+
+    def __init__(self, proto: Optional[board_pb2.EdgePlating] = None):
+        self._proto = board_pb2.EdgePlating()
+        if proto:
+            self._proto.CopyFrom(proto)
+
+    @property
+    def has_edge_plating(self) -> bool:
+        """True if board edges are plated with copper"""
+        return self._proto.has_edge_plating
+
+    @has_edge_plating.setter
+    def has_edge_plating(self, value: bool):
+        self._proto.has_edge_plating = value
+
+
+class BoardEdgeSettings(Wrapper):
+    """Settings related to board edges, such as connectors and plating
+
+    .. versionadded:: 0.8.0 (KiCad 10.0.6)"""
+
+    def __init__(self, proto: Optional[board_pb2.BoardEdgeSettings] = None):
+        self._proto = board_pb2.BoardEdgeSettings()
+        if proto:
+            self._proto.CopyFrom(proto)
+
+    @property
+    def connector(self) -> BoardEdgeConnector:
+        return BoardEdgeConnector(self._proto.connector)
+
+    @connector.setter
+    def connector(self, value: BoardEdgeConnector):
+        self._proto.connector.CopyFrom(value.proto)
+
+    @property
+    def plating(self) -> EdgePlating:
+        return EdgePlating(self._proto.plating)
+
+    @plating.setter
+    def plating(self, value: EdgePlating):
+        self._proto.plating.CopyFrom(value.proto)
+
+
 class BoardStackup(Wrapper):
     def __init__(self, proto: Optional[board_pb2.BoardStackup] = None):
         self._proto = board_pb2.BoardStackup()
@@ -249,6 +511,42 @@ class BoardStackup(Wrapper):
 
     def __repr__(self) -> str:
         return f"BoardStackup(layers={self.layers})"
+
+    @property
+    def finish(self) -> BoardFinish:
+        """The board finish (e.g. ENIG, HASL, OSP)
+
+        .. versionadded:: 0.8.0
+        """
+        return BoardFinish(self._proto.finish)
+
+    @finish.setter
+    def finish(self, value: BoardFinish):
+        self._proto.finish.CopyFrom(value.proto)
+
+    @property
+    def impedance(self) -> BoardImpedanceControl:
+        """Whether impedance-controlled routing is enabled
+
+        .. versionadded:: 0.8.0
+        """
+        return BoardImpedanceControl(self._proto.impedance)
+
+    @impedance.setter
+    def impedance(self, value: BoardImpedanceControl):
+        self._proto.impedance.CopyFrom(value.proto)
+
+    @property
+    def edge(self) -> BoardEdgeSettings:
+        """Edge connector and plating settings
+
+        .. versionadded:: 0.8.0
+        """
+        return BoardEdgeSettings(self._proto.edge)
+
+    @edge.setter
+    def edge(self, value: BoardEdgeSettings):
+        self._proto.edge.CopyFrom(value.proto)
 
     @property
     def layers(self) -> List[BoardStackupLayer]:
