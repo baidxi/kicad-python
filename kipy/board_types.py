@@ -215,6 +215,10 @@ class Track(BoardItem):
 
     @property
     def parent(self) -> Optional[KIID]:
+        """The ID of the parent container for this item (such as a Board or Footprint), if any.
+        Read-only; item parents can only be changed by add/remove calls on the parent container.
+
+        .. versionadded:: 0.8.0 (KiCad 10.0.6)"""
         return self._proto.parent if self._proto.HasField("parent") else None
 
     def length(self) -> float:
@@ -302,6 +306,10 @@ class ArcTrack(BoardItem):
 
     @property
     def parent(self) -> Optional[KIID]:
+        """The ID of the parent container for this item (such as a Board or Footprint), if any.
+        Read-only; item parents can only be changed by add/remove calls on the parent container.
+
+        .. versionadded:: 0.8.0 (KiCad 10.0.6)"""
         return self._proto.parent if self._proto.HasField("parent") else None
 
     def center(self) -> Optional[Vector2]:
@@ -407,6 +415,10 @@ class BoardShape(BoardItem):
 
     @property
     def parent(self) -> Optional[KIID]:
+        """The ID of the parent container for this item (such as a Board or Footprint), if any.
+        Read-only; item parents can only be changed by add/remove calls on the parent container.
+
+        .. versionadded:: 0.8.0 (KiCad 10.0.6)"""
         return self._proto.parent if self._proto.HasField("parent") else None
 
     def move(self, delta: Vector2):
@@ -759,6 +771,10 @@ class BoardText(BoardItem):
 
     @property
     def parent(self) -> Optional[KIID]:
+        """The ID of the parent container for this item (such as a Board or Footprint), if any.
+        Read-only; item parents can only be changed by add/remove calls on the parent container.
+
+        .. versionadded:: 0.8.0 (KiCad 10.0.6)"""
         return self._proto.parent if self._proto.HasField("parent") else None
 
 class BoardTextBox(BoardItem):
@@ -834,6 +850,10 @@ class BoardTextBox(BoardItem):
 
     @property
     def parent(self) -> Optional[KIID]:
+        """The ID of the parent container for this item (such as a Board or Footprint), if any.
+        Read-only; item parents can only be changed by add/remove calls on the parent container.
+
+        .. versionadded:: 0.8.0 (KiCad 10.0.6)"""
         return self._proto.parent if self._proto.HasField("parent") else None
 
 
@@ -965,6 +985,10 @@ class Barcode(BoardItem):
 
     @property
     def parent(self) -> Optional[KIID]:
+        """The ID of the parent container for this item (such as a Board or Footprint), if any.
+        Read-only; item parents can only be changed by add/remove calls on the parent container.
+
+        .. versionadded:: 0.8.0 (KiCad 10.0.6)"""
         return self._proto.parent if self._proto.HasField("parent") else None
 
 
@@ -1043,6 +1067,10 @@ class ReferenceImage(BoardItem):
 
     @property
     def parent(self) -> Optional[KIID]:
+        """The ID of the parent container for this item (such as a Board or Footprint), if any.
+        Read-only; item parents can only be changed by add/remove calls on the parent container.
+
+        .. versionadded:: 0.8.0 (KiCad 10.0.6)"""
         return self._proto.parent if self._proto.HasField("parent") else None
 
 
@@ -1635,6 +1663,10 @@ class Pad(BoardItem):
 
     @property
     def parent(self) -> Optional[KIID]:
+        """The ID of the parent container for this item (such as a Board or Footprint), if any.
+        Read-only; item parents can only be changed by add/remove calls on the parent container.
+
+        .. versionadded:: 0.8.0 (KiCad 10.0.6)"""
         return self._proto.parent if self._proto.HasField("parent") else None
 
 
@@ -1740,6 +1772,10 @@ class Via(BoardItem):
 
     @property
     def parent(self) -> Optional[KIID]:
+        """The ID of the parent container for this item (such as a Board or Footprint), if any.
+        Read-only; item parents can only be changed by add/remove calls on the parent container.
+
+        .. versionadded:: 0.8.0 (KiCad 10.0.6)"""
         return self._proto.parent if self._proto.HasField("parent") else None
 
 
@@ -2228,6 +2264,10 @@ class FootprintInstance(BoardItem):
 
     @property
     def parent(self) -> Optional[KIID]:
+        """The ID of the parent container for this item (such as a Board or Footprint), if any.
+        Read-only; item parents can only be changed by add/remove calls on the parent container.
+
+        .. versionadded:: 0.8.0 (KiCad 10.0.6)"""
         return self._proto.parent if self._proto.HasField("parent") else None
 
 
@@ -2458,6 +2498,10 @@ class Zone(BoardItem):
 
     @property
     def parent(self) -> Optional[KIID]:
+        """The ID of the parent container for this item (such as a Board or Footprint), if any.
+        Read-only; item parents can only be changed by add/remove calls on the parent container.
+
+        .. versionadded:: 0.8.0 (KiCad 10.0.6)"""
         return self._proto.parent if self._proto.HasField("parent") else None
 
     def bounding_box(self) -> Box2:
@@ -2630,6 +2674,10 @@ class Dimension(BoardItem):
 
     @property
     def parent(self) -> Optional[KIID]:
+        """The ID of the parent container for this item (such as a Board or Footprint), if any.
+        Read-only; item parents can only be changed by add/remove calls on the parent container.
+
+        .. versionadded:: 0.8.0 (KiCad 10.0.6)"""
         return self._proto.parent if self._proto.HasField("parent") else None
 
 
@@ -2954,6 +3002,10 @@ class Group(BoardItem):
 
     @property
     def parent(self) -> Optional[KIID]:
+        """The ID of the parent container for this item (such as a Board or Footprint), if any.
+        Read-only; item parents can only be changed by add/remove calls on the parent container.
+
+        .. versionadded:: 0.8.0 (KiCad 10.0.6)"""
         return self._proto.parent if self._proto.HasField("parent") else None
 
 
