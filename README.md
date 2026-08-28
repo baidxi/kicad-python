@@ -26,11 +26,16 @@ running with the API server enabled in Preferences > Plugins.  This package also
 
 ## Contributing
 
-Please file bug reports and feature requests in this Gitlab project.  The team may move them to the
-main KiCad repository depending on the nature of the request.
+We welcome contributions in the form of issue reports, feature requests, and merge requests.
 
-Merge requests are welcome for minor fixes and improvements.  More significant changes should be
-discussed with the development team (via email, or in an issue) first.
+All general policies from https://dev-docs.kicad.org/en/rules-guidelines/index.html apply to the
+`kicad-python` project.  Please make sure you have read all policies, especially the code
+contribution and tool-generated content policies, before creating an issue or merge request.
+
+Please try to open issues in the correct repository (here for Python binding issues; the main
+KiCad code repository for general API issues) if you're able to determine whether or not the issue
+is specific to the Python bindings.  It's OK to make mistakes here; we'll just move the issue to
+the correct repository.
 
 ## Building from Source
 
