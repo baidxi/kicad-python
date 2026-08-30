@@ -3,7 +3,7 @@ name = "kicad-python"
 version = "0.8.0"
 description = "KiCad API Python Bindings"
 authors = [
-    { name = "The KiCad Development Team" },
+    { name = "The KiCad Development Team", email = "none@email.invalid" },
 ]
 license = "MIT"
 readme = "README.md"
