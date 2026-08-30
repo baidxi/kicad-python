@@ -81,7 +81,7 @@ plugins, copy or symlink them into the appropriate plugins path in order for KiC
 
 ## Release History
 
-### 0.8.0 (TBD)
+### 0.8.0 (August 30, 2026)
 
 - Add `Item.clone` method to simplify creation of new items based on existing ones
 - Add `parent` property to board types that can have a parent (e.g. board or footprint)
