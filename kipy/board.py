@@ -18,6 +18,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import os
 import reprlib
 import pathlib
 from time import sleep
@@ -856,13 +857,91 @@ class Board:
         self,
         output_path: str,
         format: board_jobs_pb2.DrillFormat.ValueType = DrillFormat.DF_EXCELLON,
+        # Common options
+        origin: board_jobs_pb2.DrillOrigin.ValueType = DrillOrigin.DO_UNKNOWN,
+        map_format: board_jobs_pb2.DrillMapFormat.ValueType = DrillMapFormat.DMF_UNKNOWN,
+        report_filename: str = '',
+        # Gerber specific
+        precision: board_jobs_pb2.DrillGerberPrecision.ValueType = DrillGerberPrecision.DGP_UNKNOWN,
+        generate_tenting: bool = False,
+        # Excellon specific
+        units: enums_pb2.Units.ValueType = Units.U_UNKNOWN,
+        zeros_format: board_jobs_pb2.DrillZerosFormat.ValueType = DrillZerosFormat.DZF_UNKNOWN,
+        route_oval_holes: bool = False,
+        combine_pth_npth: bool = True,
+        minimal_header: bool = False,
+        mirror_y: bool = False,
     ) -> JobResult:
         """Exports NC drill files from the board."""
         command = board_jobs_pb2.RunBoardJobExportDrill()
         command.format = format
+        # For both drills
+        command.origin = origin
+        command.map_format = map_format
+        command.report_format = DrillReportFormat.DRF_STANDARD if report_filename else DrillReportFormat.DRF_UNKNOWN
+        command.report_filename = os.path.join(output_path, report_filename)
+        # For Gerber
+        command.gerber_precision = precision
+        command.gerber_generate_tenting = generate_tenting
+        # For Excellon
+        command.units = units
+        command.zeros_format = zeros_format
+        command.excellon.route_oval_holes = route_oval_holes
+        command.excellon.combine_pth_npth = combine_pth_npth
+        command.excellon.minimal_header = minimal_header
+        command.excellon.mirror_y = mirror_y
+        # Document
         command.job_settings.document.CopyFrom(self._doc)
         command.job_settings.output_path = output_path
         return JobResult(self._kicad.send(command, jobs_pb2.RunJobResponse))
+
+    def export_drill_gerber(
+        self,
+        output_path: str,
+        origin: board_jobs_pb2.DrillOrigin.ValueType = DrillOrigin.DO_UNKNOWN,
+        map_format: board_jobs_pb2.DrillMapFormat.ValueType = DrillMapFormat.DMF_UNKNOWN,
+        report_filename: str = '',
+        precision: board_jobs_pb2.DrillGerberPrecision.ValueType = DrillGerberPrecision.DGP_UNKNOWN,
+        generate_tenting: bool = False,
+    ) -> JobResult:
+        """Exports gerber NC drill files from the board."""
+        return self.export_drill(
+               output_path,
+               format=DrillFormat.DF_GERBER,
+               origin=origin,
+               map_format=map_format,
+               report_filename=report_filename,
+               precision=precision,
+               generate_tenting=generate_tenting,
+        )
+
+    def export_drill_excellon(
+        self,
+        output_path: str,
+        origin: board_jobs_pb2.DrillOrigin.ValueType = DrillOrigin.DO_UNKNOWN,
+        map_format: board_jobs_pb2.DrillMapFormat.ValueType = DrillMapFormat.DMF_UNKNOWN,
+        report_filename: str = '',
+        units: enums_pb2.Units.ValueType = Units.U_UNKNOWN,
+        zeros_format: board_jobs_pb2.DrillZerosFormat.ValueType = DrillZerosFormat.DZF_UNKNOWN,
+        route_oval_holes: bool = False,
+        combine_pth_npth: bool = True,
+        minimal_header: bool = False,
+        mirror_y: bool = False,
+    ) -> JobResult:
+        """Exports excellon NC drill files from the board."""
+        return self.export_drill(
+               output_path,
+               format=DrillFormat.DF_EXCELLON,
+               origin=origin,
+               map_format=map_format,
+               report_filename=report_filename,
+               units=units,
+               zeros_format=zeros_format,
+               route_oval_holes=route_oval_holes,
+               combine_pth_npth=combine_pth_npth,
+               minimal_header=minimal_header,
+               mirror_y=mirror_y,
+        )
 
     def export_position(
         self,
