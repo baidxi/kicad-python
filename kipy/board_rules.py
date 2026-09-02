@@ -24,7 +24,7 @@ from kipy.proto.board import board_pb2, board_commands_pb2, board_types_pb2
 from kipy.proto.common.types import base_types_pb2
 from kipy.wrapper import Wrapper
 
-from kipy.proto.board.board_pb2 import ( #noqa
+from kipy.proto.board.board_rules_pb2 import ( #noqa
     CustomRuleConstraintType,
     CustomRuleDisallowType,
     CustomRuleLayerMode,

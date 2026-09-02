@@ -75,7 +75,7 @@ from kipy.proto.board.board_types_pb2 import (  # noqa
     PadStackShape,
     SolderMaskMode,
     SolderPasteMode,
-    TeardropType,
+    ZoneTeardropType,
     UnconnectedLayerRemoval,
     ViaType,
     ZoneBorderStyle,
