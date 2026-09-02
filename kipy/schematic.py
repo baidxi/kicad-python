@@ -18,6 +18,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import pathlib
 from typing import Iterable, List, Optional, Sequence, Union, cast
 
 from google.protobuf.empty_pb2 import Empty
@@ -110,9 +111,17 @@ class Schematic:
     def save_as(
         self, filename: str, overwrite: bool = False, include_project: bool = True
     ):
+        """
+        Saves the schematic to a new file.  Does not open the newly-saved file.
+
+        :param filename: The path to save the schematic to
+        :param overwrite: If True, the file will be overwritten if it already exists
+        :param include_project: If True, the project will be saved along with the schematic
+        """
+        path = pathlib.Path(filename)
         command = editor_commands_pb2.SaveCopyOfDocument()
         command.document.CopyFrom(self._doc)
-        command.path = filename
+        command.path = str(path.resolve())
         command.options.overwrite = overwrite
         command.options.include_project = include_project
         self._kicad.send(command, Empty)
