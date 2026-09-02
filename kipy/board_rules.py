@@ -20,7 +20,7 @@
 
 from typing import Dict, List, Optional, Self, Sequence
 
-from kipy.proto.board import board_pb2, board_commands_pb2, board_types_pb2
+from kipy.proto.board import board_commands_pb2, board_types_pb2, board_rules_pb2
 from kipy.proto.common.types import base_types_pb2
 from kipy.wrapper import Wrapper
 
@@ -41,10 +41,10 @@ class MinimumConstraints(Wrapper):
     """Board-level minimum design rules"""
     def __init__(
         self,
-        proto: Optional[board_pb2.MinimumConstraints] = None,
-        proto_ref: Optional[board_pb2.MinimumConstraints] = None,
+        proto: Optional[board_rules_pb2.MinimumConstraints] = None,
+        proto_ref: Optional[board_rules_pb2.MinimumConstraints] = None,
     ):
-        self._proto = proto_ref if proto_ref is not None else board_pb2.MinimumConstraints()
+        self._proto = proto_ref if proto_ref is not None else board_rules_pb2.MinimumConstraints()
 
         if proto is not None:
             self._proto.CopyFrom(proto)
@@ -181,10 +181,10 @@ class MinimumConstraints(Wrapper):
 class PresetTrackWidth(Wrapper):
     def __init__(
         self,
-        proto: Optional[board_pb2.PresetTrackWidth] = None,
-        proto_ref: Optional[board_pb2.PresetTrackWidth] = None,
+        proto: Optional[board_rules_pb2.PresetTrackWidth] = None,
+        proto_ref: Optional[board_rules_pb2.PresetTrackWidth] = None,
     ):
-        self._proto = proto_ref if proto_ref is not None else board_pb2.PresetTrackWidth()
+        self._proto = proto_ref if proto_ref is not None else board_rules_pb2.PresetTrackWidth()
 
         if proto is not None:
             self._proto.CopyFrom(proto)
@@ -207,10 +207,10 @@ class PresetTrackWidth(Wrapper):
 class PresetViaDimension(Wrapper):
     def __init__(
         self,
-        proto: Optional[board_pb2.PresetViaDimension] = None,
-        proto_ref: Optional[board_pb2.PresetViaDimension] = None,
+        proto: Optional[board_rules_pb2.PresetViaDimension] = None,
+        proto_ref: Optional[board_rules_pb2.PresetViaDimension] = None,
     ):
-        self._proto = proto_ref if proto_ref is not None else board_pb2.PresetViaDimension()
+        self._proto = proto_ref if proto_ref is not None else board_rules_pb2.PresetViaDimension()
 
         if proto is not None:
             self._proto.CopyFrom(proto)
@@ -235,10 +235,10 @@ class PresetViaDimension(Wrapper):
 class PresetDiffPairDimension(Wrapper):
     def __init__(
         self,
-        proto: Optional[board_pb2.PresetDiffPairDimension] = None,
-        proto_ref: Optional[board_pb2.PresetDiffPairDimension] = None,
+        proto: Optional[board_rules_pb2.PresetDiffPairDimension] = None,
+        proto_ref: Optional[board_rules_pb2.PresetDiffPairDimension] = None,
     ):
-        self._proto = proto_ref if proto_ref is not None else board_pb2.PresetDiffPairDimension()
+        self._proto = proto_ref if proto_ref is not None else board_rules_pb2.PresetDiffPairDimension()
 
         if proto is not None:
             self._proto.CopyFrom(proto)
@@ -271,10 +271,10 @@ class PresetDiffPairDimension(Wrapper):
 class PredefinedSizes(Wrapper):
     def __init__(
         self,
-        proto: Optional[board_pb2.PredefinedSizes] = None,
-        proto_ref: Optional[board_pb2.PredefinedSizes] = None,
+        proto: Optional[board_rules_pb2.PredefinedSizes] = None,
+        proto_ref: Optional[board_rules_pb2.PredefinedSizes] = None,
     ):
-        self._proto = proto_ref if proto_ref is not None else board_pb2.PredefinedSizes()
+        self._proto = proto_ref if proto_ref is not None else board_rules_pb2.PredefinedSizes()
 
         if proto is not None:
             self._proto.CopyFrom(proto)
@@ -326,10 +326,10 @@ class PredefinedSizes(Wrapper):
 class SolderMaskPasteDefaults(Wrapper):
     def __init__(
         self,
-        proto: Optional[board_pb2.SolderMaskPasteDefaults] = None,
-        proto_ref: Optional[board_pb2.SolderMaskPasteDefaults] = None,
+        proto: Optional[board_rules_pb2.SolderMaskPasteDefaults] = None,
+        proto_ref: Optional[board_rules_pb2.SolderMaskPasteDefaults] = None,
     ):
-        self._proto = proto_ref if proto_ref is not None else board_pb2.SolderMaskPasteDefaults()
+        self._proto = proto_ref if proto_ref is not None else board_rules_pb2.SolderMaskPasteDefaults()
 
         if proto is not None:
             self._proto.CopyFrom(proto)
@@ -386,10 +386,10 @@ class SolderMaskPasteDefaults(Wrapper):
 class TeardropTargetParams(Wrapper):
     def __init__(
         self,
-        proto: Optional[board_pb2.TeardropTargetParams] = None,
-        proto_ref: Optional[board_pb2.TeardropTargetParams] = None,
+        proto: Optional[board_rules_pb2.TeardropTargetParams] = None,
+        proto_ref: Optional[board_rules_pb2.TeardropTargetParams] = None,
     ):
-        self._proto = proto_ref if proto_ref is not None else board_pb2.TeardropTargetParams()
+        self._proto = proto_ref if proto_ref is not None else board_rules_pb2.TeardropTargetParams()
 
         if proto is not None:
             self._proto.CopyFrom(proto)
@@ -470,20 +470,20 @@ class TeardropTargetParams(Wrapper):
 class TeardropTargetEntry(Wrapper):
     def __init__(
         self,
-        proto: Optional[board_pb2.TeardropTargetEntry] = None,
-        proto_ref: Optional[board_pb2.TeardropTargetEntry] = None,
+        proto: Optional[board_rules_pb2.TeardropTargetEntry] = None,
+        proto_ref: Optional[board_rules_pb2.TeardropTargetEntry] = None,
     ):
-        self._proto = proto_ref if proto_ref is not None else board_pb2.TeardropTargetEntry()
+        self._proto = proto_ref if proto_ref is not None else board_rules_pb2.TeardropTargetEntry()
 
         if proto is not None:
             self._proto.CopyFrom(proto)
 
     @property
-    def target(self) -> board_pb2.TeardropTarget.ValueType:
+    def target(self) -> board_rules_pb2.TeardropTarget.ValueType:
         return self._proto.target
 
     @target.setter
-    def target(self, value: board_pb2.TeardropTarget.ValueType):
+    def target(self, value: board_rules_pb2.TeardropTarget.ValueType):
         self._proto.target = value
 
     @property
@@ -498,10 +498,10 @@ class TeardropTargetEntry(Wrapper):
 class TeardropDefaults(Wrapper):
     def __init__(
         self,
-        proto: Optional[board_pb2.TeardropDefaults] = None,
-        proto_ref: Optional[board_pb2.TeardropDefaults] = None,
+        proto: Optional[board_rules_pb2.TeardropDefaults] = None,
+        proto_ref: Optional[board_rules_pb2.TeardropDefaults] = None,
     ):
-        self._proto = proto_ref if proto_ref is not None else board_pb2.TeardropDefaults()
+        self._proto = proto_ref if proto_ref is not None else board_rules_pb2.TeardropDefaults()
 
         if proto is not None:
             self._proto.CopyFrom(proto)
@@ -565,10 +565,10 @@ class TeardropDefaults(Wrapper):
 class ViaProtectionDefaults(Wrapper):
     def __init__(
         self,
-        proto: Optional[board_pb2.ViaProtectionDefaults] = None,
-        proto_ref: Optional[board_pb2.ViaProtectionDefaults] = None,
+        proto: Optional[board_rules_pb2.ViaProtectionDefaults] = None,
+        proto_ref: Optional[board_rules_pb2.ViaProtectionDefaults] = None,
     ):
-        self._proto = proto_ref if proto_ref is not None else board_pb2.ViaProtectionDefaults()
+        self._proto = proto_ref if proto_ref is not None else board_rules_pb2.ViaProtectionDefaults()
 
         if proto is not None:
             self._proto.CopyFrom(proto)
@@ -641,20 +641,20 @@ class ViaProtectionDefaults(Wrapper):
 class DrcSeveritySetting(Wrapper):
     def __init__(
         self,
-        proto: Optional[board_pb2.DrcSeveritySetting] = None,
-        proto_ref: Optional[board_pb2.DrcSeveritySetting] = None,
+        proto: Optional[board_rules_pb2.DrcSeveritySetting] = None,
+        proto_ref: Optional[board_rules_pb2.DrcSeveritySetting] = None,
     ):
-        self._proto = proto_ref if proto_ref is not None else board_pb2.DrcSeveritySetting()
+        self._proto = proto_ref if proto_ref is not None else board_rules_pb2.DrcSeveritySetting()
 
         if proto is not None:
             self._proto.CopyFrom(proto)
 
     @property
-    def rule_type(self) -> board_pb2.DrcErrorType.ValueType:
+    def rule_type(self) -> board_rules_pb2.DrcErrorType.ValueType:
         return self._proto.rule_type
 
     @rule_type.setter
-    def rule_type(self, value: board_pb2.DrcErrorType.ValueType):
+    def rule_type(self, value: board_rules_pb2.DrcErrorType.ValueType):
         self._proto.rule_type = value
 
     @property
@@ -669,20 +669,20 @@ class DrcSeveritySetting(Wrapper):
 class DrcExclusion(Wrapper):
     def __init__(
         self,
-        proto: Optional[board_pb2.DrcExclusion] = None,
-        proto_ref: Optional[board_pb2.DrcExclusion] = None,
+        proto: Optional[board_rules_pb2.DrcExclusion] = None,
+        proto_ref: Optional[board_rules_pb2.DrcExclusion] = None,
     ):
-        self._proto = proto_ref if proto_ref is not None else board_pb2.DrcExclusion()
+        self._proto = proto_ref if proto_ref is not None else board_rules_pb2.DrcExclusion()
 
         if proto is not None:
             self._proto.CopyFrom(proto)
 
     @property
-    def marker(self) -> base_types_pb2.RuleCheckerMarker:
+    def marker(self) -> board_rules_pb2.DrcMarker:
         return self._proto.marker
 
     @marker.setter
-    def marker(self, value: base_types_pb2.RuleCheckerMarker):
+    def marker(self, value: board_rules_pb2.DrcMarker):
         self._proto.marker.CopyFrom(value)
 
     @property
@@ -698,10 +698,10 @@ class BoardDesignRules(Wrapper):
     """The base board design and netclass rules (not including custom rules)"""
     def __init__(
         self,
-        proto: Optional[board_pb2.BoardDesignRules] = None,
-        proto_ref: Optional[board_pb2.BoardDesignRules] = None,
+        proto: Optional[board_rules_pb2.BoardDesignRules] = None,
+        proto_ref: Optional[board_rules_pb2.BoardDesignRules] = None,
     ):
-        self._proto = proto_ref if proto_ref is not None else board_pb2.BoardDesignRules()
+        self._proto = proto_ref if proto_ref is not None else board_rules_pb2.BoardDesignRules()
 
         if proto is not None:
             self._proto.CopyFrom(proto)
@@ -751,7 +751,7 @@ class BoardDesignRules(Wrapper):
         self._proto.via_protection.CopyFrom(value.proto)
 
     @property
-    def severities(self) -> Dict[board_pb2.DrcErrorType.ValueType, base_types_pb2.RuleSeverity.ValueType]:
+    def severities(self) -> Dict[board_rules_pb2.DrcErrorType.ValueType, base_types_pb2.RuleSeverity.ValueType]:
         if "_severities" not in self.__dict__:
             self._severities = {
                 severity.rule_type: severity.severity
@@ -760,7 +760,7 @@ class BoardDesignRules(Wrapper):
         return self._severities
 
     @severities.setter
-    def severities(self, value: Dict[board_pb2.DrcErrorType.ValueType, base_types_pb2.RuleSeverity.ValueType]):
+    def severities(self, value: Dict[board_rules_pb2.DrcErrorType.ValueType, base_types_pb2.RuleSeverity.ValueType]):
         self._severities = dict(value)
 
     @property
@@ -795,24 +795,24 @@ class BoardDesignRules(Wrapper):
 class CustomRuleDisallowSettings(Wrapper):
     def __init__(
         self,
-        proto: Optional[board_pb2.CustomRuleDisallowSettings] = None,
-        proto_ref: Optional[board_pb2.CustomRuleDisallowSettings] = None,
+        proto: Optional[board_rules_pb2.CustomRuleDisallowSettings] = None,
+        proto_ref: Optional[board_rules_pb2.CustomRuleDisallowSettings] = None,
     ):
         self._proto = (
-            proto_ref if proto_ref is not None else board_pb2.CustomRuleDisallowSettings()
+            proto_ref if proto_ref is not None else board_rules_pb2.CustomRuleDisallowSettings()
         )
 
         if proto is not None:
             self._proto.CopyFrom(proto)
 
     @property
-    def types(self) -> List[board_pb2.CustomRuleDisallowType.ValueType]:
+    def types(self) -> List[board_rules_pb2.CustomRuleDisallowType.ValueType]:
         if "_types" not in self.__dict__:
             self._types = list(self._proto.types)
         return self._types
 
     @types.setter
-    def types(self, value: Sequence[board_pb2.CustomRuleDisallowType.ValueType]):
+    def types(self, value: Sequence[board_rules_pb2.CustomRuleDisallowType.ValueType]):
         self._types = list(value)
 
     def _pack(self):
@@ -825,26 +825,26 @@ class CustomRuleConstraint(Wrapper):
     """Represents a (constraint ...) clause in a custom rule"""
     def __init__(
         self,
-        proto: Optional[board_pb2.CustomRuleConstraint] = None,
-        proto_ref: Optional[board_pb2.CustomRuleConstraint] = None,
+        proto: Optional[board_rules_pb2.CustomRuleConstraint] = None,
+        proto_ref: Optional[board_rules_pb2.CustomRuleConstraint] = None,
     ):
-        self._proto = proto_ref if proto_ref is not None else board_pb2.CustomRuleConstraint()
+        self._proto = proto_ref if proto_ref is not None else board_rules_pb2.CustomRuleConstraint()
 
         if proto is not None:
             self._proto.CopyFrom(proto)
 
     @classmethod
-    def from_type(cls, type: board_pb2.CustomRuleConstraintType.ValueType) -> Self:
+    def from_type(cls, type: board_rules_pb2.CustomRuleConstraintType.ValueType) -> Self:
         constraint = cls()
         constraint.type = type
         return constraint
 
     @property
-    def type(self) -> board_pb2.CustomRuleConstraintType.ValueType:
+    def type(self) -> board_rules_pb2.CustomRuleConstraintType.ValueType:
         return self._proto.type
 
     @type.setter
-    def type(self, value: board_pb2.CustomRuleConstraintType.ValueType):
+    def type(self, value: board_rules_pb2.CustomRuleConstraintType.ValueType):
         self._proto.type = value
 
     @property
@@ -883,7 +883,7 @@ class CustomRuleConstraint(Wrapper):
             self._disallow = CustomRuleDisallowSettings(proto_ref=self._proto.disallow)
             return self._disallow
 
-        if self.type == board_pb2.CustomRuleConstraintType.CRCT_DISALLOW:
+        if self.type == board_rules_pb2.CustomRuleConstraintType.CRCT_DISALLOW:
             self._proto.disallow.SetInParent()
             self._disallow = CustomRuleDisallowSettings(proto_ref=self._proto.disallow)
             return self._disallow
@@ -905,7 +905,7 @@ class CustomRuleConstraint(Wrapper):
         if self._proto.WhichOneof("value") == "zone_connection":
             return self._proto.zone_connection
 
-        if self.type == board_pb2.CustomRuleConstraintType.CRCT_ZONE_CONNECTION:
+        if self.type == board_rules_pb2.CustomRuleConstraintType.CRCT_ZONE_CONNECTION:
             self._proto.zone_connection = board_types_pb2.ZoneConnectionStyle.ZCS_UNKNOWN
             return self._proto.zone_connection
 
@@ -924,7 +924,7 @@ class CustomRuleConstraint(Wrapper):
         if self._proto.WhichOneof("value") == "assertion_expression":
             return self._proto.assertion_expression
 
-        if self.type == board_pb2.CustomRuleConstraintType.CRCT_ASSERTION:
+        if self.type == board_rules_pb2.CustomRuleConstraintType.CRCT_ASSERTION:
             self._proto.assertion_expression = ""
             return self._proto.assertion_expression
 
@@ -939,13 +939,13 @@ class CustomRuleConstraint(Wrapper):
             self._proto.assertion_expression = value
 
     @property
-    def options(self) -> List[board_pb2.CustomRuleConstraintOption.ValueType]:
+    def options(self) -> List[board_rules_pb2.CustomRuleConstraintOption.ValueType]:
         if "_options" not in self.__dict__:
             self._options = list(self._proto.options)
         return self._options
 
     @options.setter
-    def options(self, value: Sequence[board_pb2.CustomRuleConstraintOption.ValueType]):
+    def options(self, value: Sequence[board_rules_pb2.CustomRuleConstraintOption.ValueType]):
         self._options = list(value)
 
     def _pack(self):
@@ -960,10 +960,10 @@ class CustomRuleConstraint(Wrapper):
 class CustomRule(Wrapper):
     def __init__(
         self,
-        proto: Optional[board_pb2.CustomRule] = None,
-        proto_ref: Optional[board_pb2.CustomRule] = None,
+        proto: Optional[board_rules_pb2.CustomRule] = None,
+        proto_ref: Optional[board_rules_pb2.CustomRule] = None,
     ):
-        self._proto = proto_ref if proto_ref is not None else board_pb2.CustomRule()
+        self._proto = proto_ref if proto_ref is not None else board_rules_pb2.CustomRule()
 
         if proto is not None:
             self._proto.CopyFrom(proto)
@@ -1006,13 +1006,13 @@ class CustomRule(Wrapper):
             self._proto.single_layer = value
 
     @property
-    def layer_mode(self) -> Optional[board_pb2.CustomRuleLayerMode.ValueType]:
+    def layer_mode(self) -> Optional[board_rules_pb2.CustomRuleLayerMode.ValueType]:
         if self._proto.WhichOneof("layer_condition") == "layer_mode":
             return self._proto.layer_mode
         return None
 
     @layer_mode.setter
-    def layer_mode(self, value: Optional[board_pb2.CustomRuleLayerMode.ValueType]):
+    def layer_mode(self, value: Optional[board_rules_pb2.CustomRuleLayerMode.ValueType]):
         if value is None:
             if self._proto.WhichOneof("layer_condition") == "layer_mode":
                 self._proto.ClearField("layer_mode")
