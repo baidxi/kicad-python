@@ -2475,7 +2475,7 @@ class Zone(BoardItem):
         self._proto.copper_settings.net.CopyFrom(net.proto)
 
     @property
-    def teardrop(self) -> Optional[board_types_pb2.TeardropSettings]:
+    def teardrop(self) -> Optional[board_types_pb2.ZoneTeardropSettings]:
         if self.is_rule_area():
             return None
         return self._proto.copper_settings.teardrop
