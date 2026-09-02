@@ -18,6 +18,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import pathlib
+import reprlib
 from collections.abc import Iterable, Sequence
 from time import sleep
 from typing import Dict, List, Optional, Union, cast, overload
@@ -610,15 +612,16 @@ class Board:
         self._kicad.send(command, Empty)
 
     def save_as(self, filename: str, overwrite: bool = False, include_project: bool = True):
-        """Saves the board to a new file.
+        """Saves the board to a new file.  Does not open the newly-saved file.
 
         :param filename: The path to save the board to
         :param overwrite: If True, the file will be overwritten if it already exists
         :param include_project: If True, the project will be saved along with the board
         """
+        path = pathlib.Path(filename)
         command = editor_commands_pb2.SaveCopyOfDocument()
         command.document.CopyFrom(self._doc)
-        command.path = filename
+        command.path = str(path.resolve())
         command.options.overwrite = overwrite
         command.options.include_project = include_project
         self._kicad.send(command, Empty)
