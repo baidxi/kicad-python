@@ -865,7 +865,7 @@ class Board:
         precision: board_jobs_pb2.DrillGerberPrecision.ValueType = DrillGerberPrecision.DGP_UNKNOWN,
         generate_tenting: bool = False,
         # Excellon specific
-        units: enums_pb2.Units.ValueType = Units.U_UNKNOWN,
+        units: Units.ValueType = Units.U_UNKNOWN,
         zeros_format: board_jobs_pb2.DrillZerosFormat.ValueType = DrillZerosFormat.DZF_UNKNOWN,
         route_oval_holes: bool = False,
         combine_pth_npth: bool = True,
@@ -922,7 +922,7 @@ class Board:
         origin: board_jobs_pb2.DrillOrigin.ValueType = DrillOrigin.DO_UNKNOWN,
         map_format: board_jobs_pb2.DrillMapFormat.ValueType = DrillMapFormat.DMF_UNKNOWN,
         report_filename: str = '',
-        units: enums_pb2.Units.ValueType = Units.U_UNKNOWN,
+        units: Units.ValueType = Units.U_UNKNOWN,
         zeros_format: board_jobs_pb2.DrillZerosFormat.ValueType = DrillZerosFormat.DZF_UNKNOWN,
         route_oval_holes: bool = False,
         combine_pth_npth: bool = True,
