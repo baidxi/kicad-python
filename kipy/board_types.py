@@ -73,6 +73,7 @@ from kipy.proto.board.board_types_pb2 import (  # noqa
     PadType,
     PadStackType,
     PadStackShape,
+    PadFabricationProperty,
     SolderMaskMode,
     SolderPasteMode,
     ZoneTeardropType,
@@ -1621,6 +1622,14 @@ class Pad(BoardItem):
     @position.setter
     def position(self, position: Vector2):
         self._proto.position.CopyFrom(position.proto)
+
+    @property
+    def fab_property(self) -> PadFabricationProperty.ValueType:
+        return self._proto.fab_property
+
+    @fab_property.setter
+    def fab_property(self, fab_property: PadFabricationProperty.ValueType):
+        self._proto.fab_property = fab_property
 
     @property
     def net(self) -> Net:
