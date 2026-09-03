@@ -18,6 +18,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+
 def from_mm(value_mm: float) -> int:
     """
     KiCad uses several internal unit systems, but for the IPC API, all distance units are defined as
@@ -26,6 +27,7 @@ def from_mm(value_mm: float) -> int:
     :return: the quantity in KiCad API units
     """
     return int(value_mm * 1_000_000)
+
 
 def to_mm(value_nm: int) -> float:
     """

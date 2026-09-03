@@ -159,7 +159,7 @@ class RoundTracks(RoundTracksDialog):
                             native=False,
                             onlySelection=anySelected,
                             avoid_junctions=avoid,
-                            msg=f", pass {i+1}",
+                            msg=f", pass {i + 1}",
                         )
 
         self.board.push_commit(commit, "Round Tracks")
@@ -180,9 +180,7 @@ class RoundTracks(RoundTracksDialog):
             wx.Yield()
         dt = time.time() - start
         if dt > 0.1:
-            wx.MessageBox(
-                f"Done, took {time.time() - start:.3f} seconds", parent=self
-            )
+            wx.MessageBox(f"Done, took {time.time() - start:.3f} seconds", parent=self)
         self.EndModal(wx.ID_OK)
 
     def on_close(self, event):
@@ -218,13 +216,16 @@ class RoundTracks(RoundTracksDialog):
         classes = self.config["classes"]
         try:
             with open(self.configfilepath, "w") as configfile:
-                configfile.writelines("%s\t%s\t%s\t%s\n"
-                        % (
-                            classname,
-                            str(classes[classname]["do_round"]),
-                            str(classes[classname]["scaling"]),
-                            str(classes[classname]["passes"]),
-                        ) for classname in classes)
+                configfile.writelines(
+                    "%s\t%s\t%s\t%s\n"
+                    % (
+                        classname,
+                        str(classes[classname]["do_round"]),
+                        str(classes[classname]["scaling"]),
+                        str(classes[classname]["passes"]),
+                    )
+                    for classname in classes
+                )
                 configfile.write(
                     "%s\t%s\t%s\n"
                     % (
@@ -280,13 +281,12 @@ class RoundTracks(RoundTracksDialog):
         # A 90 degree bend will get a maximum radius of this amount
         RADIUS = from_mm(scaling / (math.sin(math.pi / 4) + 1))
 
-        nets = sorted(self.board.get_nets(netclass_filter=netclass),
-                      key = lambda net: net.code)
+        nets = sorted(self.board.get_nets(netclass_filter=netclass), key=lambda net: net.code)
         tracksToRemove = []
         itemsToCreate = []
         tracksModified = []
 
-        progressInterval = int(max(1, len(nets) / 100.0 ))
+        progressInterval = int(max(1, len(nets) / 100.0))
         lastReport = 0
 
         for net in nets:
@@ -350,10 +350,7 @@ class RoundTracks(RoundTracksDialog):
                             or tracks[t1].end == tracks[t2].start
                         ):
                             intersections.add(deepcopy(tracks[t2].start))
-                        if (
-                            tracks[t1].start == tracks[t2].end
-                            or tracks[t1].end == tracks[t2].end
-                        ):
+                        if tracks[t1].start == tracks[t2].end or tracks[t1].end == tracks[t2].end:
                             intersections.add(deepcopy(tracks[t2].end))
 
                 # for each remaining intersection, shorten each track by the same amount, and place a track between.
@@ -371,9 +368,7 @@ class RoundTracks(RoundTracksDialog):
                             tracksHere.append(t1)
                             tracksModified.append(t1)
 
-                    if len(tracksHere) == 0 or (
-                        avoid_junctions and len(tracksHere) > 2
-                    ):
+                    if len(tracksHere) == 0 or (avoid_junctions and len(tracksHere) > 2):
                         continue
 
                     # if there are any arcs or vias present, skip the intersection entirely
@@ -413,10 +408,7 @@ class RoundTracks(RoundTracksDialog):
                     for t1 in tracksHere:
                         if id(t1) not in trackLengths:
                             trackLengths[id(t1)] = t1.length()
-                        if (
-                            shortest == -1
-                            or trackLengths[id(t1)] < trackLengths[id(shortest)]
-                        ):
+                        if shortest == -1 or trackLengths[id(t1)] < trackLengths[id(shortest)]:
                             shortest = t1
 
                     # sort these tracks by angle, so new tracks can be drawn between them
@@ -504,9 +496,7 @@ class RoundTracks(RoundTracksDialog):
                                 itemsToCreate.append(track)
 
             if net.code - lastReport > progressInterval:
-                self.prog.Pulse(
-                    f"Netclass: {netclass}, {net.code+1} of {len(nets)}{msg}"
-                )
+                self.prog.Pulse(f"Netclass: {netclass}, {net.code + 1} of {len(nets)}{msg}")
                 lastReport = net.code
 
         createdItems = self.board.create_items(itemsToCreate)

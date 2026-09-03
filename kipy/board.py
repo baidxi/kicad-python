@@ -50,7 +50,7 @@ from kipy.common_types import Color, Commit, TextAttributes, TitleBlockInfo
 from kipy.geometry import Box2, PolygonWithHoles, Vector2
 from kipy.project import NetClass, Project
 from kipy.proto.board import board_commands_pb2, board_pb2, board_types_pb2
-from kipy.proto.board.board_commands_pb2 import BoardFlipDirection, BoardOriginType  #noqa
+from kipy.proto.board.board_commands_pb2 import BoardFlipDirection, BoardOriginType  # noqa
 
 # Re-exported protobuf enum types
 from kipy.proto.board.board_pb2 import (  # noqa
@@ -88,11 +88,13 @@ from kipy.wrapper import Item, Wrapper
 
 class BoardLayerGraphicsDefaults(Wrapper):
     """The default properties for graphic items added on a given class of board layer"""
+
     def __init__(self, proto: Optional[board_pb2.BoardLayerGraphicsDefaults] = None):
         self._proto = board_pb2.BoardLayerGraphicsDefaults()
 
         if proto is not None:
             self._proto.CopyFrom(proto)
+
     @property
     def layer(self) -> board_pb2.BoardLayerClass.ValueType:
         """The layer class that these defaults apply to"""
@@ -113,6 +115,7 @@ class BoardLayerGraphicsDefaults(Wrapper):
     @property
     def text(self) -> TextAttributes:
         return TextAttributes(self._proto.text)
+
 
 class BoardStackupDielectricProperties(Wrapper):
     def __init__(self, proto: Optional[board_pb2.BoardStackupDielectricProperties] = None):
@@ -557,6 +560,7 @@ class BoardStackup(Wrapper):
         """The stackup layers, in order from top to bottom of the board"""
         return [BoardStackupLayer(layer) for layer in self._proto.layers]
 
+
 class Board:
     def __init__(self, kicad: KiCadClient, document: DocumentSpecifier):
         """Represents an open board (.kicad_pcb) document in KiCad"""
@@ -684,9 +688,7 @@ class Board:
             [unwrap(item) for item in self._kicad.send(command, GetItemsResponse).items]
         )
 
-    def get_items_by_id(
-        self, ids: Union[KIID, Sequence[KIID]]
-    ) -> Sequence[Item]:
+    def get_items_by_id(self, ids: Union[KIID, Sequence[KIID]]) -> Sequence[Item]:
         """Retrieves items from the board by their KIID (internal unique identifier)
 
         .. versionadded:: 0.7.0 (KiCad 10.0.0)
@@ -844,8 +846,7 @@ class Board:
 
         .. versionadded:: 0.7.0"""
         return [
-            cast(Barcode, item)
-            for item in self.get_items(types=[KiCadObjectType.KOT_PCB_BARCODE])
+            cast(Barcode, item) for item in self.get_items(types=[KiCadObjectType.KOT_PCB_BARCODE])
         ]
 
     def get_reference_images(self) -> Sequence[ReferenceImage]:
@@ -865,7 +866,9 @@ class Board:
         """Retrieves all groups on the board
 
         .. versionadded:: 0.7.0 (KiCad 10.0.0)"""
-        groups = [cast(Group, item) for item in self.get_items(types=[KiCadObjectType.KOT_PCB_GROUP])]
+        groups = [
+            cast(Group, item) for item in self.get_items(types=[KiCadObjectType.KOT_PCB_GROUP])
+        ]
 
         # Unwrap items in groups
         if len(groups) > 0:
@@ -907,9 +910,7 @@ class Board:
         return self._to_concrete_items(
             [
                 unwrap(result.item)
-                for result in self._kicad.send(
-                    command, UpdateItemsResponse
-                ).updated_items
+                for result in self._kicad.send(command, UpdateItemsResponse).updated_items
             ]
         )
 
@@ -1037,8 +1038,7 @@ class Board:
             command.netclass_filter.extend(netclass_filter)
 
         return [
-            Net(net)
-            for net in self._kicad.send(command, board_commands_pb2.NetsResponse).nets
+            Net(net) for net in self._kicad.send(command, board_commands_pb2.NetsResponse).nets
         ]
 
     def get_netclass_for_nets(self, nets: Union[Net, Sequence[Net]]) -> Dict[str, NetClass]:
@@ -1066,16 +1066,14 @@ class Board:
         else:
             cmd.types.extend(types or [])
 
-        return self._to_concrete_items([
-            unwrap(item)
-            for item in self._kicad.send(
-                cmd, editor_commands_pb2.SelectionResponse
-            ).items
-        ])
+        return self._to_concrete_items(
+            [
+                unwrap(item)
+                for item in self._kicad.send(cmd, editor_commands_pb2.SelectionResponse).items
+            ]
+        )
 
-    def add_to_selection(
-        self, items: Union[BoardItem, Sequence[BoardItem]]
-    ) -> Sequence[Wrapper]:
+    def add_to_selection(self, items: Union[BoardItem, Sequence[BoardItem]]) -> Sequence[Wrapper]:
         """Adds one or more items to the current selection on the board
 
         :param items: The items to add to the selection
@@ -1091,9 +1089,7 @@ class Board:
 
         return [
             unwrap(item)
-            for item in self._kicad.send(
-                cmd, editor_commands_pb2.SelectionResponse
-            ).items
+            for item in self._kicad.send(cmd, editor_commands_pb2.SelectionResponse).items
         ]
 
     def remove_from_selection(
@@ -1114,9 +1110,7 @@ class Board:
 
         return [
             unwrap(item)
-            for item in self._kicad.send(
-                cmd, editor_commands_pb2.SelectionResponse
-            ).items
+            for item in self._kicad.send(cmd, editor_commands_pb2.SelectionResponse).items
         ]
 
     def clear_selection(self):
@@ -1186,12 +1180,24 @@ class Board:
         cmd.board.CopyFrom(self._doc)
         reply = self._kicad.send(cmd, board_commands_pb2.GraphicsDefaultsResponse)
         return {
-            board_pb2.BoardLayerClass.BLC_SILKSCREEN:  BoardLayerGraphicsDefaults(reply.defaults.layers[0]),
-            board_pb2.BoardLayerClass.BLC_COPPER:      BoardLayerGraphicsDefaults(reply.defaults.layers[1]),
-            board_pb2.BoardLayerClass.BLC_EDGES:       BoardLayerGraphicsDefaults(reply.defaults.layers[2]),
-            board_pb2.BoardLayerClass.BLC_COURTYARD:   BoardLayerGraphicsDefaults(reply.defaults.layers[3]),
-            board_pb2.BoardLayerClass.BLC_FABRICATION: BoardLayerGraphicsDefaults(reply.defaults.layers[4]),
-            board_pb2.BoardLayerClass.BLC_OTHER:       BoardLayerGraphicsDefaults(reply.defaults.layers[5])
+            board_pb2.BoardLayerClass.BLC_SILKSCREEN: BoardLayerGraphicsDefaults(
+                reply.defaults.layers[0]
+            ),
+            board_pb2.BoardLayerClass.BLC_COPPER: BoardLayerGraphicsDefaults(
+                reply.defaults.layers[1]
+            ),
+            board_pb2.BoardLayerClass.BLC_EDGES: BoardLayerGraphicsDefaults(
+                reply.defaults.layers[2]
+            ),
+            board_pb2.BoardLayerClass.BLC_COURTYARD: BoardLayerGraphicsDefaults(
+                reply.defaults.layers[3]
+            ),
+            board_pb2.BoardLayerClass.BLC_FABRICATION: BoardLayerGraphicsDefaults(
+                reply.defaults.layers[4]
+            ),
+            board_pb2.BoardLayerClass.BLC_OTHER: BoardLayerGraphicsDefaults(
+                reply.defaults.layers[5]
+            ),
         }
 
     def get_title_block_info(self) -> TitleBlockInfo:
@@ -1218,8 +1224,9 @@ class Board:
         cmd.type = origin_type
         return Vector2(self._kicad.send(cmd, base_types_pb2.Vector2))
 
-    def set_origin(self, origin_type: board_commands_pb2.BoardOriginType.ValueType,
-                   origin: Vector2):
+    def set_origin(
+        self, origin_type: board_commands_pb2.BoardOriginType.ValueType, origin: Vector2
+    ):
         """Sets the specified (grid or drill/place) board origin
 
         .. versionadded:: 0.3.0"""
@@ -1251,12 +1258,10 @@ class Board:
         return self._kicad.send(cmd, board_commands_pb2.BoardLayerResponse).layer
 
     @overload
-    def expand_text_variables(self, text: str) -> str:
-        ...
+    def expand_text_variables(self, text: str) -> str: ...
 
     @overload
-    def expand_text_variables(self, text: List[str]) -> List[str]:
-        ...
+    def expand_text_variables(self, text: List[str]) -> List[str]: ...
 
     def expand_text_variables(self, text: Union[str, List[str]]) -> Union[str, List[str]]:
         """Expands text variables in a string or list of strings.  Any text variables that do not
@@ -1287,9 +1292,7 @@ class Board:
     ) -> List[Optional[Box2]]: ...
 
     def get_item_bounding_box(
-        self,
-        items: Union[BoardItem, Sequence[BoardItem]],
-        include_text: bool = False
+        self, items: Union[BoardItem, Sequence[BoardItem]], include_text: bool = False
     ) -> Union[Optional[Box2], List[Optional[Box2]]]:
         """Gets the KiCad-calculated bounding box for an item or items, returning None if the item
         does not exist or has no bounding box"""
@@ -1347,7 +1350,9 @@ class Board:
         if isinstance(pads, Pad):
             return PolygonWithHoles(response.polygons[0]) if len(response.polygons) == 1 else None
 
-        pad_to_polygon = {pad.value: polygon for pad, polygon in zip(response.pads, response.polygons)}
+        pad_to_polygon = {
+            pad.value: polygon for pad, polygon in zip(response.pads, response.polygons)
+        }
         return [
             PolygonWithHoles(p)
             for p in (pad_to_polygon.get(pad.id.value, None) for pad in pads)
@@ -1357,7 +1362,9 @@ class Board:
     def check_padstack_presence_on_layers(
         self,
         items: Union[BoardItem, Iterable[BoardItem]],
-        layers: Union[board_types_pb2.BoardLayer.ValueType, Iterable[board_types_pb2.BoardLayer.ValueType]]
+        layers: Union[
+            board_types_pb2.BoardLayer.ValueType, Iterable[board_types_pb2.BoardLayer.ValueType]
+        ],
     ) -> Dict[BoardItem, Dict[board_types_pb2.BoardLayer.ValueType, bool]]:
         """Checks if the given items with padstacks (pads or vias) have content on the given layers.
 
@@ -1418,8 +1425,9 @@ class Board:
 
         self._kicad.send(cmd, Empty)
 
-    def refill_zones(self, block=True, max_poll_seconds: float = 30.0,
-                     poll_interval_seconds: float = 0.5):
+    def refill_zones(
+        self, block=True, max_poll_seconds: float = 30.0, poll_interval_seconds: float = 0.5
+    ):
         """Refills all zones on the board.  If block is True, this function will block until the
         refill operation is complete.  If block is False, this function will return immediately,
         and future API calls will return AS_BUSY until the refill operation is complete."""

@@ -22,7 +22,7 @@
 
 from kipy import KiCad
 
-if __name__=='__main__':
+if __name__ == "__main__":
     try:
         kicad = KiCad()
         print(f"Connected to KiCad {kicad.get_version()}")

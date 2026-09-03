@@ -27,8 +27,10 @@ import subprocess
 _default_protoc = "protoc.exe" if platform.system() == "Windows" else "protoc"
 _default_protol = "protol.exe" if platform.system() == "Windows" else "protol"
 
-def generate_protos(input_path: str, output_path: str, protoc: str = _default_protoc,
-                    protol: str = _default_protol):
+
+def generate_protos(
+    input_path: str, output_path: str, protoc: str = _default_protoc, protol: str = _default_protol
+):
     try:
         os.mkdir(output_path)
     except FileExistsError:
@@ -41,27 +43,38 @@ def generate_protos(input_path: str, output_path: str, protoc: str = _default_pr
             proto_sources.append(os.path.join(input_path, str(root), item))
 
     print("Generating Python classes from protobuf files...")
-    subprocess.run([protoc,
-           "--python_out=" + output_path,
-           "--mypy_out=" + output_path,
-           "--proto_path=" + input_path,
-           "--experimental_allow_proto3_optional",  # Needed for old protoc versions
-           *proto_sources],
-           check=True)
+    subprocess.run(
+        [
+            protoc,
+            "--python_out=" + output_path,
+            "--mypy_out=" + output_path,
+            "--proto_path=" + input_path,
+            "--experimental_allow_proto3_optional",  # Needed for old protoc versions
+            *proto_sources,
+        ],
+        check=True,
+    )
 
     print("Post-processing with protoletariat...")
-    subprocess.run([protol,
-           "--dont-create-package",
-           "--in-place",
-           "--exclude-google-imports",
-           "--python-out", output_path,
-           "protoc",
-           "--experimental_allow_proto3_optional",  # Needed for old protoc versions
-           "--proto-path", input_path,
-           *proto_sources],
-           check=True)
+    subprocess.run(
+        [
+            protol,
+            "--dont-create-package",
+            "--in-place",
+            "--exclude-google-imports",
+            "--python-out",
+            output_path,
+            "protoc",
+            "--experimental_allow_proto3_optional",  # Needed for old protoc versions
+            "--proto-path",
+            input_path,
+            *proto_sources,
+        ],
+        check=True,
+    )
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
     parser.add_argument("--input", default="kicad/api/proto")

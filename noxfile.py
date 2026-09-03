@@ -27,11 +27,13 @@ def lint(session: Session):
     session.install("ruff")
     session.run("ruff", "check", "examples", "kipy", "tests", "tools")
 
+
 @nox.session
 def mypy(session: Session) -> None:
     session.install("poetry")
     session.run("poetry", "install", "--with", "dev")
     session.run("mypy", "-p", "kipy")
+
 
 @nox.session
 def tests(session: Session) -> None:

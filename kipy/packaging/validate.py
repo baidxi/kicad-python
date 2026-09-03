@@ -49,7 +49,9 @@ def validate_plugin(source_dir: str | Path) -> ValidationReport:
     plugin_path = root / "plugin.json"
 
     if not plugin_path.exists():
-        report.add_error("plugin.json does not exist. This tool can only validate IPC API plugins.")
+        report.add_error(
+            "plugin.json does not exist. This tool can only validate IPC API plugins."
+        )
         return report
 
     plugin = _load_plugin_json(plugin_path, report)
@@ -104,12 +106,12 @@ def validate(path: str | Path) -> ValidationReport:
             return report
 
     if candidate.is_dir() and (candidate / "metadata.json").exists():
-
         report.add_info("Found metadata.json; validating as PCM package")
         _validate_pcm_package_data(candidate, report)
         return report
 
     return validate_plugin(candidate)
+
 
 def _load_plugin_json(
     plugin_path: Path,
@@ -172,9 +174,7 @@ def _validate_plugin_schema(plugin: dict[str, Any], report: ValidationReport):
 
     try:
         schema_text = (
-            files("kipy.packaging.schemas")
-            .joinpath(_PLUGIN_SCHEMA)
-            .read_text(encoding="utf-8")
+            files("kipy.packaging.schemas").joinpath(_PLUGIN_SCHEMA).read_text(encoding="utf-8")
         )
         schema = json.loads(schema_text)
     except Exception as e:
@@ -273,6 +273,7 @@ def _validate_pcm_package_data(root: Path, report: ValidationReport):
             message.path = f"plugins/{message.path}"
         report.add(message)
 
+
 def _validate_pcm_schema(metadata: dict[str, Any], report: ValidationReport) -> bool:
     all_errors: dict[str, list[ValidationMessage]] = {}
 
@@ -283,7 +284,11 @@ def _validate_pcm_schema(metadata: dict[str, Any], report: ValidationReport) -> 
 
     for schema_version in _PCM_SCHEMAS:
         try:
-            schema_text = files("kipy.packaging.schemas").joinpath(schema_version).read_text(encoding="utf-8")
+            schema_text = (
+                files("kipy.packaging.schemas")
+                .joinpath(schema_version)
+                .read_text(encoding="utf-8")
+            )
             schema = json.loads(schema_text)
         except Exception as ex:
             report.add_error(f"failed to read schema '{schema_version}': {ex!s}")
@@ -292,12 +297,14 @@ def _validate_pcm_schema(metadata: dict[str, Any], report: ValidationReport) -> 
         validator = Draft7Validator(schema)
         errors: list[ValidationMessage] = []
 
-        for error in sorted(validator.iter_errors(metadata), key=lambda current: list(current.path)):
+        for error in sorted(
+            validator.iter_errors(metadata), key=lambda current: list(current.path)
+        ):
             errors.append(
                 ValidationMessage(
                     message=f"schema validation error: {error.message}",
                     path=f"metadata.json{_format_schema_error_path(error.path)}",
-                    level="error"
+                    level="error",
                 )
             )
 
@@ -311,6 +318,7 @@ def _validate_pcm_schema(metadata: dict[str, Any], report: ValidationReport) -> 
         report.add(message)
 
     return False
+
 
 def _load_metadata_json(root: Path, report: ValidationReport) -> dict[str, Any] | None:
     metadata_path = root / "metadata.json"
@@ -329,6 +337,7 @@ def _load_metadata_json(root: Path, report: ValidationReport) -> dict[str, Any] 
         return None
 
     return data
+
 
 def _validate_file_path(
     root: Path,
@@ -372,6 +381,7 @@ def _format_schema_error_path(path: Any) -> str:
 
 
 _REQUIREMENT_NAME_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]*")
+
 
 def _parse_requirement_name(line: str) -> str | None:
     text = line.strip()

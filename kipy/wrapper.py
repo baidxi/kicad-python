@@ -33,9 +33,7 @@ from kipy.proto.common.types.base_types_pb2 import KIID
 
 
 class Wrapper(ABC):
-    def __init__(
-        self, proto: Optional[Message] = None, proto_ref: Optional[Message] = None
-    ):
+    def __init__(self, proto: Optional[Message] = None, proto_ref: Optional[Message] = None):
         pass
 
     @property

@@ -49,6 +49,7 @@ if sys.version_info >= (3, 13):
 else:
     from typing_extensions import deprecated
 
+
 class Commit:
     def __init__(self, id: KIID):
         self._id = id
@@ -86,6 +87,7 @@ class SheetPath(Wrapper):
         (for example, is not present in contexts where the SheetPath is sourced from a board
         object)"""
         return self._proto.path_human_readable
+
 
 class Color(Wrapper):
     def __init__(
@@ -151,7 +153,9 @@ class TextAttributes(Wrapper):
         )
 
     @property
-    @deprecated("This property will always return True in KiCad 9, and will be removed in KiCad 10")
+    @deprecated(
+        "This property will always return True in KiCad 9, and will be removed in KiCad 10"
+    )
     def visible(self) -> bool:
         """
         .. deprecated:: 0.3.0 removed in KiCad 9.0.1
@@ -346,9 +350,7 @@ class GraphicFillAttributes(Wrapper):
         proto: Optional[types.GraphicFillAttributes] = None,
         proto_ref: Optional[types.GraphicFillAttributes] = None,
     ):
-        self._proto = (
-            proto_ref if proto_ref is not None else types.GraphicFillAttributes()
-        )
+        self._proto = proto_ref if proto_ref is not None else types.GraphicFillAttributes()
 
         if proto is not None:
             self._proto.CopyFrom(proto)
@@ -360,9 +362,7 @@ class GraphicFillAttributes(Wrapper):
     @filled.setter
     def filled(self, fill: bool):
         self._proto.fill_type = (
-            types.GraphicFillType.GFT_FILLED
-            if fill
-            else types.GraphicFillType.GFT_UNFILLED
+            types.GraphicFillType.GFT_FILLED if fill else types.GraphicFillType.GFT_UNFILLED
         )
 
     @property
@@ -401,9 +401,7 @@ class GraphicAttributes(Wrapper):
 class Text(Wrapper):
     """Common text properties (wrapper for KiCad's EDA_TEXT) shared between board and schematic"""
 
-    def __init__(
-        self, proto: Optional[types.Text] = None, proto_ref: Optional[types.Text] = None
-    ):
+    def __init__(self, proto: Optional[types.Text] = None, proto_ref: Optional[types.Text] = None):
         self._proto = proto_ref if proto_ref is not None else types.Text()
 
         if proto is not None:
@@ -505,16 +503,17 @@ class GraphicShape(Wrapper):
         self._graphic_proto.attributes.CopyFrom(attributes.proto)
 
     def bounding_box(self) -> Box2:
-        raise NotImplementedError(
-            f"bounding_box() not implemented for {type(self).__name__}"
-        )
+        raise NotImplementedError(f"bounding_box() not implemented for {type(self).__name__}")
 
 
 class Segment(GraphicShape):
     """Represents a base graphic segment (not a board or schematic item)"""
 
-    def __init__(self, proto: Optional[base_types_pb2.GraphicShape] = None,
-                 proto_ref: Optional[base_types_pb2.GraphicShape] = None):
+    def __init__(
+        self,
+        proto: Optional[base_types_pb2.GraphicShape] = None,
+        proto_ref: Optional[base_types_pb2.GraphicShape] = None,
+    ):
         self._graphic_proto = proto_ref if proto_ref is not None else base_types_pb2.GraphicShape()
 
         if proto is not None:
@@ -546,8 +545,11 @@ class Segment(GraphicShape):
 class Arc(GraphicShape):
     """Represents a generic graphical arc (not a board or schematic item)"""
 
-    def __init__(self, proto: Optional[base_types_pb2.GraphicShape] = None,
-                 proto_ref: Optional[base_types_pb2.GraphicShape] = None):
+    def __init__(
+        self,
+        proto: Optional[base_types_pb2.GraphicShape] = None,
+        proto_ref: Optional[base_types_pb2.GraphicShape] = None,
+    ):
         self._graphic_proto = proto_ref if proto_ref is not None else base_types_pb2.GraphicShape()
 
         if proto is not None:
@@ -623,8 +625,11 @@ class Arc(GraphicShape):
 class Circle(GraphicShape):
     """Represents a graphic circle (not a board or schematic item)"""
 
-    def __init__(self, proto: Optional[base_types_pb2.GraphicShape] = None,
-                 proto_ref: Optional[base_types_pb2.GraphicShape] = None):
+    def __init__(
+        self,
+        proto: Optional[base_types_pb2.GraphicShape] = None,
+        proto_ref: Optional[base_types_pb2.GraphicShape] = None,
+    ):
         self._graphic_proto = proto_ref if proto_ref is not None else base_types_pb2.GraphicShape()
 
         if proto is not None:
@@ -667,8 +672,11 @@ class Circle(GraphicShape):
 class Rectangle(GraphicShape):
     """Represents a graphic rectangle (not a board or schematic item)"""
 
-    def __init__(self, proto: Optional[base_types_pb2.GraphicShape] = None,
-                 proto_ref: Optional[base_types_pb2.GraphicShape] = None):
+    def __init__(
+        self,
+        proto: Optional[base_types_pb2.GraphicShape] = None,
+        proto_ref: Optional[base_types_pb2.GraphicShape] = None,
+    ):
         self._graphic_proto = proto_ref if proto_ref is not None else base_types_pb2.GraphicShape()
 
         if proto is not None:
@@ -700,8 +708,11 @@ class Rectangle(GraphicShape):
 class Polygon(GraphicShape):
     """Represents a graphic polygon (not a board or schematic item)"""
 
-    def __init__(self, proto: Optional[base_types_pb2.GraphicShape] = None,
-                 proto_ref: Optional[base_types_pb2.GraphicShape] = None):
+    def __init__(
+        self,
+        proto: Optional[base_types_pb2.GraphicShape] = None,
+        proto_ref: Optional[base_types_pb2.GraphicShape] = None,
+    ):
         self._graphic_proto = proto_ref if proto_ref is not None else base_types_pb2.GraphicShape()
 
         if proto is not None:
@@ -713,10 +724,8 @@ class Polygon(GraphicShape):
         ]
 
     def _pack(self):
-        self._graphic_proto.polygon.ClearField('polygons')
-        self._graphic_proto.polygon.polygons.extend([
-            polygon.proto for polygon in self._polygons
-        ])
+        self._graphic_proto.polygon.ClearField("polygons")
+        self._graphic_proto.polygon.polygons.extend([polygon.proto for polygon in self._polygons])
 
     @property
     def polygons(self) -> list[PolygonWithHoles]:
@@ -736,8 +745,11 @@ class Polygon(GraphicShape):
 class Bezier(GraphicShape):
     """Represents a graphic bezier curve (not a board or schematic item)"""
 
-    def __init__(self, proto: Optional[base_types_pb2.GraphicShape] = None,
-                 proto_ref: Optional[base_types_pb2.GraphicShape] = None):
+    def __init__(
+        self,
+        proto: Optional[base_types_pb2.GraphicShape] = None,
+        proto_ref: Optional[base_types_pb2.GraphicShape] = None,
+    ):
         self._graphic_proto = proto_ref if proto_ref is not None else base_types_pb2.GraphicShape()
 
         if proto is not None:
@@ -811,8 +823,7 @@ class CompoundShape(Wrapper):
         return [
             shape
             for shape in (
-                to_concrete_shape(GraphicShape(subshape))
-                for subshape in self._proto.shapes
+                to_concrete_shape(GraphicShape(subshape)) for subshape in self._proto.shapes
             )
             if shape is not None
         ]

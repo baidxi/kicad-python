@@ -36,6 +36,7 @@ else:
 
 class Vector2(Wrapper):
     """Wraps a kiapi.common.types.Vector2, aka VECTOR2I"""
+
     def __init__(self, proto: Optional[types.Vector2] = None):
         self._proto = types.Vector2()
 
@@ -146,8 +147,10 @@ class Vector2(Wrapper):
 
         return self
 
+
 class Vector3D(Wrapper):
     """Wraps a kiapi.common.types.Vector3D"""
+
     def __init__(self, proto: Optional[types.Vector3D] = None):
         self._proto = types.Vector3D()
 
@@ -229,6 +232,7 @@ class Vector3D(Wrapper):
     def length(self) -> float:
         return math.sqrt(self.x * self.x + self.y * self.y + self.z * self.z)
 
+
 class Box2:
     def __init__(
         self,
@@ -258,7 +262,7 @@ class Box2:
         return cls(pos._proto, size._proto)
 
     @classmethod
-    def from_proto( cls, other: types.Box2) -> Self:
+    def from_proto(cls, other: types.Box2) -> Self:
         return cls(other.position, other.size)
 
     @classmethod
@@ -317,6 +321,7 @@ class Box2:
         self._pos_proto.y_nm -= (new_height - self.size.y) // 2
         self._size_proto.x_nm = new_width
         self._size_proto.y_nm = new_height
+
 
 class Angle(Wrapper):
     def __init__(self, proto: Optional[types.Angle] = None):
@@ -386,6 +391,7 @@ class Angle(Wrapper):
             self.degrees -= 360.0
 
         return self
+
 
 class ArcStartMidEnd(Wrapper):
     def __init__(
@@ -459,6 +465,7 @@ class ArcStartMidEnd(Wrapper):
         """Returns the bounding box of the arc -- not calculated by KiCad; may differ from KiCad's"""
         return arc_bounding_box(self.start, self.mid, self.end)
 
+
 class PolyLineNode(Wrapper):
     def __init__(
         self,
@@ -512,6 +519,7 @@ class PolyLineNode(Wrapper):
     @arc.setter
     def arc(self, val: ArcStartMidEnd):
         self._proto.arc.CopyFrom(val._proto)
+
 
 class PolyLine(Wrapper):
     def __init__(
@@ -571,6 +579,7 @@ class PolyLine(Wrapper):
                 node.arc.start = node.arc.start.rotate(delta, center)
                 node.arc.mid = node.arc.mid.rotate(delta, center)
                 node.arc.end = node.arc.end.rotate(delta, center)
+
 
 class PolygonWithHoles(Wrapper):
     def __init__(
@@ -662,6 +671,7 @@ class PolygonWithHoles(Wrapper):
         for hole in self.holes:
             hole.rotate(delta, center)
 
+
 def arc_center(start: Vector2, mid: Vector2, end: Vector2) -> Optional[Vector2]:
     """
     Calculates the center of the arc.  Uses a different algorithm than KiCad so may have
@@ -695,6 +705,7 @@ def arc_center(start: Vector2, mid: Vector2, end: Vector2) -> Optional[Vector2]:
 
     return center
 
+
 def arc_radius(start: Vector2, mid: Vector2, end: Vector2) -> float:
     """
     Calculates the radius of the arc.  Uses a different algorithm than KiCad so may have
@@ -711,6 +722,7 @@ def arc_radius(start: Vector2, mid: Vector2, end: Vector2) -> float:
 
     return (start - center).length()
 
+
 def normalize_angle_degrees(angle: float) -> float:
     """Normalizes an angle to fall within the range [0, 360)
 
@@ -722,6 +734,7 @@ def normalize_angle_degrees(angle: float) -> float:
         angle -= 360.0
 
     return angle
+
 
 def normalize_angle_radians(angle: float) -> float:
     """Normalizes an angle to fall within the range [0, 2*pi)
@@ -735,6 +748,7 @@ def normalize_angle_radians(angle: float) -> float:
 
     return angle
 
+
 def normalize_angle_pi_radians(angle: float) -> float:
     """Normalizes an angle to fall within the range (-pi, pi]
 
@@ -747,6 +761,7 @@ def normalize_angle_pi_radians(angle: float) -> float:
 
     return angle
 
+
 def arc_start_angle(start: Vector2, mid: Vector2, end: Vector2) -> Optional[float]:
     """Calculates the arc's starting angle in radians, normalized to [0, 2*pi)
 
@@ -756,6 +771,7 @@ def arc_start_angle(start: Vector2, mid: Vector2, end: Vector2) -> Optional[floa
         return None
 
     return normalize_angle_radians((start - center).angle())
+
 
 def arc_end_angle(start: Vector2, mid: Vector2, end: Vector2) -> Optional[float]:
     """Calculates the arc's ending angle in radians, normalized to [0, 2*pi)
@@ -768,32 +784,34 @@ def arc_end_angle(start: Vector2, mid: Vector2, end: Vector2) -> Optional[float]
     angle = (end - center).angle()
 
     start_angle = arc_start_angle(start, mid, end)
-    assert(start_angle is not None)
+    assert start_angle is not None
 
     if angle == start_angle:
         angle += 2 * math.pi
 
     return normalize_angle_radians(angle)
 
+
 def arc_angle(start: Vector2, mid: Vector2, end: Vector2) -> Optional[float]:
-        """Calculates the angle between the start and end of the arc in radians
+    """Calculates the angle between the start and end of the arc in radians
 
-        :return: The angle of the arc, or None if the arc is degenerate
-        .. versionadded:: 0.4.0"""
-        center = arc_center(start, mid, end)
-        if center is None:
-            return None
+    :return: The angle of the arc, or None if the arc is degenerate
+    .. versionadded:: 0.4.0"""
+    center = arc_center(start, mid, end)
+    if center is None:
+        return None
 
-        angle1 = (mid-center).angle() - (start - center).angle()
-        angle2 = (end - center).angle() - (mid - center).angle()
+    angle1 = (mid - center).angle() - (start - center).angle()
+    angle2 = (end - center).angle() - (mid - center).angle()
 
-        return abs(normalize_angle_pi_radians(angle1) + normalize_angle_pi_radians(angle2))
+    return abs(normalize_angle_pi_radians(angle1) + normalize_angle_pi_radians(angle2))
 
 
 def arc_bounding_box(start: Vector2, mid: Vector2, end: Vector2) -> Box2:
     """Calculates a bounding box for an arc
 
     .. versionadded:: 0.7.0"""
+
     def ccw_delta(start_angle: float, end_angle: float) -> float:
         return (end_angle - start_angle) % (2 * math.pi)
 
@@ -842,6 +860,7 @@ def arc_bounding_box(start: Vector2, mid: Vector2, end: Vector2) -> Box2:
 
     return box
 
+
 def arc_start_angle_degrees(start: Vector2, mid: Vector2, end: Vector2) -> Optional[float]:
     """Calculates the arc's starting angle in degrees, normalized to [0, 360)
 
@@ -852,6 +871,7 @@ def arc_start_angle_degrees(start: Vector2, mid: Vector2, end: Vector2) -> Optio
         return None
 
     return normalize_angle_degrees((start - center).angle_degrees())
+
 
 def arc_end_angle_degrees(start: Vector2, mid: Vector2, end: Vector2) -> Optional[float]:
     """Calculates the arc's ending angle in degrees, normalized to [0, 360)
@@ -865,7 +885,7 @@ def arc_end_angle_degrees(start: Vector2, mid: Vector2, end: Vector2) -> Optiona
     angle = (end - center).angle_degrees()
 
     start_angle = arc_start_angle(start, mid, end)
-    assert(start_angle is not None)
+    assert start_angle is not None
 
     if angle == start_angle:
         angle += 360
