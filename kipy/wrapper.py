@@ -18,10 +18,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import sys
 from abc import ABC, abstractmethod
 from typing import Optional
-
-import sys
 
 if sys.version_info >= (3, 11):
     from typing import Self
@@ -29,6 +28,7 @@ else:
     from typing_extensions import Self
 
 from google.protobuf.message import Message
+
 from kipy.proto.common.types.base_types_pb2 import KIID
 
 
@@ -48,7 +48,6 @@ class Wrapper(ABC):
         class instance, for subclasses where the properties are not directly acting on
         the proto object.
         """
-        pass
 
 
 class Item(Wrapper):

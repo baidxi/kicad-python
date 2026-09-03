@@ -20,9 +20,9 @@
 
 from kipy.proto.common import ApiStatusCode
 
+
 class ConnectionError(Exception):
     """Raised when a connection to KiCad cannot be established"""
-    pass
 
 class ApiError(Exception):
     """Raised when KiCad returns an error from an API call.  This indicates that the communcation
@@ -44,4 +44,3 @@ class ApiError(Exception):
 class FutureVersionError(Exception):
     """Raised when a version check shows that kicad-python is talking to a version of KiCad
     newer than the one it was built against"""
-    pass

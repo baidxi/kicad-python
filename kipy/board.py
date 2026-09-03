@@ -19,36 +19,14 @@
 # SOFTWARE.
 
 import os
-import reprlib
 import pathlib
+import reprlib
+from collections.abc import Iterable, Sequence
 from time import sleep
-from typing import List, Dict, Union, Iterable, Optional, Sequence, cast, overload
+from typing import Dict, List, Optional, Union, cast, overload
+
 from google.protobuf.empty_pb2 import Empty
 
-from kipy.board_types import (
-    ArcTrack,
-    Barcode,
-    BoardEditorAppearanceSettings,
-    BoardItem,
-    ReferenceImage,
-    BoardText,
-    BoardTextBox,
-    Dimension,
-    FootprintInstance,
-    Net,
-    Pad,
-    BoardShape,
-    Track,
-    Via,
-    Zone,
-    Group,
-    to_concrete_board_shape,
-    to_concrete_dimension,
-    unwrap
-)
-from kipy.client import ApiError, KiCadClient
-from kipy.common_types import Color, Commit, TitleBlockInfo, TextAttributes
-from kipy.geometry import Box2, PolygonWithHoles, Vector2
 from kipy.board_jobs import (
     Export3DSettings,
     Ipc2581ExportSettings,
@@ -63,70 +41,101 @@ from kipy.board_rules import (
     CustomRule,
     CustomRulesResponse,
 )
-from kipy.project import Project, NetClass
-from kipy.proto.board import board_types_pb2
-from kipy.proto.common.commands import editor_commands_pb2, project_commands_pb2
-from kipy.proto.common.envelope_pb2 import ApiStatusCode
-from kipy.proto.common.types.enums_pb2 import Units
-from kipy.util import pack_any
-from kipy.wrapper import Item, Wrapper
-
-from kipy.proto.common.commands import Ping
-from kipy.proto.common.types import DocumentSpecifier, KIID, KiCadObjectType, base_types_pb2
-from kipy.proto.common.types import jobs_pb2
-from kipy.proto.common.commands.editor_commands_pb2 import (
-    BeginCommit, BeginCommitResponse, CommitAction,
-    EndCommit, EndCommitResponse,
-    CreateItems, CreateItemsResponse,
-    UpdateItems, UpdateItemsResponse,
-    GetItems, GetItemsById, GetItemsResponse,
-    DeleteItems, DeleteItemsResponse,
-    HitTest, HitTestResponse, HitTestResult
+from kipy.board_types import (
+    ArcTrack,
+    Barcode,
+    BoardEditorAppearanceSettings,
+    BoardItem,
+    BoardShape,
+    BoardText,
+    BoardTextBox,
+    Dimension,
+    FootprintInstance,
+    Group,
+    Net,
+    Pad,
+    ReferenceImage,
+    Track,
+    Via,
+    Zone,
+    to_concrete_board_shape,
+    to_concrete_dimension,
+    unwrap,
 )
-from kipy.proto.board import board_pb2
-from kipy.proto.board import board_commands_pb2
-from kipy.proto.board import board_jobs_pb2
-
-# Re-exported protobuf enum types
-from kipy.proto.board.board_pb2 import (    # noqa
-    BoardLayerClass,
-    BoardEdgeConnectorType,
-    DielectricModel,
-    BoardStackupDielectricType,
-)
-from kipy.proto.board.board_types_pb2 import ( #noqa
-    BoardLayer
-)
-from kipy.proto.board.board_commands_pb2 import ( #noqa
-    BoardOriginType,
+from kipy.client import ApiError, KiCadClient
+from kipy.common_types import Color, Commit, TextAttributes, TitleBlockInfo
+from kipy.geometry import Box2, PolygonWithHoles, Vector2
+from kipy.project import NetClass, Project
+from kipy.proto.board import board_commands_pb2, board_jobs_pb2, board_pb2, board_types_pb2
+from kipy.proto.board.board_commands_pb2 import (  #noqa
     BoardFlipDirection,
+    BoardOriginType,
     CustomRulesStatus,
     NetlistMatchMode,
 )
 from kipy.proto.board.board_jobs_pb2 import (  # noqa
-    PlotDrillMarks,
-    GerberPrecision,
     Board3DFormat,
-    RenderFormat,
-    RenderQuality,
-    RenderBackgroundStyle,
-    RenderSide,
     BoardJobPaginationMode,
     DrillFormat,
-    DrillOrigin,
-    DrillZerosFormat,
-    DrillMapFormat,
     DrillGerberPrecision,
+    DrillMapFormat,
+    DrillOrigin,
     DrillReportFormat,
-    PositionSide,
-    PositionFormat,
+    DrillZerosFormat,
+    GerberPrecision,
     Ipc2581Version,
     OdbCompression,
+    PlotDrillMarks,
+    PositionFormat,
+    PositionSide,
+    RenderBackgroundStyle,
+    RenderFormat,
+    RenderQuality,
+    RenderSide,
     StatsOutputFormat,
 )
-from kipy.proto.common.types.enums_pb2 import (  # noqa
+
+# Re-exported protobuf enum types
+from kipy.proto.board.board_pb2 import (  # noqa
+    BoardEdgeConnectorType,
+    BoardLayerClass,
+    BoardStackupDielectricType,
+    DielectricModel,
+)
+from kipy.proto.board.board_types_pb2 import BoardLayer
+from kipy.proto.common.commands import Ping, editor_commands_pb2, project_commands_pb2
+from kipy.proto.common.commands.editor_commands_pb2 import (
+    BeginCommit,
+    BeginCommitResponse,
+    CommitAction,
+    CreateItems,
+    CreateItemsResponse,
+    DeleteItems,
+    DeleteItemsResponse,
+    EndCommit,
+    EndCommitResponse,
+    GetItems,
+    GetItemsById,
+    GetItemsResponse,
+    HitTest,
+    HitTestResponse,
+    HitTestResult,
+    UpdateItems,
+    UpdateItemsResponse,
+)
+from kipy.proto.common.envelope_pb2 import ApiStatusCode
+from kipy.proto.common.types import (
+    KIID,
+    DocumentSpecifier,
+    KiCadObjectType,
+    base_types_pb2,
+    jobs_pb2,
+)
+from kipy.proto.common.types.enums_pb2 import (
     Units,
 )
+from kipy.util import pack_any
+from kipy.wrapper import Item, Wrapper
 
 BoardJobCommand = Union[
     board_jobs_pb2.RunBoardJobExport3D,
@@ -1960,7 +1969,7 @@ class Board:
             sleep(poll_interval_seconds)
             try:
                 self._kicad.send(Ping(), Empty)
-            except IOError:
+            except OSError:
                 # transport-layer timeout
                 continue
             except ApiError as e:

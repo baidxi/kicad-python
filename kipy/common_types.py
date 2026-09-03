@@ -19,10 +19,9 @@
 # SOFTWARE.
 
 import sys
-from typing import Optional, Sequence
-from kipy.proto.common import types
-from kipy.proto.common.types import base_types_pb2
-from kipy.proto.common.types.base_types_pb2 import KIID
+from collections.abc import Sequence
+from typing import Optional
+
 from kipy.geometry import (
     Box2,
     PolygonWithHoles,
@@ -30,22 +29,24 @@ from kipy.geometry import (
     arc_angle,
     arc_bounding_box,
     arc_center,
+    arc_end_angle,
     arc_radius,
     arc_start_angle,
-    arc_end_angle,
 )
-from kipy.wrapper import Wrapper
+from kipy.proto.common import types
+from kipy.proto.common.types import base_types_pb2
+from kipy.proto.common.types.base_types_pb2 import (  # noqa
+    KIID,
+    PageOrientation,
+    PageSize,
+)
 
 # Re-exported protobuf enum types
 from kipy.proto.common.types.enums_pb2 import (  # noqa
     HorizontalAlignment,
     VerticalAlignment,
 )
-
-from kipy.proto.common.types.base_types_pb2 import (  # noqa
-    PageSize,
-    PageOrientation,
-)
+from kipy.wrapper import Wrapper
 
 if sys.version_info >= (3, 13):
     from warnings import deprecated

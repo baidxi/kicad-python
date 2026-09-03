@@ -19,78 +19,78 @@
 # SOFTWARE.
 
 import sys
-from typing import Dict, Sequence, Optional, Union
-from google.protobuf.message import Message
-from google.protobuf.any_pb2 import Any
+from collections.abc import Sequence
+from typing import Dict, Optional, Union
 
-from kipy.proto.common.types import KIID
-from kipy.proto.common.types import base_types_pb2
-from kipy.proto.common.types.base_types_pb2 import LockedState
-from kipy.proto.board import board_commands_pb2, board_types_pb2
+from google.protobuf.any_pb2 import Any
+from google.protobuf.message import Message
+
 from kipy.common_types import (
-    GraphicAttributes,
-    TextAttributes,
-    LibraryIdentifier,
-    Segment,
     Arc,
-    Circle,
-    Rectangle,
-    Polygon,
     Bezier,
+    Circle,
+    GraphicAttributes,
+    LibraryIdentifier,
+    Polygon,
+    Rectangle,
+    Segment,
     SheetPath,
     Text,
+    TextAttributes,
     TextBox,
 )
 from kipy.geometry import (
     Angle,
     Box2,
-    Vector2,
-    Vector3D,
     PolygonWithHoles,
     PolyLineNode,
+    Vector2,
+    Vector3D,
     arc_angle,
     arc_bounding_box,
     arc_center,
+    arc_end_angle,
     arc_radius,
     arc_start_angle,
-    arc_end_angle,
 )
-from kipy.util import unpack_any
-from kipy.util.board_layer import is_copper_layer, iter_copper_layers
-from kipy.util.units import from_mm
-from kipy.wrapper import Item, Wrapper
+from kipy.proto.board import board_commands_pb2, board_types_pb2
+from kipy.proto.board.board_commands_pb2 import (  # noqa
+    BoardFlipMode,
+    InactiveLayerDisplayMode,
+    NetColorDisplayMode,
+    RatsnestDisplayMode,
+)
 
 # Re-exported protobuf enum types
 from kipy.proto.board.board_types_pb2 import (  # noqa
-    BarcodeErrorCorrection,
-    BarcodeKind,
     PSS_CIRCLE,
     PST_NORMAL,
+    BarcodeErrorCorrection,
+    BarcodeKind,
     BoardLayer,
     ChamferedRectCorners,
     DrillShape,
     IslandRemovalMode,
-    PadType,
-    PadStackType,
-    PadStackShape,
     PadFabricationProperty,
+    PadStackShape,
+    PadStackType,
+    PadType,
     SolderMaskMode,
     SolderPasteMode,
-    ZoneTeardropType,
     UnconnectedLayerRemoval,
     ViaType,
     ZoneBorderStyle,
     ZoneConnectionStyle,
     ZoneFillMode,
+    ZoneTeardropType,
     ZoneType,
 )
-
-from kipy.proto.board.board_commands_pb2 import (  # noqa
-    InactiveLayerDisplayMode,
-    NetColorDisplayMode,
-    BoardFlipMode,
-    RatsnestDisplayMode
-)
+from kipy.proto.common.types import KIID, base_types_pb2
+from kipy.proto.common.types.base_types_pb2 import LockedState
+from kipy.util import unpack_any
+from kipy.util.board_layer import is_copper_layer, iter_copper_layers
+from kipy.util.units import from_mm
+from kipy.wrapper import Item, Wrapper
 
 if sys.version_info >= (3, 13):
     from warnings import deprecated
@@ -1507,7 +1507,7 @@ class PadStack(BoardItem):
             board_types_pb2.PadStackType.PST_CUSTOM: [layer for layer in iter_copper_layers()]
         }.get(type, [])
 
-        for layer in layer_map.keys():
+        for layer in layer_map:
             if layer not in required_layers:
                 self._proto.copper_layers.remove(layer_map[layer])
 

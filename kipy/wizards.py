@@ -16,12 +16,12 @@
 # SOFTWARE.
 
 import argparse
-from google.protobuf.json_format import MessageToJson, Parse, ParseError
 import sys
 from typing import Optional, Union
 
+from google.protobuf.json_format import MessageToJson, Parse, ParseError
+
 from kipy.proto.common import types
-from kipy.wrapper import Wrapper
 
 # Re-exported protobuf enum types
 from kipy.proto.common.types.wizards_pb2 import (  # noqa: F401
@@ -29,7 +29,7 @@ from kipy.proto.common.types.wizards_pb2 import (  # noqa: F401
     WizardParameterCategory,
     WizardParameterDataType,
 )
-
+from kipy.wrapper import Wrapper
 
 WizardParameterValue = Union[int, float, bool, str]
 
@@ -773,7 +773,7 @@ class WizardBase:
             footprint = self.build_generated_content(parameters)
         except Exception as ex:
             generated.status = types.WizardGenerationStatus.WGS_ERROR
-            generated.error_message = f"Generation failed: {str(ex)}"
+            generated.error_message = f"Generation failed: {ex!s}"
             return generated
 
         generated.status = types.WizardGenerationStatus.WGS_OK
@@ -791,8 +791,8 @@ class WizardBase:
             container = types.WizardParameterList()
             Parse(args.params, container)
         except ParseError as ex:
-            return None, f"Invalid --params protobuf JSON: {str(ex)}"
+            return None, f"Invalid --params protobuf JSON: {ex!s}"
         except (ValueError, TypeError) as ex:
-            return None, f"Invalid --params value: {str(ex)}"
+            return None, f"Invalid --params value: {ex!s}"
 
         return [WizardParameter(proto=proto_param) for proto_param in container.parameters], None

@@ -21,6 +21,7 @@
 import nox
 from nox.sessions import Session
 
+
 @nox.session
 def lint(session: Session):
     session.install("ruff")

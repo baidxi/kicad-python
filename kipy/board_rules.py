@@ -18,23 +18,19 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from typing import Dict, List, Optional, Self, Sequence
+from collections.abc import Sequence
+from typing import Dict, List, Optional, Self
 
-from kipy.proto.board import board_commands_pb2, board_types_pb2, board_rules_pb2
-from kipy.proto.common.types import base_types_pb2
-from kipy.wrapper import Wrapper
-
-from kipy.proto.board.board_rules_pb2 import ( #noqa
+from kipy.proto.board import board_commands_pb2, board_rules_pb2, board_types_pb2
+from kipy.proto.board.board_rules_pb2 import (  #noqa
     CustomRuleConstraintType,
     CustomRuleDisallowType,
     CustomRuleLayerMode,
-    DrcErrorType
+    DrcErrorType,
 )
-
-from kipy.proto.common.types.base_types_pb2 import ( #noqa
-    MinOptMax,
-    RuleSeverity
-)
+from kipy.proto.common.types import base_types_pb2
+from kipy.proto.common.types.base_types_pb2 import MinOptMax, RuleSeverity  #noqa
+from kipy.wrapper import Wrapper
 
 
 class MinimumConstraints(Wrapper):

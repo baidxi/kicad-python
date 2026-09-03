@@ -48,7 +48,7 @@ def main(argv: list[str] | None = None) -> int:
 
     report = validate(args.path)
 
-    print(f"Validating path: {str(report.root)}")
+    print(f"Validating path: {report.root!s}")
 
     for message in report.messages:
         output = f"[{message.level}] {message.message}"

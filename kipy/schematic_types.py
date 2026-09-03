@@ -18,15 +18,16 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from typing import Dict, Optional, Sequence
+from collections.abc import Sequence
+from typing import Dict, Optional
 
 from google.protobuf.any_pb2 import Any
 from google.protobuf.message import Message
 
 from kipy.common_types import (
     Color,
-    GraphicFillAttributes,
     GraphicAttributes,
+    GraphicFillAttributes,
     GraphicShape,
     LibraryIdentifier,
     SheetPath,
@@ -39,10 +40,7 @@ from kipy.geometry import Vector2
 from kipy.proto.common.types import KIID
 from kipy.proto.common.types.base_types_pb2 import ElectricalPinType, LockedState
 from kipy.proto.schematic import schematic_types_pb2
-from kipy.util import unpack_any
-from kipy.wrapper import Item, Wrapper
-
-from kipy.proto.schematic.schematic_types_pb2 import (  # noqa
+from kipy.proto.schematic.schematic_types_pb2 import (
     BusEntryType,
     SchematicLabelShape,
     SchematicLabelSpinStyle,
@@ -53,6 +51,8 @@ from kipy.proto.schematic.schematic_types_pb2 import (  # noqa
     SchematicSymbolType,
     SheetSide,
 )
+from kipy.util import unpack_any
+from kipy.wrapper import Item, Wrapper
 
 
 class SchematicItem(Item):

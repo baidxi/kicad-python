@@ -35,7 +35,6 @@ import uuid
 from pathlib import Path
 from typing import IO, Optional
 
-
 _READY_PREFIX = "KiCad API server listening at "
 
 
@@ -142,8 +141,8 @@ class KiCadServer:
         self._socket_path = socket_path or self._generate_socket_path()
 
         self._process: Optional[subprocess.Popen[str]] = None
-        self._stdout_lines: "queue.Queue[str]" = queue.Queue()
-        self._stderr_lines: "queue.Queue[str]" = queue.Queue()
+        self._stdout_lines: queue.Queue[str] = queue.Queue()
+        self._stderr_lines: queue.Queue[str] = queue.Queue()
         self._stdout_thread: Optional[threading.Thread] = None
         self._stderr_thread: Optional[threading.Thread] = None
         self._ready_line: Optional[str] = None
@@ -156,7 +155,7 @@ class KiCadServer:
         token = uuid.uuid4().hex[:8]
         return str(temp_root / f"api-{os.getpid()}-{token}.sock")
 
-    def _drain_stream(self, stream: Optional[IO[str]], out_queue: "queue.Queue[str]"):
+    def _drain_stream(self, stream: Optional[IO[str]], out_queue: queue.Queue[str]):
         if stream is None:
             return
 
@@ -202,6 +201,7 @@ class KiCadServer:
         next_probe = time.monotonic()
 
         from google.protobuf.empty_pb2 import Empty
+
         from kipy.client import KiCadClient
         from kipy.proto.common import commands
 

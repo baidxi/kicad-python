@@ -19,28 +19,14 @@
 # SOFTWARE.
 
 import pathlib
-from typing import Iterable, List, Optional, Sequence, Union, cast
+from collections.abc import Iterable, Sequence
+from typing import List, Optional, Union, cast
 
 from google.protobuf.empty_pb2 import Empty
 
 from kipy.client import KiCadClient
 from kipy.common_types import Commit, PageSettings, TitleBlockInfo
 from kipy.project import Project
-from kipy.schematic_types import (
-    Group,
-    LocalLabel,
-    SchematicGraphicShape,
-    SchematicImage,
-    SchematicItem,
-    SchematicLine,
-    SchematicNet,
-    SchematicSymbolInstance,
-    SchematicText,
-    SchematicTextBox,
-    SheetInstance,
-    SheetSymbol,
-    unwrap,
-)
 from kipy.proto.common.commands import editor_commands_pb2, project_commands_pb2
 from kipy.proto.common.commands.editor_commands_pb2 import (
     BeginCommit,
@@ -61,8 +47,8 @@ from kipy.proto.common.commands.editor_commands_pb2 import (
     UpdateItemsResponse,
 )
 from kipy.proto.common.types import (
-    DocumentSpecifier,
     KIID,
+    DocumentSpecifier,
     KiCadObjectType,
     base_types_pb2,
 )
@@ -71,6 +57,21 @@ from kipy.proto.schematic.schematic_commands_pb2 import (
     GetSchematicNetlist,
     SchematicHierarchyResponse,
     SchematicNetlistResponse,
+)
+from kipy.schematic_types import (
+    Group,
+    LocalLabel,
+    SchematicGraphicShape,
+    SchematicImage,
+    SchematicItem,
+    SchematicLine,
+    SchematicNet,
+    SchematicSymbolInstance,
+    SchematicText,
+    SchematicTextBox,
+    SheetInstance,
+    SheetSymbol,
+    unwrap,
 )
 from kipy.util import pack_any
 from kipy.wrapper import Wrapper

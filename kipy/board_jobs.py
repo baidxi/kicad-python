@@ -18,12 +18,12 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from typing import Optional, Sequence
+from collections.abc import Sequence
+from typing import Optional
 
 from kipy.geometry import Vector2, Vector3D
 from kipy.proto.board import board_jobs_pb2, board_types_pb2
-from kipy.proto.common.types import enums_pb2
-from kipy.proto.common.types import jobs_pb2
+from kipy.proto.common.types import enums_pb2, jobs_pb2
 from kipy.wrapper import Wrapper
 
 

@@ -19,11 +19,12 @@
 # SOFTWARE.
 
 from google.protobuf.any_pb2 import Any
-from google.protobuf.message import Message, DecodeError
+from google.protobuf.message import DecodeError, Message
 
 from kipy.proto.board import board_types_pb2
 from kipy.proto.common.types import base_types_pb2
 from kipy.proto.schematic import schematic_types_pb2
+
 
 def pack_any(object: Message) -> Any:
     a = Any()

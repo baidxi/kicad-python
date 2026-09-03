@@ -20,12 +20,17 @@
 
 from typing import List, Union, overload
 
+from google.protobuf.empty_pb2 import Empty
+
 from kipy.client import KiCadClient
 from kipy.project_types import NetClass, TextVariables
-from kipy.proto.common.types import DocumentSpecifier, MapMergeMode, DocumentType
 from kipy.proto.common.commands import project_commands_pb2
-from kipy.proto.common.types import project_settings_pb2
-from google.protobuf.empty_pb2 import Empty
+from kipy.proto.common.types import (
+    DocumentSpecifier,
+    DocumentType,
+    MapMergeMode,
+    project_settings_pb2,
+)
 
 
 class Project:
