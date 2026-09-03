@@ -1527,9 +1527,9 @@ class PadStack(BoardItem):
             board_types_pb2.PadStackType.PST_CUSTOM: [layer for layer in COPPER_LAYERS],
         }.get(type, [])
 
-        for layer in layer_map:
+        for layer, value in layer_map.items():
             if layer not in required_layers:
-                self._proto.copper_layers.remove(layer_map[layer])
+                self._proto.copper_layers.remove(value)
 
         for layer in required_layers:
             if layer not in layer_map:

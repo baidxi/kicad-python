@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 # Copyright The KiCad Developers
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -64,7 +62,7 @@ if __name__ == "__main__":
     for copper_layer in copper_layers:
         layer_text = BoardText()
         layer_text.layer = copper_layer.layer
-        layer_text.value = "%d" % layer_idx
+        layer_text.value = f"{layer_idx}"
         layer_text.position = Vector2.from_xy(offset, 0)
         layer_text.attributes = defaults.text
         fp.add_item(layer_text)

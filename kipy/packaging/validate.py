@@ -179,7 +179,7 @@ def _validate_plugin_schema(plugin: dict[str, Any], report: ValidationReport):
             files("kipy.packaging.schemas").joinpath(_PLUGIN_SCHEMA).read_text(encoding="utf-8")
         )
         schema = json.loads(schema_text)
-    except Exception as e:
+    except ValueError as e:
         report.add_error(
             f"failed to read plugin schema file: {e!s}",
             path=f"kipy.packaging.schemas:{_PLUGIN_SCHEMA}",
@@ -292,7 +292,7 @@ def _validate_pcm_schema(metadata: dict[str, Any], report: ValidationReport) -> 
                 .read_text(encoding="utf-8")
             )
             schema = json.loads(schema_text)
-        except Exception as ex:
+        except ValueError as ex:
             report.add_error(f"failed to read schema '{schema_version}': {ex!s}")
             continue
 
