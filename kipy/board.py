@@ -879,7 +879,8 @@ class Board:
         command.origin = origin
         command.map_format = map_format
         command.report_format = DrillReportFormat.DRF_STANDARD if report_filename else DrillReportFormat.DRF_UNKNOWN
-        command.report_filename = os.path.join(output_path, report_filename)
+        if report_filename:
+             command.report_filename = os.path.join(output_path, report_filename)
         # For Gerber
         command.gerber_precision = precision
         command.gerber_generate_tenting = generate_tenting
