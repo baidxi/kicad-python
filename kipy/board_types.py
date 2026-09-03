@@ -18,9 +18,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from __future__ import annotations
+
 import sys
 from collections.abc import Sequence
-from typing import Dict, Optional, Union
 
 from google.protobuf.any_pb2 import Any
 from google.protobuf.message import Message
@@ -110,7 +111,7 @@ class BoardItem(Item):
 
 
 class Net(Wrapper):
-    def __init__(self, proto: Optional[board_types_pb2.Net] = None, name: Optional[str] = None):
+    def __init__(self, proto: board_types_pb2.Net | None = None, name: str | None = None):
         self._proto = board_types_pb2.Net()
 
         if proto is not None:
@@ -147,8 +148,8 @@ class Net(Wrapper):
 class Track(BoardItem):
     """Represents a straight track segment"""
 
-    def __init__(self, proto: Optional[board_types_pb2.Track] = None,
-                 proto_ref: Optional[board_types_pb2.Track] = None):
+    def __init__(self, proto: board_types_pb2.Track | None = None,
+                 proto_ref: board_types_pb2.Track | None = None):
         self._proto = proto_ref if proto_ref is not None else board_types_pb2.Track()
 
         if proto is not None:
@@ -215,7 +216,7 @@ class Track(BoardItem):
         self._proto.width.value_nm = width
 
     @property
-    def parent(self) -> Optional[KIID]:
+    def parent(self) -> KIID | None:
         """The ID of the parent container for this item (such as a Board or Footprint), if any.
         Read-only; item parents can only be changed by add/remove calls on the parent container.
 
@@ -230,8 +231,8 @@ class Track(BoardItem):
 class ArcTrack(BoardItem):
     """Represents an arc track segment"""
 
-    def __init__(self, proto: Optional[board_types_pb2.Arc] = None,
-                 proto_ref: Optional[board_types_pb2.Arc] = None):
+    def __init__(self, proto: board_types_pb2.Arc | None = None,
+                 proto_ref: board_types_pb2.Arc | None = None):
         self._proto = proto_ref if proto_ref is not None else board_types_pb2.Arc()
 
         if proto is not None:
@@ -306,14 +307,14 @@ class ArcTrack(BoardItem):
         self._proto.mid.CopyFrom(point.proto)
 
     @property
-    def parent(self) -> Optional[KIID]:
+    def parent(self) -> KIID | None:
         """The ID of the parent container for this item (such as a Board or Footprint), if any.
         Read-only; item parents can only be changed by add/remove calls on the parent container.
 
         .. versionadded:: 0.8.0 (KiCad 10.0.6)"""
         return self._proto.parent if self._proto.HasField("parent") else None
 
-    def center(self) -> Optional[Vector2]:
+    def center(self) -> Vector2 | None:
         """
         Calculates the center of the arc.  Uses a different algorithm than KiCad so may have
         slightly different results.  The KiCad API preserves the start, middle, and end points of
@@ -337,13 +338,13 @@ class ArcTrack(BoardItem):
         # for situations where matching KiCad's behavior exactly is important
         return arc_radius(self.start, self.mid, self.end)
 
-    def start_angle(self) -> Optional[float]:
+    def start_angle(self) -> float | None:
         return arc_start_angle(self.start, self.mid, self.end)
 
-    def end_angle(self) -> Optional[float]:
+    def end_angle(self) -> float | None:
         return arc_end_angle(self.start, self.mid, self.end)
 
-    def angle(self) -> Optional[float]:
+    def angle(self) -> float | None:
         """Calculates the angle between the start and end of the arc in radians
 
         :return: The angle of the arc, or None if the arc is degenerate
@@ -368,8 +369,8 @@ class ArcTrack(BoardItem):
 class BoardShape(BoardItem):
     """Represents a graphic shape on a board or footprint"""
 
-    def __init__(self, proto: Optional[board_types_pb2.BoardGraphicShape] = None,
-                 proto_ref: Optional[board_types_pb2.BoardGraphicShape] = None):
+    def __init__(self, proto: board_types_pb2.BoardGraphicShape | None = None,
+                 proto_ref: board_types_pb2.BoardGraphicShape | None = None):
         self._proto = proto_ref if proto_ref is not None else board_types_pb2.BoardGraphicShape()
 
         if proto is not None:
@@ -415,7 +416,7 @@ class BoardShape(BoardItem):
         self._proto.shape.attributes.CopyFrom(attributes.proto)
 
     @property
-    def parent(self) -> Optional[KIID]:
+    def parent(self) -> KIID | None:
         """The ID of the parent container for this item (such as a Board or Footprint), if any.
         Read-only; item parents can only be changed by add/remove calls on the parent container.
 
@@ -431,8 +432,8 @@ class BoardShape(BoardItem):
 class BoardSegment(BoardShape, Segment):
     """Represents a graphic line segment (not a track) on a board or footprint"""
 
-    def __init__(self, proto: Optional[board_types_pb2.BoardGraphicShape] = None,
-                 proto_ref: Optional[board_types_pb2.BoardGraphicShape] = None):
+    def __init__(self, proto: board_types_pb2.BoardGraphicShape | None = None,
+                 proto_ref: board_types_pb2.BoardGraphicShape | None = None):
         self._proto = proto_ref if proto_ref is not None else board_types_pb2.BoardGraphicShape()
 
         if proto is not None:
@@ -468,8 +469,8 @@ class BoardSegment(BoardShape, Segment):
 class BoardArc(BoardShape, Arc):
     """Represents a graphic arc (not a track) on a board or footprint"""
 
-    def __init__(self, proto: Optional[board_types_pb2.BoardGraphicShape] = None,
-                 proto_ref: Optional[board_types_pb2.BoardGraphicShape] = None):
+    def __init__(self, proto: board_types_pb2.BoardGraphicShape | None = None,
+                 proto_ref: board_types_pb2.BoardGraphicShape | None = None):
         self._proto = proto_ref if proto_ref is not None else board_types_pb2.BoardGraphicShape()
 
         if proto is not None:
@@ -507,8 +508,8 @@ class BoardArc(BoardShape, Arc):
 class BoardCircle(BoardShape, Circle):
     """Represents a graphic circle on a board or footprint"""
 
-    def __init__(self, proto: Optional[board_types_pb2.BoardGraphicShape] = None,
-                 proto_ref: Optional[board_types_pb2.BoardGraphicShape] = None):
+    def __init__(self, proto: board_types_pb2.BoardGraphicShape | None = None,
+                 proto_ref: board_types_pb2.BoardGraphicShape | None = None):
         self._proto = proto_ref if proto_ref is not None else board_types_pb2.BoardGraphicShape()
 
         if proto is not None:
@@ -547,8 +548,8 @@ class BoardCircle(BoardShape, Circle):
 class BoardRectangle(BoardShape, Rectangle):
     """Represents a graphic rectangle on a board or footprint"""
 
-    def __init__(self, proto: Optional[board_types_pb2.BoardGraphicShape] = None,
-                 proto_ref: Optional[board_types_pb2.BoardGraphicShape] = None):
+    def __init__(self, proto: board_types_pb2.BoardGraphicShape | None = None,
+                 proto_ref: board_types_pb2.BoardGraphicShape | None = None):
         self._proto = proto_ref if proto_ref is not None else board_types_pb2.BoardGraphicShape()
 
         if proto is not None:
@@ -586,8 +587,8 @@ class BoardRectangle(BoardShape, Rectangle):
 class BoardPolygon(BoardShape, Polygon):
     """Represents a graphic polygon on a board or footprint"""
 
-    def __init__(self, proto: Optional[board_types_pb2.BoardGraphicShape] = None,
-                 proto_ref: Optional[board_types_pb2.BoardGraphicShape] = None):
+    def __init__(self, proto: board_types_pb2.BoardGraphicShape | None = None,
+                 proto_ref: board_types_pb2.BoardGraphicShape | None = None):
         self._proto = proto_ref if proto_ref is not None else board_types_pb2.BoardGraphicShape()
 
         if proto is not None:
@@ -651,8 +652,8 @@ class BoardPolygon(BoardShape, Polygon):
 class BoardBezier(BoardShape, Bezier):
     """Represents a graphic bezier curve on a board or footprint"""
 
-    def __init__(self, proto: Optional[board_types_pb2.BoardGraphicShape] = None,
-                 proto_ref: Optional[board_types_pb2.BoardGraphicShape] = None):
+    def __init__(self, proto: board_types_pb2.BoardGraphicShape | None = None,
+                 proto_ref: board_types_pb2.BoardGraphicShape | None = None):
         self._proto = proto_ref if proto_ref is not None else board_types_pb2.BoardGraphicShape()
 
         if proto is not None:
@@ -707,8 +708,8 @@ class BoardText(BoardItem):
 
     def __init__(
         self,
-        proto: Optional[board_types_pb2.BoardText] = None,
-        proto_ref: Optional[board_types_pb2.BoardText] = None,
+        proto: board_types_pb2.BoardText | None = None,
+        proto_ref: board_types_pb2.BoardText | None = None,
     ):
         self._proto = proto_ref if proto_ref is not None else board_types_pb2.BoardText()
 
@@ -771,7 +772,7 @@ class BoardText(BoardItem):
         self._proto.text.attributes.CopyFrom(attributes.proto)
 
     @property
-    def parent(self) -> Optional[KIID]:
+    def parent(self) -> KIID | None:
         """The ID of the parent container for this item (such as a Board or Footprint), if any.
         Read-only; item parents can only be changed by add/remove calls on the parent container.
 
@@ -781,8 +782,8 @@ class BoardText(BoardItem):
 class BoardTextBox(BoardItem):
     """Represents a text box on a board"""
 
-    def __init__(self, proto: Optional[board_types_pb2.BoardTextBox] = None,
-                 proto_ref: Optional[board_types_pb2.BoardTextBox] = None,):
+    def __init__(self, proto: board_types_pb2.BoardTextBox | None = None,
+                 proto_ref: board_types_pb2.BoardTextBox | None = None,):
         self._proto = proto_ref if proto_ref is not None else board_types_pb2.BoardTextBox()
 
         if proto is not None:
@@ -850,7 +851,7 @@ class BoardTextBox(BoardItem):
         self._proto.textbox.text = text
 
     @property
-    def parent(self) -> Optional[KIID]:
+    def parent(self) -> KIID | None:
         """The ID of the parent container for this item (such as a Board or Footprint), if any.
         Read-only; item parents can only be changed by add/remove calls on the parent container.
 
@@ -864,8 +865,8 @@ class Barcode(BoardItem):
     .. versionadded:: 0.7.0 (KiCad 10.0.1)"""
     def __init__(
         self,
-        proto: Optional[board_types_pb2.Barcode] = None,
-        proto_ref: Optional[board_types_pb2.Barcode] = None,
+        proto: board_types_pb2.Barcode | None = None,
+        proto_ref: board_types_pb2.Barcode | None = None,
     ):
         self._proto = proto_ref if proto_ref is not None else board_types_pb2.Barcode()
 
@@ -985,7 +986,7 @@ class Barcode(BoardItem):
         )
 
     @property
-    def parent(self) -> Optional[KIID]:
+    def parent(self) -> KIID | None:
         """The ID of the parent container for this item (such as a Board or Footprint), if any.
         Read-only; item parents can only be changed by add/remove calls on the parent container.
 
@@ -1000,8 +1001,8 @@ class ReferenceImage(BoardItem):
 
     def __init__(
         self,
-        proto: Optional[board_types_pb2.ReferenceImage] = None,
-        proto_ref: Optional[board_types_pb2.ReferenceImage] = None,
+        proto: board_types_pb2.ReferenceImage | None = None,
+        proto_ref: board_types_pb2.ReferenceImage | None = None,
     ):
         self._proto = (
             proto_ref if proto_ref is not None else board_types_pb2.ReferenceImage()
@@ -1067,7 +1068,7 @@ class ReferenceImage(BoardItem):
         )
 
     @property
-    def parent(self) -> Optional[KIID]:
+    def parent(self) -> KIID | None:
         """The ID of the parent container for this item (such as a Board or Footprint), if any.
         Read-only; item parents can only be changed by add/remove calls on the parent container.
 
@@ -1080,8 +1081,8 @@ class Field(BoardItem):
 
     def __init__(
         self,
-        proto: Optional[board_types_pb2.Field] = None,
-        proto_ref: Optional[board_types_pb2.Field] = None,
+        proto: board_types_pb2.Field | None = None,
+        proto_ref: board_types_pb2.Field | None = None,
     ):
         self._proto = proto_ref if proto_ref is not None else board_types_pb2.Field()
 
@@ -1137,8 +1138,8 @@ class Field(BoardItem):
 class ThermalSpokeSettings(Wrapper):
     def __init__(
         self,
-        proto: Optional[board_types_pb2.ThermalSpokeSettings] = None,
-        proto_ref: Optional[board_types_pb2.ThermalSpokeSettings] = None,
+        proto: board_types_pb2.ThermalSpokeSettings | None = None,
+        proto_ref: board_types_pb2.ThermalSpokeSettings | None = None,
     ):
         self._proto = (
             proto_ref
@@ -1150,7 +1151,7 @@ class ThermalSpokeSettings(Wrapper):
             self._proto.CopyFrom(proto)
 
     @property
-    def width(self) -> Optional[int]:
+    def width(self) -> int | None:
         if self._proto.HasField("width"):
             return self._proto.width.value_nm
         return None
@@ -1171,13 +1172,13 @@ class ThermalSpokeSettings(Wrapper):
         self._proto.angle.CopyFrom(angle.proto)
 
     @property
-    def gap(self) -> Optional[int]:
+    def gap(self) -> int | None:
         if self._proto.HasField("gap"):
             return self._proto.gap.value_nm
         return None
 
     @gap.setter
-    def gap(self, gap: Optional[int]):
+    def gap(self, gap: int | None):
         if gap is None:
             self._proto.ClearField("gap")
         else:
@@ -1187,8 +1188,8 @@ class ThermalSpokeSettings(Wrapper):
 class ZoneConnectionSettings(Wrapper):
     def __init__(
         self,
-        proto: Optional[board_types_pb2.ZoneConnectionSettings] = None,
-        proto_ref: Optional[board_types_pb2.ZoneConnectionSettings] = None,
+        proto: board_types_pb2.ZoneConnectionSettings | None = None,
+        proto_ref: board_types_pb2.ZoneConnectionSettings | None = None,
     ):
         self._proto = (
             proto_ref
@@ -1215,8 +1216,8 @@ class ZoneConnectionSettings(Wrapper):
 class SolderMaskOverrides(Wrapper):
     def __init__(
         self,
-        proto: Optional[board_types_pb2.SolderMaskOverrides] = None,
-        proto_ref: Optional[board_types_pb2.SolderMaskOverrides] = None,
+        proto: board_types_pb2.SolderMaskOverrides | None = None,
+        proto_ref: board_types_pb2.SolderMaskOverrides | None = None,
     ):
         self._proto = (
             proto_ref
@@ -1239,8 +1240,8 @@ class SolderMaskOverrides(Wrapper):
 class SolderPasteOverrides(Wrapper):
     def __init__(
         self,
-        proto: Optional[board_types_pb2.SolderPasteOverrides] = None,
-        proto_ref: Optional[board_types_pb2.SolderPasteOverrides] = None,
+        proto: board_types_pb2.SolderPasteOverrides | None = None,
+        proto_ref: board_types_pb2.SolderPasteOverrides | None = None,
     ):
         self._proto = (
             proto_ref
@@ -1252,26 +1253,26 @@ class SolderPasteOverrides(Wrapper):
             self._proto.CopyFrom(proto)
 
     @property
-    def solder_paste_margin(self) -> Optional[int]:
+    def solder_paste_margin(self) -> int | None:
         if self._proto.HasField("solder_paste_margin"):
             return self._proto.solder_paste_margin.value_nm
         return None
 
     @solder_paste_margin.setter
-    def solder_paste_margin(self, margin_nm: Optional[int]):
+    def solder_paste_margin(self, margin_nm: int | None):
         if margin_nm is None:
             self._proto.ClearField("solder_paste_margin")
         else:
             self._proto.solder_paste_margin.value_nm = margin_nm
 
     @property
-    def solder_paste_margin_ratio(self) -> Optional[float]:
+    def solder_paste_margin_ratio(self) -> float | None:
         if self._proto.HasField("solder_paste_margin_ratio"):
             return self._proto.solder_paste_margin_ratio.value
         return None
 
     @solder_paste_margin_ratio.setter
-    def solder_paste_margin_ratio(self, ratio: Optional[float]):
+    def solder_paste_margin_ratio(self, ratio: float | None):
         if ratio is None:
             self._proto.ClearField("solder_paste_margin_ratio")
         else:
@@ -1281,8 +1282,8 @@ class SolderPasteOverrides(Wrapper):
 class PadStackLayer(Wrapper):
     def __init__(
         self,
-        proto: Optional[board_types_pb2.PadStackLayer] = None,
-        proto_ref: Optional[board_types_pb2.PadStackLayer] = None,
+        proto: board_types_pb2.PadStackLayer | None = None,
+        proto_ref: board_types_pb2.PadStackLayer | None = None,
     ):
         self._proto = (
             proto_ref if proto_ref is not None else board_types_pb2.PadStackLayer()
@@ -1386,8 +1387,8 @@ class PadStackLayer(Wrapper):
 class DrillProperties(Wrapper):
     def __init__(
         self,
-        proto: Optional[board_types_pb2.DrillProperties] = None,
-        proto_ref: Optional[board_types_pb2.DrillProperties] = None,
+        proto: board_types_pb2.DrillProperties | None = None,
+        proto_ref: board_types_pb2.DrillProperties | None = None,
     ):
         self._proto = (
             proto_ref if proto_ref is not None else board_types_pb2.DrillProperties()
@@ -1433,8 +1434,8 @@ class DrillProperties(Wrapper):
 class PadStackOuterLayer(Wrapper):
     def __init__(
         self,
-        proto: Optional[board_types_pb2.PadStackOuterLayer] = None,
-        proto_ref: Optional[board_types_pb2.PadStackOuterLayer] = None,
+        proto: board_types_pb2.PadStackOuterLayer | None = None,
+        proto_ref: board_types_pb2.PadStackOuterLayer | None = None,
     ):
         self._proto = (
             proto_ref if proto_ref is not None else board_types_pb2.PadStackOuterLayer()
@@ -1479,8 +1480,8 @@ class PadStackOuterLayer(Wrapper):
 class PadStack(BoardItem):
     def __init__(
         self,
-        proto: Optional[board_types_pb2.PadStack] = None,
-        proto_ref: Optional[board_types_pb2.PadStack] = None,
+        proto: board_types_pb2.PadStack | None = None,
+        proto_ref: board_types_pb2.PadStack | None = None,
     ):
         self._proto = proto_ref if proto_ref is not None else board_types_pb2.PadStack()
 
@@ -1540,7 +1541,7 @@ class PadStack(BoardItem):
     def copper_layers(self) -> list[PadStackLayer]:
         return [PadStackLayer(proto_ref=p) for p in self._proto.copper_layers]
 
-    def copper_layer(self, layer: BoardLayer.ValueType) -> Optional[PadStackLayer]:
+    def copper_layer(self, layer: BoardLayer.ValueType) -> PadStackLayer | None:
         for copper_layer in self.copper_layers:
             if copper_layer.layer == layer:
                 return copper_layer
@@ -1588,8 +1589,8 @@ class PadStack(BoardItem):
         return self._proto.copper_layers[-1]
 
 class Pad(BoardItem):
-    def __init__(self, proto: Optional[board_types_pb2.Pad] = None,
-                 proto_ref: Optional[board_types_pb2.Pad] = None):
+    def __init__(self, proto: board_types_pb2.Pad | None = None,
+                 proto_ref: board_types_pb2.Pad | None = None):
         self._proto = proto_ref if proto_ref is not None else board_types_pb2.Pad()
 
         if proto is not None:
@@ -1671,7 +1672,7 @@ class Pad(BoardItem):
         self._proto.pad_to_die_length.value_nm = length
 
     @property
-    def parent(self) -> Optional[KIID]:
+    def parent(self) -> KIID | None:
         """The ID of the parent container for this item (such as a Board or Footprint), if any.
         Read-only; item parents can only be changed by add/remove calls on the parent container.
 
@@ -1680,8 +1681,8 @@ class Pad(BoardItem):
 
 
 class Via(BoardItem):
-    def __init__(self, proto: Optional[board_types_pb2.Via] = None,
-                 proto_ref: Optional[board_types_pb2.Via] = None):
+    def __init__(self, proto: board_types_pb2.Via | None = None,
+                 proto_ref: board_types_pb2.Via | None = None):
         self._proto = proto_ref if proto_ref is not None else board_types_pb2.Via()
 
         if proto is not None:
@@ -1780,7 +1781,7 @@ class Via(BoardItem):
         self.padstack.drill.diameter = Vector2.from_xy(diameter, diameter)
 
     @property
-    def parent(self) -> Optional[KIID]:
+    def parent(self) -> KIID | None:
         """The ID of the parent container for this item (such as a Board or Footprint), if any.
         Read-only; item parents can only be changed by add/remove calls on the parent container.
 
@@ -1793,8 +1794,8 @@ class FootprintAttributes(Wrapper):
 
     def __init__(
         self,
-        proto: Optional[board_types_pb2.FootprintAttributes] = None,
-        proto_ref: Optional[board_types_pb2.FootprintAttributes] = None,
+        proto: board_types_pb2.FootprintAttributes | None = None,
+        proto_ref: board_types_pb2.FootprintAttributes | None = None,
     ):
         self._proto = (
             proto_ref
@@ -1853,8 +1854,8 @@ class FootprintAttributes(Wrapper):
 class Footprint3DModel(Wrapper):
     """Represents a 3D model associated with a footprint"""
 
-    def __init__(self, proto: Optional[board_types_pb2.Footprint3DModel] = None,
-                 proto_ref: Optional[board_types_pb2.Footprint3DModel] = None):
+    def __init__(self, proto: board_types_pb2.Footprint3DModel | None = None,
+                 proto_ref: board_types_pb2.Footprint3DModel | None = None):
         self._proto = proto_ref if proto_ref is not None else board_types_pb2.Footprint3DModel()
 
         if proto is not None:
@@ -1926,8 +1927,8 @@ class FootprintDesignRuleOverrides(Wrapper):
 
     def __init__(
         self,
-        proto: Optional[board_types_pb2.FootprintDesignRuleOverrides] = None,
-        proto_ref: Optional[board_types_pb2.FootprintDesignRuleOverrides] = None,
+        proto: board_types_pb2.FootprintDesignRuleOverrides | None = None,
+        proto_ref: board_types_pb2.FootprintDesignRuleOverrides | None = None,
     ):
         self._proto = (
             proto_ref
@@ -1939,39 +1940,39 @@ class FootprintDesignRuleOverrides(Wrapper):
             self._proto.CopyFrom(proto)
 
     @property
-    def solder_mask(self) -> Optional[SolderMaskOverrides]:
+    def solder_mask(self) -> SolderMaskOverrides | None:
         if self._proto.HasField("solder_mask"):
             return SolderMaskOverrides(proto_ref=self._proto.solder_mask)
         return None
 
     @solder_mask.setter
-    def solder_mask(self, value: Optional[SolderMaskOverrides]):
+    def solder_mask(self, value: SolderMaskOverrides | None):
         if value is not None:
             self._proto.solder_mask.CopyFrom(value.proto)
         else:
             self._proto.ClearField("solder_mask")
 
     @property
-    def solder_paste(self) -> Optional[SolderPasteOverrides]:
+    def solder_paste(self) -> SolderPasteOverrides | None:
         if self._proto.HasField("solder_paste"):
             return SolderPasteOverrides(proto_ref=self._proto.solder_paste)
         return None
 
     @solder_paste.setter
-    def solder_paste(self, value: Optional[SolderPasteOverrides]):
+    def solder_paste(self, value: SolderPasteOverrides | None):
         if value is not None:
             self._proto.solder_paste.CopyFrom(value.proto)
         else:
             self._proto.ClearField("solder_paste")
 
     @property
-    def copper_clearance(self) -> Optional[int]:
+    def copper_clearance(self) -> int | None:
         if self._proto.HasField("copper_clearance"):
             return self._proto.copper_clearance.value_nm
         return None
 
     @copper_clearance.setter
-    def copper_clearance(self, clearance_nm: Optional[int]):
+    def copper_clearance(self, clearance_nm: int | None):
         if clearance_nm is not None:
             self._proto.copper_clearance.value_nm = clearance_nm
         else:
@@ -1993,8 +1994,8 @@ class Footprint(Wrapper):
 
     def __init__(
         self,
-        proto: Optional[board_types_pb2.Footprint] = None,
-        proto_ref: Optional[board_types_pb2.Footprint] = None,
+        proto: board_types_pb2.Footprint | None = None,
+        proto_ref: board_types_pb2.Footprint | None = None,
     ):
         self._proto = (
             proto_ref if proto_ref is not None else board_types_pb2.Footprint()
@@ -2050,14 +2051,12 @@ class Footprint(Wrapper):
         ]
 
     @property
-    def texts(self) -> Sequence[Union[BoardText, BoardTextBox, Field]]:
+    def texts(self) -> Sequence[BoardText | BoardTextBox | Field]:
         """Returns all fields and free text objects in the footprint library definition"""
         return [
             item
             for item in self.items
-            if isinstance(item, BoardText)
-            or isinstance(item, BoardTextBox)
-            or isinstance(item, Field)
+            if isinstance(item, (BoardText, BoardTextBox, Field))
         ]
 
     @property
@@ -2074,7 +2073,7 @@ class Footprint(Wrapper):
 class FootprintInstance(BoardItem):
     """Represents a footprint instance on a board"""
 
-    def __init__(self, proto: Optional[board_types_pb2.FootprintInstance] = None):
+    def __init__(self, proto: board_types_pb2.FootprintInstance | None = None):
         self._proto = board_types_pb2.FootprintInstance()
 
         if proto is not None:
@@ -2116,7 +2115,7 @@ class FootprintInstance(BoardItem):
         for item in self.definition.items:
             if isinstance(item, Field):
                 item.text.position += delta
-            elif isinstance(item, Pad) or isinstance(item, BoardText):
+            elif isinstance(item, (Pad, BoardText)):
                 item.position += delta
             elif isinstance(item, Zone):
                 item.move(delta)
@@ -2247,14 +2246,12 @@ class FootprintInstance(BoardItem):
         self._proto.overrides.CopyFrom(value.proto)
 
     @property
-    def texts_and_fields(self) -> Sequence[Union[BoardText, BoardTextBox, Field]]:
+    def texts_and_fields(self) -> Sequence[BoardText | BoardTextBox | Field]:
         """Returns all fields and free text objects in the footprint"""
         return [
             item
             for item in self.definition.items
-            if isinstance(item, BoardText)
-            or isinstance(item, BoardTextBox)
-            or isinstance(item, Field)
+            if isinstance(item, (BoardText, BoardTextBox, Field))
         ] + [
             self.reference_field,
             self.value_field,
@@ -2272,7 +2269,7 @@ class FootprintInstance(BoardItem):
         return SheetPath(self._proto.symbol_path)
 
     @property
-    def parent(self) -> Optional[KIID]:
+    def parent(self) -> KIID | None:
         """The ID of the parent container for this item (such as a Board or Footprint), if any.
         Read-only; item parents can only be changed by add/remove calls on the parent container.
 
@@ -2285,8 +2282,8 @@ class ZoneFilledPolygons(Wrapper):
 
     def __init__(
         self,
-        proto: Optional[board_types_pb2.ZoneFilledPolygons] = None,
-        proto_ref: Optional[board_types_pb2.ZoneFilledPolygons] = None,
+        proto: board_types_pb2.ZoneFilledPolygons | None = None,
+        proto_ref: board_types_pb2.ZoneFilledPolygons | None = None,
     ):
         self._proto = (
             proto_ref if proto_ref is not None else board_types_pb2.ZoneFilledPolygons()
@@ -2311,8 +2308,8 @@ class ZoneFilledPolygons(Wrapper):
 class Zone(BoardItem):
     """Represents a copper, graphical, or rule area zone on a board"""
 
-    def __init__(self, proto: Optional[board_types_pb2.Zone] = None,
-                 proto_ref: Optional[board_types_pb2.Zone] = None):
+    def __init__(self, proto: board_types_pb2.Zone | None = None,
+                 proto_ref: board_types_pb2.Zone | None = None):
         self._proto = proto_ref if proto_ref is not None else board_types_pb2.Zone()
 
         if proto is not None:
@@ -2406,13 +2403,13 @@ class Zone(BoardItem):
         return self.type == ZoneType.ZT_RULE_AREA
 
     @property
-    def connection(self) -> Optional[ZoneConnectionSettings]:
+    def connection(self) -> ZoneConnectionSettings | None:
         if self.is_rule_area():
             return None
         return ZoneConnectionSettings(proto_ref=self._proto.copper_settings.connection)
 
     @property
-    def clearance(self) -> Optional[int]:
+    def clearance(self) -> int | None:
         """The override (local) clearance for this filled copper zone"""
         if self.is_rule_area():
             return None
@@ -2425,7 +2422,7 @@ class Zone(BoardItem):
         self._proto.copper_settings.clearance.value_nm = clearance
 
     @property
-    def min_thickness(self) -> Optional[int]:
+    def min_thickness(self) -> int | None:
         if self.is_rule_area():
             return None
         return self._proto.copper_settings.min_thickness.value_nm
@@ -2437,7 +2434,7 @@ class Zone(BoardItem):
         self._proto.copper_settings.min_thickness.value_nm = thickness
 
     @property
-    def island_mode(self) -> Optional[IslandRemovalMode.ValueType]:
+    def island_mode(self) -> IslandRemovalMode.ValueType | None:
         if self.is_rule_area():
             return None
         return self._proto.copper_settings.island_mode
@@ -2449,7 +2446,7 @@ class Zone(BoardItem):
         self._proto.copper_settings.island_mode = mode
 
     @property
-    def min_island_area(self) -> Optional[int]:
+    def min_island_area(self) -> int | None:
         if self.is_rule_area():
             return None
         return self._proto.copper_settings.min_island_area
@@ -2461,13 +2458,13 @@ class Zone(BoardItem):
         self._proto.copper_settings.min_island_area = area
 
     @property
-    def fill_mode(self) -> Optional[ZoneFillMode.ValueType]:
+    def fill_mode(self) -> ZoneFillMode.ValueType | None:
         if self.is_rule_area():
             return None
         return self._proto.copper_settings.fill_mode
 
     @property
-    def net(self) -> Optional[Net]:
+    def net(self) -> Net | None:
         if self.is_rule_area():
             return None
         return Net(self._proto.copper_settings.net)
@@ -2484,7 +2481,7 @@ class Zone(BoardItem):
         self._proto.copper_settings.net.CopyFrom(net.proto)
 
     @property
-    def teardrop(self) -> Optional[board_types_pb2.ZoneTeardropSettings]:
+    def teardrop(self) -> board_types_pb2.ZoneTeardropSettings | None:
         if self.is_rule_area():
             return None
         return self._proto.copper_settings.teardrop
@@ -2506,7 +2503,7 @@ class Zone(BoardItem):
         self._proto.border.pitch.value_nm = value
 
     @property
-    def parent(self) -> Optional[KIID]:
+    def parent(self) -> KIID | None:
         """The ID of the parent container for this item (such as a Board or Footprint), if any.
         Read-only; item parents can only be changed by add/remove calls on the parent container.
 
@@ -2534,8 +2531,8 @@ class Zone(BoardItem):
 class Dimension(BoardItem):
     """Represents a dimension object on a board"""
 
-    def __init__(self, proto: Optional[board_types_pb2.Dimension] = None,
-                 proto_ref: Optional[board_types_pb2.Dimension] = None):
+    def __init__(self, proto: board_types_pb2.Dimension | None = None,
+                 proto_ref: board_types_pb2.Dimension | None = None):
         self._proto = proto_ref if proto_ref is not None else board_types_pb2.Dimension()
 
         if proto is not None:
@@ -2682,7 +2679,7 @@ class Dimension(BoardItem):
         self._proto.keep_text_aligned = aligned
 
     @property
-    def parent(self) -> Optional[KIID]:
+    def parent(self) -> KIID | None:
         """The ID of the parent container for this item (such as a Board or Footprint), if any.
         Read-only; item parents can only be changed by add/remove calls on the parent container.
 
@@ -2691,7 +2688,7 @@ class Dimension(BoardItem):
 
 
 class AlignedDimension(Dimension):
-    def __init__(self, proto: Optional[board_types_pb2.Dimension] = None):
+    def __init__(self, proto: board_types_pb2.Dimension | None = None):
         self._proto = board_types_pb2.Dimension()
 
         if proto is not None:
@@ -2740,7 +2737,7 @@ class AlignedDimension(Dimension):
 
 
 class OrthogonalDimension(Dimension):
-    def __init__(self, proto: Optional[board_types_pb2.Dimension] = None):
+    def __init__(self, proto: board_types_pb2.Dimension | None = None):
         self._proto = board_types_pb2.Dimension()
 
         if proto is not None:
@@ -2793,7 +2790,7 @@ class OrthogonalDimension(Dimension):
         self._proto.orthogonal.alignment = alignment
 
 class RadialDimension(Dimension):
-    def __init__(self, proto: Optional[board_types_pb2.Dimension] = None):
+    def __init__(self, proto: board_types_pb2.Dimension | None = None):
         self._proto = board_types_pb2.Dimension()
 
         if proto is not None:
@@ -2834,7 +2831,7 @@ class RadialDimension(Dimension):
 
 
 class LeaderDimension(Dimension):
-    def __init__(self, proto: Optional[board_types_pb2.Dimension] = None):
+    def __init__(self, proto: board_types_pb2.Dimension | None = None):
         self._proto = board_types_pb2.Dimension()
 
         if proto is not None:
@@ -2875,7 +2872,7 @@ class LeaderDimension(Dimension):
 
 
 class CenterDimension(Dimension):
-    def __init__(self, proto: Optional[board_types_pb2.Dimension] = None):
+    def __init__(self, proto: board_types_pb2.Dimension | None = None):
         self._proto = board_types_pb2.Dimension()
 
         if proto is not None:
@@ -2920,8 +2917,8 @@ def to_concrete_dimension(dimension: Dimension) -> Dimension:
 class BoardEditorAppearanceSettings(Wrapper):
     def __init__(
         self,
-        proto: Optional[board_commands_pb2.BoardEditorAppearanceSettings] = None,
-        proto_ref: Optional[board_commands_pb2.BoardEditorAppearanceSettings] = None,
+        proto: board_commands_pb2.BoardEditorAppearanceSettings | None = None,
+        proto_ref: board_commands_pb2.BoardEditorAppearanceSettings | None = None,
     ):
         self._proto = (
             proto_ref
@@ -2976,7 +2973,7 @@ class Group(BoardItem):
 
     def __init__(
         self,
-        proto: Optional[board_types_pb2.Group] = None,
+        proto: board_types_pb2.Group | None = None,
     ):
         self._proto = board_types_pb2.Group()
 
@@ -2984,7 +2981,7 @@ class Group(BoardItem):
             self._proto.CopyFrom(proto)
 
         self._item_ids = self._proto.items
-        self._unwrapped_items: Optional[Sequence[Item]] = None
+        self._unwrapped_items: Sequence[Item] | None = None
 
     @property
     def id(self) -> KIID:
@@ -3010,7 +3007,7 @@ class Group(BoardItem):
         return f"Group(id={self.id}, items={self.items})"
 
     @property
-    def parent(self) -> Optional[KIID]:
+    def parent(self) -> KIID | None:
         """The ID of the parent container for this item (such as a Board or Footprint), if any.
         Read-only; item parents can only be changed by add/remove calls on the parent container.
 
@@ -3018,7 +3015,7 @@ class Group(BoardItem):
         return self._proto.parent if self._proto.HasField("parent") else None
 
 
-_proto_to_object: Dict[type[Message], type[Wrapper]] = {
+_proto_to_object: dict[type[Message], type[Wrapper]] = {
     board_types_pb2.Arc: ArcTrack,
     board_types_pb2.Barcode: Barcode,
     board_types_pb2.BoardGraphicShape: BoardShape,

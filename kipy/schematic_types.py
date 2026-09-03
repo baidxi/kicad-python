@@ -18,8 +18,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from __future__ import annotations
+
 from collections.abc import Sequence
-from typing import Dict, Optional
 
 from google.protobuf.any_pb2 import Any
 from google.protobuf.message import Message
@@ -68,8 +69,8 @@ class SchematicField(SchematicItem):
 
     def __init__(
         self,
-        proto: Optional[schematic_types_pb2.SchematicField] = None,
-        proto_ref: Optional[schematic_types_pb2.SchematicField] = None,
+        proto: schematic_types_pb2.SchematicField | None = None,
+        proto_ref: schematic_types_pb2.SchematicField | None = None,
     ):
         self._proto = (
             proto_ref if proto_ref is not None else schematic_types_pb2.SchematicField()
@@ -139,8 +140,8 @@ class SchematicLine(SchematicItem):
 
     def __init__(
         self,
-        proto: Optional[schematic_types_pb2.SchematicLine] = None,
-        proto_ref: Optional[schematic_types_pb2.SchematicLine] = None,
+        proto: schematic_types_pb2.SchematicLine | None = None,
+        proto_ref: schematic_types_pb2.SchematicLine | None = None,
     ):
         self._proto = (
             proto_ref if proto_ref is not None else schematic_types_pb2.SchematicLine()
@@ -202,8 +203,8 @@ class Junction(SchematicItem):
 
     def __init__(
         self,
-        proto: Optional[schematic_types_pb2.Junction] = None,
-        proto_ref: Optional[schematic_types_pb2.Junction] = None,
+        proto: schematic_types_pb2.Junction | None = None,
+        proto_ref: schematic_types_pb2.Junction | None = None,
     ):
         self._proto = (
             proto_ref if proto_ref is not None else schematic_types_pb2.Junction()
@@ -255,8 +256,8 @@ class NoConnectMarker(SchematicItem):
 
     def __init__(
         self,
-        proto: Optional[schematic_types_pb2.NoConnectMarker] = None,
-        proto_ref: Optional[schematic_types_pb2.NoConnectMarker] = None,
+        proto: schematic_types_pb2.NoConnectMarker | None = None,
+        proto_ref: schematic_types_pb2.NoConnectMarker | None = None,
     ):
         self._proto = (
             proto_ref
@@ -302,8 +303,8 @@ class BusEntry(SchematicItem):
 
     def __init__(
         self,
-        proto: Optional[schematic_types_pb2.BusEntry] = None,
-        proto_ref: Optional[schematic_types_pb2.BusEntry] = None,
+        proto: schematic_types_pb2.BusEntry | None = None,
+        proto_ref: schematic_types_pb2.BusEntry | None = None,
     ):
         self._proto = (
             proto_ref if proto_ref is not None else schematic_types_pb2.BusEntry()
@@ -363,8 +364,8 @@ class SchematicText(SchematicItem):
 
     def __init__(
         self,
-        proto: Optional[schematic_types_pb2.SchematicText] = None,
-        proto_ref: Optional[schematic_types_pb2.SchematicText] = None,
+        proto: schematic_types_pb2.SchematicText | None = None,
+        proto_ref: schematic_types_pb2.SchematicText | None = None,
     ):
         self._proto = (
             proto_ref if proto_ref is not None else schematic_types_pb2.SchematicText()
@@ -420,8 +421,8 @@ class SchematicText(SchematicItem):
 class SchematicTextBox(SchematicItem):
     def __init__(
         self,
-        proto: Optional[schematic_types_pb2.SchematicTextBox] = None,
-        proto_ref: Optional[schematic_types_pb2.SchematicTextBox] = None,
+        proto: schematic_types_pb2.SchematicTextBox | None = None,
+        proto_ref: schematic_types_pb2.SchematicTextBox | None = None,
     ):
         self._proto = (
             proto_ref
@@ -531,8 +532,8 @@ class SchematicGraphicShape(SchematicItem):
 
     def __init__(
         self,
-        proto: Optional[schematic_types_pb2.SchematicGraphicShape] = None,
-        proto_ref: Optional[schematic_types_pb2.SchematicGraphicShape] = None,
+        proto: schematic_types_pb2.SchematicGraphicShape | None = None,
+        proto_ref: schematic_types_pb2.SchematicGraphicShape | None = None,
     ):
         self._proto = (
             proto_ref
@@ -555,7 +556,7 @@ class SchematicGraphicShape(SchematicItem):
         }.get(locked, LockedState.LS_UNLOCKED)
 
     @property
-    def shape(self) -> Optional[GraphicShape]:
+    def shape(self) -> GraphicShape | None:
         return to_concrete_shape(GraphicShape(self._proto.shape))
 
     @shape.setter
@@ -574,8 +575,8 @@ class SchematicImage(SchematicItem):
 
     def __init__(
         self,
-        proto: Optional[schematic_types_pb2.SchematicImage] = None,
-        proto_ref: Optional[schematic_types_pb2.SchematicImage] = None,
+        proto: schematic_types_pb2.SchematicImage | None = None,
+        proto_ref: schematic_types_pb2.SchematicImage | None = None,
     ):
         self._proto = (
             proto_ref if proto_ref is not None else schematic_types_pb2.SchematicImage()
@@ -699,8 +700,8 @@ class LocalLabel(BaseLabel):
 
     def __init__(
         self,
-        proto: Optional[schematic_types_pb2.LocalLabel] = None,
-        proto_ref: Optional[schematic_types_pb2.LocalLabel] = None,
+        proto: schematic_types_pb2.LocalLabel | None = None,
+        proto_ref: schematic_types_pb2.LocalLabel | None = None,
     ):
         self._proto = (
             proto_ref if proto_ref is not None else schematic_types_pb2.LocalLabel()
@@ -717,8 +718,8 @@ class GlobalLabel(ShapeLabel):
 
     def __init__(
         self,
-        proto: Optional[schematic_types_pb2.GlobalLabel] = None,
-        proto_ref: Optional[schematic_types_pb2.GlobalLabel] = None,
+        proto: schematic_types_pb2.GlobalLabel | None = None,
+        proto_ref: schematic_types_pb2.GlobalLabel | None = None,
     ):
         self._proto = (
             proto_ref if proto_ref is not None else schematic_types_pb2.GlobalLabel()
@@ -743,8 +744,8 @@ class HierarchicalLabel(ShapeLabel):
 
     def __init__(
         self,
-        proto: Optional[schematic_types_pb2.HierarchicalLabel] = None,
-        proto_ref: Optional[schematic_types_pb2.HierarchicalLabel] = None,
+        proto: schematic_types_pb2.HierarchicalLabel | None = None,
+        proto_ref: schematic_types_pb2.HierarchicalLabel | None = None,
     ):
         self._proto = (
             proto_ref
@@ -763,8 +764,8 @@ class DirectiveLabel(ShapeLabel):
 
     def __init__(
         self,
-        proto: Optional[schematic_types_pb2.DirectiveLabel] = None,
-        proto_ref: Optional[schematic_types_pb2.DirectiveLabel] = None,
+        proto: schematic_types_pb2.DirectiveLabel | None = None,
+        proto_ref: schematic_types_pb2.DirectiveLabel | None = None,
     ):
         self._proto = (
             proto_ref if proto_ref is not None else schematic_types_pb2.DirectiveLabel()
@@ -781,8 +782,8 @@ class Group(SchematicItem):
 
     def __init__(
         self,
-        proto: Optional[schematic_types_pb2.Group] = None,
-        proto_ref: Optional[schematic_types_pb2.Group] = None,
+        proto: schematic_types_pb2.Group | None = None,
+        proto_ref: schematic_types_pb2.Group | None = None,
     ):
         self._proto = (
             proto_ref if proto_ref is not None else schematic_types_pb2.Group()
@@ -792,7 +793,7 @@ class Group(SchematicItem):
             self._proto.CopyFrom(proto)
 
         self._item_ids = self._proto.items
-        self._unwrapped_items: Optional[Sequence[SchematicItem]] = None
+        self._unwrapped_items: Sequence[SchematicItem] | None = None
 
     @property
     def locked(self) -> bool:
@@ -832,8 +833,8 @@ class SheetPin(ShapeLabel):
 
     def __init__(
         self,
-        proto: Optional[schematic_types_pb2.SheetPin] = None,
-        proto_ref: Optional[schematic_types_pb2.SheetPin] = None,
+        proto: schematic_types_pb2.SheetPin | None = None,
+        proto_ref: schematic_types_pb2.SheetPin | None = None,
     ):
         self._proto = (
             proto_ref if proto_ref is not None else schematic_types_pb2.SheetPin()
@@ -861,8 +862,8 @@ class SheetSymbol(SchematicItem):
 
     def __init__(
         self,
-        proto: Optional[schematic_types_pb2.SheetSymbol] = None,
-        proto_ref: Optional[schematic_types_pb2.SheetSymbol] = None,
+        proto: schematic_types_pb2.SheetSymbol | None = None,
+        proto_ref: schematic_types_pb2.SheetSymbol | None = None,
     ):
         self._proto = (
             proto_ref if proto_ref is not None else schematic_types_pb2.SheetSymbol()
@@ -1007,8 +1008,8 @@ class SchematicPinAlternate(Wrapper):
 
     def __init__(
         self,
-        proto: Optional[schematic_types_pb2.SchematicPinAlternate] = None,
-        proto_ref: Optional[schematic_types_pb2.SchematicPinAlternate] = None,
+        proto: schematic_types_pb2.SchematicPinAlternate | None = None,
+        proto_ref: schematic_types_pb2.SchematicPinAlternate | None = None,
     ):
         self._proto = (
             proto_ref
@@ -1051,8 +1052,8 @@ class SchematicPin(SchematicItem):
 
     def __init__(
         self,
-        proto: Optional[schematic_types_pb2.SchematicPin] = None,
-        proto_ref: Optional[schematic_types_pb2.SchematicPin] = None,
+        proto: schematic_types_pb2.SchematicPin | None = None,
+        proto_ref: schematic_types_pb2.SchematicPin | None = None,
     ):
         self._proto = (
             proto_ref if proto_ref is not None else schematic_types_pb2.SchematicPin()
@@ -1151,7 +1152,7 @@ class SchematicPin(SchematicItem):
         self._proto.alternates.extend(alt.proto for alt in value)
 
     @property
-    def active_alternate(self) -> Optional[str]:
+    def active_alternate(self) -> str | None:
         return (
             self._proto.active_alternate
             if self._proto.HasField("active_alternate")
@@ -1159,7 +1160,7 @@ class SchematicPin(SchematicItem):
         )
 
     @active_alternate.setter
-    def active_alternate(self, value: Optional[str]):
+    def active_alternate(self, value: str | None):
         if value is not None:
             self._proto.active_alternate = value
         else:
@@ -1173,8 +1174,8 @@ class SchematicSymbolChild(Wrapper):
 
     def __init__(
         self,
-        proto: Optional[schematic_types_pb2.SchematicSymbolChild] = None,
-        proto_ref: Optional[schematic_types_pb2.SchematicSymbolChild] = None,
+        proto: schematic_types_pb2.SchematicSymbolChild | None = None,
+        proto_ref: schematic_types_pb2.SchematicSymbolChild | None = None,
     ):
         self._proto = (
             proto_ref
@@ -1194,24 +1195,24 @@ class SchematicSymbolChild(Wrapper):
         self._proto.item.CopyFrom(value)
 
     @property
-    def unit(self) -> Optional[int]:
+    def unit(self) -> int | None:
         return self._proto.unit.unit if self._proto.HasField("unit") else None
 
     @unit.setter
-    def unit(self, value: Optional[int]):
+    def unit(self, value: int | None):
         if value is not None:
             self._proto.unit.unit = value
         else:
             self._proto.ClearField("unit")
 
     @property
-    def body_style(self) -> Optional[int]:
+    def body_style(self) -> int | None:
         return (
             self._proto.body_style.style if self._proto.HasField("body_style") else None
         )
 
     @body_style.setter
-    def body_style(self, value: Optional[int]):
+    def body_style(self, value: int | None):
         if value is not None:
             self._proto.body_style.style = value
         else:
@@ -1233,8 +1234,8 @@ class SchematicSymbolAttributes(Wrapper):
 
     def __init__(
         self,
-        proto: Optional[schematic_types_pb2.SchematicSymbolAttributes] = None,
-        proto_ref: Optional[schematic_types_pb2.SchematicSymbolAttributes] = None,
+        proto: schematic_types_pb2.SchematicSymbolAttributes | None = None,
+        proto_ref: schematic_types_pb2.SchematicSymbolAttributes | None = None,
     ):
         self._proto = (
             proto_ref
@@ -1293,8 +1294,8 @@ class SchematicSymbolVariant(Wrapper):
 
     def __init__(
         self,
-        proto: Optional[schematic_types_pb2.SchematicSymbolVariant] = None,
-        proto_ref: Optional[schematic_types_pb2.SchematicSymbolVariant] = None,
+        proto: schematic_types_pb2.SchematicSymbolVariant | None = None,
+        proto_ref: schematic_types_pb2.SchematicSymbolVariant | None = None,
     ):
         self._proto = (
             proto_ref
@@ -1330,11 +1331,11 @@ class SchematicSymbolVariant(Wrapper):
         self._proto.attributes.CopyFrom(value.proto)
 
     @property
-    def fields(self) -> Dict[str, str]:
+    def fields(self) -> dict[str, str]:
         return dict(self._proto.fields)
 
     @fields.setter
-    def fields(self, value: Dict[str, str]):
+    def fields(self, value: dict[str, str]):
         self._proto.fields.clear()
         self._proto.fields.update(value)
 
@@ -1346,8 +1347,8 @@ class SchematicSymbol(Wrapper):
 
     def __init__(
         self,
-        proto: Optional[schematic_types_pb2.SchematicSymbol] = None,
-        proto_ref: Optional[schematic_types_pb2.SchematicSymbol] = None,
+        proto: schematic_types_pb2.SchematicSymbol | None = None,
+        proto_ref: schematic_types_pb2.SchematicSymbol | None = None,
     ):
         self._proto = (
             proto_ref
@@ -1472,8 +1473,8 @@ class SchematicSymbolTransform(Wrapper):
 
     def __init__(
         self,
-        proto: Optional[schematic_types_pb2.SchematicSymbolTransform] = None,
-        proto_ref: Optional[schematic_types_pb2.SchematicSymbolTransform] = None,
+        proto: schematic_types_pb2.SchematicSymbolTransform | None = None,
+        proto_ref: schematic_types_pb2.SchematicSymbolTransform | None = None,
     ):
         self._proto = (
             proto_ref
@@ -1516,8 +1517,8 @@ class SchematicSymbolInstance(SchematicItem):
 
     def __init__(
         self,
-        proto: Optional[schematic_types_pb2.SchematicSymbolInstance] = None,
-        proto_ref: Optional[schematic_types_pb2.SchematicSymbolInstance] = None,
+        proto: schematic_types_pb2.SchematicSymbolInstance | None = None,
+        proto_ref: schematic_types_pb2.SchematicSymbolInstance | None = None,
     ):
         self._proto = (
             proto_ref
@@ -1628,13 +1629,13 @@ class SchematicSymbolInstance(SchematicItem):
         self._proto.unit.unit = value
 
     @property
-    def body_style(self) -> Optional[int]:
+    def body_style(self) -> int | None:
         return (
             self._proto.body_style.style if self._proto.HasField("body_style") else None
         )
 
     @body_style.setter
-    def body_style(self, value: Optional[int]):
+    def body_style(self, value: int | None):
         if value is not None:
             self._proto.body_style.style = value
         else:
@@ -1692,8 +1693,8 @@ class SheetInstance(Wrapper):
 
     def __init__(
         self,
-        proto: Optional[schematic_types_pb2.SheetInstance] = None,
-        proto_ref: Optional[schematic_types_pb2.SheetInstance] = None,
+        proto: schematic_types_pb2.SheetInstance | None = None,
+        proto_ref: schematic_types_pb2.SheetInstance | None = None,
     ):
         self._proto = (
             proto_ref if proto_ref is not None else schematic_types_pb2.SheetInstance()
@@ -1735,7 +1736,7 @@ class SheetInstance(Wrapper):
         return self._proto.page_number
 
     @property
-    def children(self) -> Sequence["SheetInstance"]:
+    def children(self) -> Sequence[SheetInstance]:
         return [SheetInstance(proto_ref=child) for child in self._proto.children]
 
 
@@ -1748,8 +1749,8 @@ class SchematicNetSheetContents(Wrapper):
 
     def __init__(
         self,
-        proto: Optional[schematic_types_pb2.SchematicNetSheetContents] = None,
-        proto_ref: Optional[schematic_types_pb2.SchematicNetSheetContents] = None,
+        proto: schematic_types_pb2.SchematicNetSheetContents | None = None,
+        proto_ref: schematic_types_pb2.SchematicNetSheetContents | None = None,
     ):
         self._proto = (
             proto_ref
@@ -1781,8 +1782,8 @@ class SchematicNet(Wrapper):
 
     def __init__(
         self,
-        proto: Optional[schematic_types_pb2.SchematicNet] = None,
-        proto_ref: Optional[schematic_types_pb2.SchematicNet] = None,
+        proto: schematic_types_pb2.SchematicNet | None = None,
+        proto_ref: schematic_types_pb2.SchematicNet | None = None,
     ):
         self._proto = (
             proto_ref if proto_ref is not None else schematic_types_pb2.SchematicNet()
@@ -1813,7 +1814,7 @@ class SchematicNet(Wrapper):
         return [SchematicNetSheetContents(proto_ref=s) for s in self._proto.sheets]
 
 
-_proto_to_object: Dict[type[Message], type[Wrapper]] = {
+_proto_to_object: dict[type[Message], type[Wrapper]] = {
     schematic_types_pb2.SchematicField: SchematicField,
     schematic_types_pb2.SchematicLine: SchematicLine,
     schematic_types_pb2.Junction: Junction,

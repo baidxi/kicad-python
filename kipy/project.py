@@ -18,7 +18,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from typing import List, Union, overload
+from __future__ import annotations
+
+from typing import overload
 
 from google.protobuf.empty_pb2 import Empty
 
@@ -59,7 +61,7 @@ class Project:
     def path(self) -> str:
         return self._doc.project.path
 
-    def get_net_classes(self) -> List[NetClass]:
+    def get_net_classes(self) -> list[NetClass]:
         command = project_commands_pb2.GetNetClasses()
         response = self._kicad.send(command, project_commands_pb2.NetClassesResponse)
         return [NetClass(p) for p in response.net_classes]
@@ -69,10 +71,10 @@ class Project:
         ...
 
     @overload
-    def expand_text_variables(self, text: List[str]) -> List[str]:
+    def expand_text_variables(self, text: list[str]) -> list[str]:
         ...
 
-    def expand_text_variables(self, text: Union[str, List[str]]) -> Union[str, List[str]]:
+    def expand_text_variables(self, text: str | list[str]) -> str | list[str]:
         command = project_commands_pb2.ExpandTextVariables()
         command.document.CopyFrom(self._doc)
         if isinstance(text, list):

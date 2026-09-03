@@ -18,9 +18,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from __future__ import annotations
+
 import sys
 from abc import ABC, abstractmethod
-from typing import Optional
 
 if sys.version_info >= (3, 11):
     from typing import Self
@@ -34,7 +35,7 @@ from kipy.proto.common.types.base_types_pb2 import KIID
 
 class Wrapper(ABC):
     def __init__(
-        self, proto: Optional[Message] = None, proto_ref: Optional[Message] = None
+        self, proto: Message | None = None, proto_ref: Message | None = None
     ):
         pass
 

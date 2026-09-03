@@ -18,9 +18,11 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from __future__ import annotations
+
 import pathlib
 from collections.abc import Iterable, Sequence
-from typing import List, Optional, Union, cast
+from typing import cast
 
 from google.protobuf.empty_pb2 import Empty
 
@@ -150,8 +152,8 @@ class Schematic:
         self._kicad.send(command, EndCommitResponse)
 
     def create_items(
-        self, items: Union[Wrapper, Iterable[Wrapper]]
-    ) -> List[SchematicItem]:
+        self, items: Wrapper | Iterable[Wrapper]
+    ) -> list[SchematicItem]:
         command = CreateItems()
         command.header.document.CopyFrom(self._doc)
 
@@ -167,7 +169,7 @@ class Schematic:
 
     def get_items(
         self,
-        types: Union[KiCadObjectType.ValueType, Sequence[KiCadObjectType.ValueType]],
+        types: KiCadObjectType.ValueType | Sequence[KiCadObjectType.ValueType],
     ) -> Sequence[SchematicItem]:
         command = GetItems()
         command.header.document.CopyFrom(self._doc)
@@ -183,7 +185,7 @@ class Schematic:
         ]
 
     def get_items_by_id(
-        self, ids: Union[KIID, Sequence[KIID]]
+        self, ids: KIID | Sequence[KIID]
     ) -> Sequence[SchematicItem]:
         command = GetItemsById()
         command.header.document.CopyFrom(self._doc)
@@ -199,8 +201,8 @@ class Schematic:
         ]
 
     def update_items(
-        self, items: Union[SchematicItem, Sequence[SchematicItem]]
-    ) -> List[SchematicItem]:
+        self, items: SchematicItem | Sequence[SchematicItem]
+    ) -> list[SchematicItem]:
         command = UpdateItems()
         command.header.document.CopyFrom(self._doc)
 
@@ -217,7 +219,7 @@ class Schematic:
             for result in self._kicad.send(command, UpdateItemsResponse).updated_items
         ]
 
-    def remove_items(self, items: Union[SchematicItem, Sequence[SchematicItem]]):
+    def remove_items(self, items: SchematicItem | Sequence[SchematicItem]):
         command = DeleteItems()
         command.header.document.CopyFrom(self._doc)
 
@@ -231,7 +233,7 @@ class Schematic:
 
         self._kicad.send(command, DeleteItemsResponse)
 
-    def remove_items_by_id(self, items: Union[KIID, Sequence[KIID]]):
+    def remove_items_by_id(self, items: KIID | Sequence[KIID]):
         command = DeleteItems()
         command.header.document.CopyFrom(self._doc)
 
@@ -251,7 +253,7 @@ class Schematic:
             for item in self.get_items(types=[KiCadObjectType.KOT_SCH_LINE])
         ]
 
-    def get_text(self) -> Sequence[Union[SchematicText, SchematicTextBox]]:
+    def get_text(self) -> Sequence[SchematicText | SchematicTextBox]:
         return [
             cast(SchematicText, item)
             if isinstance(item, SchematicText)
@@ -318,9 +320,7 @@ class Schematic:
 
     def get_netlist(
         self,
-        types: Union[
-            KiCadObjectType.ValueType, Sequence[KiCadObjectType.ValueType], None
-        ] = None,
+        types: KiCadObjectType.ValueType | Sequence[KiCadObjectType.ValueType] | None = None,
     ) -> list[SchematicNet]:
         command = GetSchematicNetlist()
         command.document.CopyFrom(self._doc)
@@ -371,9 +371,7 @@ class Schematic:
 
     def get_selection(
         self,
-        types: Optional[
-            Union[KiCadObjectType.ValueType, Sequence[KiCadObjectType.ValueType]]
-        ] = None,
+        types: KiCadObjectType.ValueType | Sequence[KiCadObjectType.ValueType] | None = None,
     ) -> Sequence[SchematicItem]:
         command = editor_commands_pb2.GetSelection()
         command.header.document.CopyFrom(self._doc)
@@ -391,7 +389,7 @@ class Schematic:
         ]
 
     def add_to_selection(
-        self, items: Union[SchematicItem, Sequence[SchematicItem]]
+        self, items: SchematicItem | Sequence[SchematicItem]
     ) -> Sequence[SchematicItem]:
         command = editor_commands_pb2.AddToSelection()
         command.header.document.CopyFrom(self._doc)
@@ -409,7 +407,7 @@ class Schematic:
         ]
 
     def remove_from_selection(
-        self, items: Union[SchematicItem, Sequence[SchematicItem]]
+        self, items: SchematicItem | Sequence[SchematicItem]
     ) -> Sequence[SchematicItem]:
         command = editor_commands_pb2.RemoveFromSelection()
         command.header.document.CopyFrom(self._doc)

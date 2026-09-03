@@ -23,7 +23,6 @@ import math
 import os
 import time
 from copy import deepcopy
-from typing import Set
 
 import wx
 from round_tracks_utils import (
@@ -218,16 +217,14 @@ class RoundTracks(RoundTracksDialog):
         classes = self.config["classes"]
         try:
             with open(self.configfilepath, "w") as configfile:
-                configfile.writelines("%s\t%s\t%s\t%s\n"
-                        % (
+                configfile.writelines("{}\t{}\t{}\t{}\n".format(
                             classname,
                             str(classes[classname]["do_round"]),
                             str(classes[classname]["scaling"]),
                             str(classes[classname]["passes"]),
                         ) for classname in classes)
                 configfile.write(
-                    "%s\t%s\t%s\n"
-                    % (
+                    "{}\t{}\t{}\n".format(
                         str(self.config["checkboxes"]["new_file"]),
                         str(self.config["checkboxes"]["native"]),
                         str(self.config["checkboxes"]["avoid_junctions"]),
@@ -335,12 +332,12 @@ class RoundTracks(RoundTracksDialog):
 
                 if layer in viasPerLayer:
                     vias = viasPerLayer[layer]
-                    viaLocations = set([v.position for v in vias])
+                    viaLocations = {v.position for v in vias}
                 else:
                     viaLocations = set()
 
                 # add all the possible intersections to a unique set, for iterating over later
-                intersections: Set[Vector2] = set()
+                intersections: set[Vector2] = set()
                 for t1 in range(len(tracks)):
                     for t2 in range(t1 + 1, len(tracks)):
                         # check if these two tracks share an endpoint

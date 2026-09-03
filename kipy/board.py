@@ -18,12 +18,14 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from __future__ import annotations
+
 import os
 import pathlib
 import reprlib
 from collections.abc import Iterable, Sequence
 from time import sleep
-from typing import Dict, List, Optional, Union, cast, overload
+from typing import Union, cast, overload
 
 from google.protobuf.empty_pb2 import Empty
 
@@ -159,8 +161,8 @@ class ImportNetlistResult(Wrapper):
 
     def __init__(
         self,
-        proto: Optional[board_commands_pb2.ImportNetlistResponse] = None,
-        proto_ref: Optional[board_commands_pb2.ImportNetlistResponse] = None,
+        proto: board_commands_pb2.ImportNetlistResponse | None = None,
+        proto_ref: board_commands_pb2.ImportNetlistResponse | None = None,
     ):
         self._proto = (
             proto_ref
@@ -196,7 +198,7 @@ class ImportNetlistResult(Wrapper):
 
 class BoardLayerGraphicsDefaults(Wrapper):
     """The default properties for graphic items added on a given class of board layer"""
-    def __init__(self, proto: Optional[board_pb2.BoardLayerGraphicsDefaults] = None):
+    def __init__(self, proto: board_pb2.BoardLayerGraphicsDefaults | None = None):
         self._proto = board_pb2.BoardLayerGraphicsDefaults()
 
         if proto is not None:
@@ -223,7 +225,7 @@ class BoardLayerGraphicsDefaults(Wrapper):
         return TextAttributes(self._proto.text)
 
 class BoardStackupDielectricProperties(Wrapper):
-    def __init__(self, proto: Optional[board_pb2.BoardStackupDielectricProperties] = None):
+    def __init__(self, proto: board_pb2.BoardStackupDielectricProperties | None = None):
         self._proto = board_pb2.BoardStackupDielectricProperties()
         if proto:
             self._proto.CopyFrom(proto)
@@ -273,7 +275,7 @@ class BoardStackupDielectricProperties(Wrapper):
         self._proto.thickness_locked = locked
 
     @property
-    def spec_frequency(self) -> Optional[float]:
+    def spec_frequency(self) -> float | None:
         """The frequency at which the dielectric properties were measured, in Hz
 
         .. versionadded:: 0.8.0 (KiCad 11.0)
@@ -283,7 +285,7 @@ class BoardStackupDielectricProperties(Wrapper):
         return None
 
     @spec_frequency.setter
-    def spec_frequency(self, frequency: Optional[float]):
+    def spec_frequency(self, frequency: float | None):
         if frequency is None:
             self._proto.ClearField("spec_frequency")
         else:
@@ -303,13 +305,13 @@ class BoardStackupDielectricProperties(Wrapper):
 
 
 class BoardStackupDielectricLayer(Wrapper):
-    def __init__(self, proto: Optional[board_pb2.BoardStackupDielectricLayer] = None):
+    def __init__(self, proto: board_pb2.BoardStackupDielectricLayer | None = None):
         self._proto = board_pb2.BoardStackupDielectricLayer()
         if proto:
             self._proto.CopyFrom(proto)
 
     @property
-    def layers(self) -> List[BoardStackupDielectricProperties]:
+    def layers(self) -> list[BoardStackupDielectricProperties]:
         """Each dielectric layer may be made up of one or more sub-layers with different properties"""
         return [BoardStackupDielectricProperties(layer) for layer in self._proto.layer]
 
@@ -331,7 +333,7 @@ class BoardStackupSoldermaskLayer(Wrapper):
 
     .. versionadded:: 0.8.0 (KiCad 10.0.6)"""
 
-    def __init__(self, proto: Optional[board_pb2.BoardStackupSoldermaskLayer] = None):
+    def __init__(self, proto: board_pb2.BoardStackupSoldermaskLayer | None = None):
         self._proto = board_pb2.BoardStackupSoldermaskLayer()
         if proto:
             self._proto.CopyFrom(proto)
@@ -374,7 +376,7 @@ class BoardStackupSilkscreenLayer(Wrapper):
 
     .. versionadded:: 0.8.0 (KiCad 10.0.6)"""
 
-    def __init__(self, proto: Optional[board_pb2.BoardStackupSilkscreenLayer] = None):
+    def __init__(self, proto: board_pb2.BoardStackupSilkscreenLayer | None = None):
         self._proto = board_pb2.BoardStackupSilkscreenLayer()
         if proto:
             self._proto.CopyFrom(proto)
@@ -389,7 +391,7 @@ class BoardStackupSilkscreenLayer(Wrapper):
 
 
 class BoardStackupLayer(Wrapper):
-    def __init__(self, proto: Optional[board_pb2.BoardStackupLayer] = None):
+    def __init__(self, proto: board_pb2.BoardStackupLayer | None = None):
         self._proto = board_pb2.BoardStackupLayer()
         if proto:
             self._proto.CopyFrom(proto)
@@ -438,7 +440,7 @@ class BoardStackupLayer(Wrapper):
         self._proto.type = value
 
     @property
-    def dielectric(self) -> Optional[BoardStackupDielectricLayer]:
+    def dielectric(self) -> BoardStackupDielectricLayer | None:
         """Dielectric details, if this layer is a dielectric layer
 
         .. versionadded:: 0.8.0 (KiCad 10.0.6)
@@ -452,7 +454,7 @@ class BoardStackupLayer(Wrapper):
         self._proto.dielectric.CopyFrom(value.proto)
 
     @property
-    def soldermask(self) -> Optional[BoardStackupSoldermaskLayer]:
+    def soldermask(self) -> BoardStackupSoldermaskLayer | None:
         """Soldermask details, if this layer is a soldermask layer
 
         .. versionadded:: 0.8.0 (KiCad 10.0.6)
@@ -466,7 +468,7 @@ class BoardStackupLayer(Wrapper):
         self._proto.soldermask.CopyFrom(value.proto)
 
     @property
-    def silkscreen(self) -> Optional[BoardStackupSilkscreenLayer]:
+    def silkscreen(self) -> BoardStackupSilkscreenLayer | None:
         """Silkscreen details, if this layer is a silkscreen layer
 
         .. versionadded:: 0.8.0 (KiCad 10.0.6)
@@ -511,7 +513,7 @@ class BoardFinish(Wrapper):
 
     .. versionadded:: 0.8.0 (KiCad 10.0.6)"""
 
-    def __init__(self, proto: Optional[board_pb2.BoardFinish] = None):
+    def __init__(self, proto: board_pb2.BoardFinish | None = None):
         self._proto = board_pb2.BoardFinish()
         if proto:
             self._proto.CopyFrom(proto)
@@ -534,7 +536,7 @@ class BoardImpedanceControl(Wrapper):
 
     .. versionadded:: 0.8.0 (KiCad 10.0.6)"""
 
-    def __init__(self, proto: Optional[board_pb2.BoardImpedanceControl] = None):
+    def __init__(self, proto: board_pb2.BoardImpedanceControl | None = None):
         self._proto = board_pb2.BoardImpedanceControl()
         if proto:
             self._proto.CopyFrom(proto)
@@ -554,7 +556,7 @@ class BoardEdgeConnector(Wrapper):
 
     .. versionadded:: 0.8.0 (KiCad 10.0.6)"""
 
-    def __init__(self, proto: Optional[board_pb2.BoardEdgeConnector] = None):
+    def __init__(self, proto: board_pb2.BoardEdgeConnector | None = None):
         self._proto = board_pb2.BoardEdgeConnector()
         if proto:
             self._proto.CopyFrom(proto)
@@ -573,7 +575,7 @@ class EdgePlating(Wrapper):
 
     .. versionadded:: 0.8.0 (KiCad 10.0.6)"""
 
-    def __init__(self, proto: Optional[board_pb2.EdgePlating] = None):
+    def __init__(self, proto: board_pb2.EdgePlating | None = None):
         self._proto = board_pb2.EdgePlating()
         if proto:
             self._proto.CopyFrom(proto)
@@ -593,7 +595,7 @@ class BoardEdgeSettings(Wrapper):
 
     .. versionadded:: 0.8.0 (KiCad 10.0.6)"""
 
-    def __init__(self, proto: Optional[board_pb2.BoardEdgeSettings] = None):
+    def __init__(self, proto: board_pb2.BoardEdgeSettings | None = None):
         self._proto = board_pb2.BoardEdgeSettings()
         if proto:
             self._proto.CopyFrom(proto)
@@ -616,7 +618,7 @@ class BoardEdgeSettings(Wrapper):
 
 
 class BoardStackup(Wrapper):
-    def __init__(self, proto: Optional[board_pb2.BoardStackup] = None):
+    def __init__(self, proto: board_pb2.BoardStackup | None = None):
         self._proto = board_pb2.BoardStackup()
         if proto:
             self._proto.CopyFrom(proto)
@@ -661,7 +663,7 @@ class BoardStackup(Wrapper):
         self._proto.edge.CopyFrom(value.proto)
 
     @property
-    def layers(self) -> List[BoardStackupLayer]:
+    def layers(self) -> list[BoardStackupLayer]:
         """The stackup layers, in order from top to bottom of the board"""
         return [BoardStackupLayer(layer) for layer in self._proto.layers]
 
@@ -722,7 +724,7 @@ class Board:
     def export_3d(
         self,
         output_path: str,
-        settings: Optional[Export3DSettings] = None,
+        settings: Export3DSettings | None = None,
     ) -> JobResult:
         """Exports the board as a 3D model file."""
         command = board_jobs_pb2.RunBoardJobExport3D()
@@ -735,7 +737,7 @@ class Board:
     def export_render(
         self,
         output_path: str,
-        settings: Optional[RenderSettings] = None,
+        settings: RenderSettings | None = None,
     ) -> JobResult:
         """Exports a raytraced 3D render of the board."""
         command = board_jobs_pb2.RunBoardJobExportRender()
@@ -748,7 +750,7 @@ class Board:
     def export_svg(
         self,
         output_path: str,
-        plot_settings: Optional[PlotSettings] = None,
+        plot_settings: PlotSettings | None = None,
         fit_page_to_board: bool = False,
         precision: int = 4,
         page_mode: board_jobs_pb2.BoardJobPaginationMode.ValueType = BoardJobPaginationMode.BJPM_ALL_LAYERS_ONE_PAGE,
@@ -767,7 +769,7 @@ class Board:
     def export_dxf(
         self,
         output_path: str,
-        plot_settings: Optional[PlotSettings] = None,
+        plot_settings: PlotSettings | None = None,
         plot_graphic_items_using_contours: bool = False,
         polygon_mode: bool = False,
         units: Units.ValueType = Units.U_MM,
@@ -788,7 +790,7 @@ class Board:
     def export_pdf(
         self,
         output_path: str,
-        plot_settings: Optional[PlotSettings] = None,
+        plot_settings: PlotSettings | None = None,
         include_metadata: bool = True,
         single_document: bool = True,
         page_mode: board_jobs_pb2.BoardJobPaginationMode.ValueType = BoardJobPaginationMode.BJPM_ALL_LAYERS_ONE_PAGE,
@@ -813,7 +815,7 @@ class Board:
     def export_ps(
         self,
         output_path: str,
-        plot_settings: Optional[PlotSettings] = None,
+        plot_settings: PlotSettings | None = None,
         page_mode: board_jobs_pb2.BoardJobPaginationMode.ValueType = BoardJobPaginationMode.BJPM_ALL_LAYERS_ONE_PAGE,
         track_width_correction: float = 0.0,
         x_scale_adjust: float = 1.0,
@@ -838,7 +840,7 @@ class Board:
     def export_gerbers(
         self,
         output_path: str,
-        plot_settings: Optional[PlotSettings] = None,
+        plot_settings: PlotSettings | None = None,
         use_board_plot_params: bool = False,
         create_gerber_job_file: bool = False,
         include_netlist_attributes: bool = True,
@@ -956,7 +958,7 @@ class Board:
     def export_position(
         self,
         output_path: str,
-        settings: Optional[PositionExportSettings] = None,
+        settings: PositionExportSettings | None = None,
     ) -> JobResult:
         """Exports pick-and-place position files from the board."""
         command = board_jobs_pb2.RunBoardJobExportPosition()
@@ -989,7 +991,7 @@ class Board:
     def export_ipc2581(
         self,
         output_path: str,
-        settings: Optional[Ipc2581ExportSettings] = None,
+        settings: Ipc2581ExportSettings | None = None,
     ) -> JobResult:
         """Exports the board to IPC-2581 format."""
         command = board_jobs_pb2.RunBoardJobExportIpc2581()
@@ -1104,7 +1106,7 @@ class Board:
         command.action = CommitAction.CMA_DROP
         self._kicad.send(command, EndCommitResponse)
 
-    def create_items(self, items: Union[Wrapper, Iterable[Wrapper]]) -> List[Wrapper]:
+    def create_items(self, items: Wrapper | Iterable[Wrapper]) -> list[Wrapper]:
         command = CreateItems()
         command.header.document.CopyFrom(self._doc)
 
@@ -1118,8 +1120,8 @@ class Board:
             for result in self._kicad.send(command, CreateItemsResponse).created_items
         ]
 
-    def _to_concrete_items(self, items: Sequence[Wrapper]) -> List[BoardItem]:
-        items_converted: List[BoardItem] = []
+    def _to_concrete_items(self, items: Sequence[Wrapper]) -> list[BoardItem]:
+        items_converted: list[BoardItem] = []
         for it in items:
             assert isinstance(it, BoardItem)
 
@@ -1132,7 +1134,7 @@ class Board:
         return items_converted
 
     def get_items(
-        self, types: Union[KiCadObjectType.ValueType, Sequence[KiCadObjectType.ValueType]]
+        self, types: KiCadObjectType.ValueType | Sequence[KiCadObjectType.ValueType]
     ) -> Sequence[Item]:
         """Retrieves items from the board, optionally filtering to a single or set of types"""
         command = GetItems()
@@ -1148,7 +1150,7 @@ class Board:
         )
 
     def get_items_by_id(
-        self, ids: Union[KIID, Sequence[KIID]]
+        self, ids: KIID | Sequence[KIID]
     ) -> Sequence[Item]:
         """Retrieves items from the board by their KIID (internal unique identifier)
 
@@ -1167,10 +1169,8 @@ class Board:
 
     def get_items_by_net(
         self,
-        nets: Union[Net, Sequence[Net]],
-        types: Optional[
-            Union[KiCadObjectType.ValueType, Sequence[KiCadObjectType.ValueType]]
-        ] = None,
+        nets: Net | Sequence[Net],
+        types: KiCadObjectType.ValueType | Sequence[KiCadObjectType.ValueType] | None = None,
     ) -> Sequence[Item]:
         """Retrieves items from the board, filtered by one or more nets
 
@@ -1194,10 +1194,8 @@ class Board:
 
     def get_items_by_netclass(
         self,
-        net_classes: Union[str, Sequence[str]],
-        types: Optional[
-            Union[KiCadObjectType.ValueType, Sequence[KiCadObjectType.ValueType]]
-        ] = None,
+        net_classes: str | Sequence[str],
+        types: KiCadObjectType.ValueType | Sequence[KiCadObjectType.ValueType] | None = None,
     ) -> Sequence[Item]:
         """Retrieves items from the board, filtered by one or more net class names
 
@@ -1221,10 +1219,8 @@ class Board:
 
     def get_connected_items(
         self,
-        items: Union[BoardItem, KIID, Sequence[Union[BoardItem, KIID]]],
-        types: Optional[
-            Union[KiCadObjectType.ValueType, Sequence[KiCadObjectType.ValueType]]
-        ] = None,
+        items: BoardItem | KIID | Sequence[BoardItem | KIID],
+        types: KiCadObjectType.ValueType | Sequence[KiCadObjectType.ValueType] | None = None,
     ) -> Sequence[Item]:
         """Retrieves items that are copper-connected to the given source item(s) or item IDs
 
@@ -1246,7 +1242,7 @@ class Board:
             [unwrap(item) for item in self._kicad.send(command, GetItemsResponse).items]
         )
 
-    def get_tracks(self) -> Sequence[Union[Track, ArcTrack]]:
+    def get_tracks(self) -> Sequence[Track | ArcTrack]:
         """Retrieves all tracks and arc tracks on the board"""
         return [
             cast(Track, item) if isinstance(item, Track) else cast(ArcTrack, item)
@@ -1293,7 +1289,7 @@ class Board:
             if item is not None
         ]
 
-    def get_text(self) -> Sequence[Union[BoardText, BoardTextBox]]:
+    def get_text(self) -> Sequence[BoardText | BoardTextBox]:
         """Retrieves all text objects on the board"""
         return [
             cast(BoardText, item) if isinstance(item, BoardText) else cast(BoardTextBox, item)
@@ -1349,7 +1345,7 @@ class Board:
         command = editor_commands_pb2.SaveSelectionToString()
         return self._kicad.send(command, editor_commands_pb2.SavedSelectionResponse).contents
 
-    def update_items(self, items: Union[BoardItem, Sequence[BoardItem]]) -> List[BoardItem]:
+    def update_items(self, items: BoardItem | Sequence[BoardItem]) -> list[BoardItem]:
         """Updates the properties of one or more items on the board.  The items must already exist
         on the board, and are matched by internal UUID.  All other properties of the items are
         updated from those passed in this call.
@@ -1376,7 +1372,7 @@ class Board:
             ]
         )
 
-    def remove_items(self, items: Union[BoardItem, Sequence[BoardItem]]):
+    def remove_items(self, items: BoardItem | Sequence[BoardItem]):
         """Deletes one or more items from the board"""
         command = DeleteItems()
         command.header.document.CopyFrom(self._doc)
@@ -1391,7 +1387,7 @@ class Board:
 
         self._kicad.send(command, DeleteItemsResponse)
 
-    def remove_items_by_id(self, items: Union[KIID, Sequence[KIID]]):
+    def remove_items_by_id(self, items: KIID | Sequence[KIID]):
         """Deletes one or more items from the board using their unique IDs
 
         .. versionadded:: 0.4.0"""
@@ -1410,9 +1406,9 @@ class Board:
 
     def flip_items(
         self,
-        items: Union[BoardItem, Sequence[BoardItem]],
+        items: BoardItem | Sequence[BoardItem],
         direction: board_commands_pb2.BoardFlipDirection.ValueType = BoardFlipDirection.BFD_LEFT_RIGHT,
-    ) -> List[BoardItem]:
+    ) -> list[BoardItem]:
         """Flips one or more board items to the opposite side of the board.
 
         The given items must already exist on the board; each is flipped in place and the
@@ -1440,7 +1436,7 @@ class Board:
 
         response = self._kicad.send(command, board_commands_pb2.FlipItemsResponse)
 
-        flipped: List[BoardItem] = []
+        flipped: list[BoardItem] = []
         for item, result in zip(items, response.flipped_items):
             if result.status.code != editor_commands_pb2.ItemStatusCode.ISC_OK:
                 continue
@@ -1451,9 +1447,9 @@ class Board:
 
     def flip_items_by_id(
         self,
-        items: Union[KIID, Sequence[KIID]],
+        items: KIID | Sequence[KIID],
         direction: board_commands_pb2.BoardFlipDirection.ValueType = BoardFlipDirection.BFD_LEFT_RIGHT,
-    ) -> List[BoardItem]:
+    ) -> list[BoardItem]:
         """Flips one or more board items to the opposite side of the board by their unique IDs.
 
         Returns the flipped items as returned by KiCad.  Items that could not be flipped (for
@@ -1488,7 +1484,7 @@ class Board:
         )
 
     def get_nets(
-        self, netclass_filter: Optional[Union[str, Sequence[str]]] = None
+        self, netclass_filter: str | Sequence[str] | None = None
     ) -> Sequence[Net]:
         """Retrieves all nets on the board, optionally filtering by net class"""
         command = board_commands_pb2.GetNets()
@@ -1504,7 +1500,7 @@ class Board:
             for net in self._kicad.send(command, board_commands_pb2.NetsResponse).nets
         ]
 
-    def get_netclass_for_nets(self, nets: Union[Net, Sequence[Net]]) -> Dict[str, NetClass]:
+    def get_netclass_for_nets(self, nets: Net | Sequence[Net]) -> dict[str, NetClass]:
         """Retrieves the net class for one or more nets on the board"""
         cmd = board_commands_pb2.GetNetClassForNets()
         if isinstance(nets, Net):
@@ -1517,9 +1513,7 @@ class Board:
 
     def get_selection(
         self,
-        types: Optional[
-            Union[KiCadObjectType.ValueType, Sequence[KiCadObjectType.ValueType]]
-        ] = None,
+        types: KiCadObjectType.ValueType | Sequence[KiCadObjectType.ValueType] | None = None,
     ) -> Sequence[Wrapper]:
         cmd = editor_commands_pb2.GetSelection()
         cmd.header.document.CopyFrom(self._doc)
@@ -1537,7 +1531,7 @@ class Board:
         ])
 
     def add_to_selection(
-        self, items: Union[BoardItem, Sequence[BoardItem]]
+        self, items: BoardItem | Sequence[BoardItem]
     ) -> Sequence[Wrapper]:
         """Adds one or more items to the current selection on the board
 
@@ -1560,7 +1554,7 @@ class Board:
         ]
 
     def remove_from_selection(
-        self, items: Union[BoardItem, Sequence[BoardItem]]
+        self, items: BoardItem | Sequence[BoardItem]
     ) -> Sequence[Wrapper]:
         """Removes one or more items from the current selection on the board
 
@@ -1607,7 +1601,7 @@ class Board:
         response = self._kicad.send(cmd, board_commands_pb2.BoardEnabledLayersResponse)
         return response.copper_layer_count
 
-    def get_enabled_layers(self) -> List[board_types_pb2.BoardLayer.ValueType]:
+    def get_enabled_layers(self) -> list[board_types_pb2.BoardLayer.ValueType]:
         """
         Retrieves the list of all enabled layers in the board, including copper and non-copper layers.
 
@@ -1624,7 +1618,7 @@ class Board:
         self,
         copper_layer_count: int,
         layers: Sequence[board_types_pb2.BoardLayer.ValueType],
-    ) -> List[board_types_pb2.BoardLayer.ValueType]:
+    ) -> list[board_types_pb2.BoardLayer.ValueType]:
         """
         Sets the copper layer count and enabled non-copper layers for the board.
 
@@ -1643,7 +1637,7 @@ class Board:
         response = self._kicad.send(cmd, board_commands_pb2.BoardEnabledLayersResponse)
         return list(response.layers)
 
-    def get_graphics_defaults(self) -> Dict[int, BoardLayerGraphicsDefaults]:
+    def get_graphics_defaults(self) -> dict[int, BoardLayerGraphicsDefaults]:
         """Retrieves the default graphics properties for each layer class on the board"""
         cmd = board_commands_pb2.GetGraphicsDefaults()
         cmd.board.CopyFrom(self._doc)
@@ -1688,7 +1682,7 @@ class Board:
 
     def set_custom_design_rules(
         self,
-        rules: Union[CustomRule, Sequence[CustomRule]],
+        rules: CustomRule | Sequence[CustomRule],
     ) -> CustomRulesResponse:
         """Sets custom design rules.
 
@@ -1764,10 +1758,10 @@ class Board:
         ...
 
     @overload
-    def expand_text_variables(self, text: List[str]) -> List[str]:
+    def expand_text_variables(self, text: list[str]) -> list[str]:
         ...
 
-    def expand_text_variables(self, text: Union[str, List[str]]) -> Union[str, List[str]]:
+    def expand_text_variables(self, text: str | list[str]) -> str | list[str]:
         """Expands text variables in a string or list of strings.  Any text variables that do not
         exist will be left as-is in the output."""
         command = project_commands_pb2.ExpandTextVariables()
@@ -1788,18 +1782,18 @@ class Board:
     @overload
     def get_item_bounding_box(
         self, items: BoardItem, include_text: bool = False
-    ) -> Optional[Box2]: ...
+    ) -> Box2 | None: ...
 
     @overload
     def get_item_bounding_box(
         self, items: Sequence[BoardItem], include_text: bool = False
-    ) -> List[Optional[Box2]]: ...
+    ) -> list[Box2 | None]: ...
 
     def get_item_bounding_box(
         self,
-        items: Union[BoardItem, Sequence[BoardItem]],
+        items: BoardItem | Sequence[BoardItem],
         include_text: bool = False
-    ) -> Union[Optional[Box2], List[Optional[Box2]]]:
+    ) -> Box2 | None | list[Box2 | None]:
         """Gets the KiCad-calculated bounding box for an item or items, returning None if the item
         does not exist or has no bounding box"""
         cmd = editor_commands_pb2.GetBoundingBox()
@@ -1830,16 +1824,16 @@ class Board:
     @overload
     def get_pad_shapes_as_polygons(
         self, pads: Pad, layer: BoardLayer.ValueType = BoardLayer.BL_F_Cu
-    ) -> Optional[PolygonWithHoles]: ...
+    ) -> PolygonWithHoles | None: ...
 
     @overload
     def get_pad_shapes_as_polygons(
         self, pads: Sequence[Pad], layer: BoardLayer.ValueType = BoardLayer.BL_F_Cu
-    ) -> List[Optional[PolygonWithHoles]]: ...
+    ) -> list[PolygonWithHoles | None]: ...
 
     def get_pad_shapes_as_polygons(
-        self, pads: Union[Pad, Sequence[Pad]], layer: BoardLayer.ValueType = BoardLayer.BL_F_Cu
-    ) -> Union[Optional[PolygonWithHoles], List[Optional[PolygonWithHoles]]]:
+        self, pads: Pad | Sequence[Pad], layer: BoardLayer.ValueType = BoardLayer.BL_F_Cu
+    ) -> PolygonWithHoles | None | list[PolygonWithHoles | None]:
         """Retrieves the polygonal shape of one or more pads on a given layer.  If a pad does not
         exist or has no polygonal shape on the given layer, None will be returned for that pad."""
         cmd = board_commands_pb2.GetPadShapeAsPolygon()
@@ -1865,9 +1859,9 @@ class Board:
 
     def check_padstack_presence_on_layers(
         self,
-        items: Union[BoardItem, Iterable[BoardItem]],
-        layers: Union[board_types_pb2.BoardLayer.ValueType, Iterable[board_types_pb2.BoardLayer.ValueType]]
-    ) -> Dict[BoardItem, Dict[board_types_pb2.BoardLayer.ValueType, bool]]:
+        items: BoardItem | Iterable[BoardItem],
+        layers: board_types_pb2.BoardLayer.ValueType | Iterable[board_types_pb2.BoardLayer.ValueType]
+    ) -> dict[BoardItem, dict[board_types_pb2.BoardLayer.ValueType, bool]]:
         """Checks if the given items with padstacks (pads or vias) have content on the given layers.
 
         :param items: The items to check (one or more pads or vias).
@@ -1880,7 +1874,7 @@ class Board:
         cmd = board_commands_pb2.CheckPadstackPresenceOnLayers()
         cmd.board.CopyFrom(self._doc)
 
-        items_map: Dict[str, BoardItem] = {}
+        items_map: dict[str, BoardItem] = {}
 
         if isinstance(items, BoardItem):
             cmd.items.append(items.id)
@@ -1896,7 +1890,7 @@ class Board:
 
         response = self._kicad.send(cmd, board_commands_pb2.PadstackPresenceResponse)
 
-        result: Dict[BoardItem, Dict[board_types_pb2.BoardLayer.ValueType, bool]] = {}
+        result: dict[BoardItem, dict[board_types_pb2.BoardLayer.ValueType, bool]] = {}
         for entry in response.entries:
             if entry.item.value not in items_map:
                 continue
@@ -1912,7 +1906,7 @@ class Board:
 
         return result
 
-    def interactive_move(self, items: Union[KIID, Iterable[KIID]]):
+    def interactive_move(self, items: KIID | Iterable[KIID]):
         """Initiates an interactive move operation on one or more items on the board.  The user
         will be able to move the items interactively in the KiCad editor.  This is a blocking
         operation; this function will return immediately but future API calls will return AS_BUSY
@@ -1929,7 +1923,7 @@ class Board:
 
     def refill_zones(
         self,
-        zones: Optional[Union[KIID, Iterable[KIID]]]=None,
+        zones: KIID | Iterable[KIID] | None=None,
         block=True,
         max_poll_seconds: float = 30.0,
         poll_interval_seconds: float = 0.5
@@ -1976,7 +1970,7 @@ class Board:
                 if e.code == ApiStatusCode.AS_BUSY:
                     continue
                 else:
-                    raise e
+                    raise
             break
 
     def hit_test(self, item: Item, position: Vector2, tolerance: int = 0) -> bool:

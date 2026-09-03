@@ -18,8 +18,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from __future__ import annotations
+
 from collections.abc import Sequence
-from typing import Optional
 
 from kipy.geometry import Vector2, Vector3D
 from kipy.proto.board import board_jobs_pb2, board_types_pb2
@@ -31,8 +32,8 @@ class JobResult(Wrapper):
 
     def __init__(
         self,
-        proto: Optional[jobs_pb2.RunJobResponse] = None,
-        proto_ref: Optional[jobs_pb2.RunJobResponse] = None,
+        proto: jobs_pb2.RunJobResponse | None = None,
+        proto_ref: jobs_pb2.RunJobResponse | None = None,
     ):
         self._proto = proto_ref if proto_ref is not None else jobs_pb2.RunJobResponse()
         if proto is not None:
@@ -69,8 +70,8 @@ class PlotSettings(Wrapper):
 
     def __init__(
         self,
-        proto: Optional[board_jobs_pb2.BoardPlotSettings] = None,
-        proto_ref: Optional[board_jobs_pb2.BoardPlotSettings] = None,
+        proto: board_jobs_pb2.BoardPlotSettings | None = None,
+        proto_ref: board_jobs_pb2.BoardPlotSettings | None = None,
     ):
         self._proto = proto_ref if proto_ref is not None else board_jobs_pb2.BoardPlotSettings()
         if proto is not None:
@@ -253,8 +254,8 @@ class Export3DSettings(Wrapper):
 
     def __init__(
         self,
-        proto: Optional[board_jobs_pb2.RunBoardJobExport3D] = None,
-        proto_ref: Optional[board_jobs_pb2.RunBoardJobExport3D] = None,
+        proto: board_jobs_pb2.RunBoardJobExport3D | None = None,
+        proto_ref: board_jobs_pb2.RunBoardJobExport3D | None = None,
     ):
         self._proto = proto_ref if proto_ref is not None else board_jobs_pb2.RunBoardJobExport3D()
         if proto is not None:
@@ -523,8 +524,8 @@ class RenderSettings(Wrapper):
 
     def __init__(
         self,
-        proto: Optional[board_jobs_pb2.RunBoardJobExportRender] = None,
-        proto_ref: Optional[board_jobs_pb2.RunBoardJobExportRender] = None,
+        proto: board_jobs_pb2.RunBoardJobExportRender | None = None,
+        proto_ref: board_jobs_pb2.RunBoardJobExportRender | None = None,
     ):
         self._proto = proto_ref if proto_ref is not None else board_jobs_pb2.RunBoardJobExportRender()
         if proto is not None:
@@ -712,8 +713,8 @@ class PositionExportSettings(Wrapper):
 
     def __init__(
         self,
-        proto: Optional[board_jobs_pb2.RunBoardJobExportPosition] = None,
-        proto_ref: Optional[board_jobs_pb2.RunBoardJobExportPosition] = None,
+        proto: board_jobs_pb2.RunBoardJobExportPosition | None = None,
+        proto_ref: board_jobs_pb2.RunBoardJobExportPosition | None = None,
     ):
         self._proto = (
             proto_ref if proto_ref is not None else board_jobs_pb2.RunBoardJobExportPosition()
@@ -722,13 +723,13 @@ class PositionExportSettings(Wrapper):
             self._proto.CopyFrom(proto)
 
     @property
-    def use_drill_place_file_origin(self) -> Optional[bool]:
+    def use_drill_place_file_origin(self) -> bool | None:
         if not self._proto.HasField("use_drill_place_file_origin"):
             return None
         return self._proto.use_drill_place_file_origin
 
     @use_drill_place_file_origin.setter
-    def use_drill_place_file_origin(self, value: Optional[bool]):
+    def use_drill_place_file_origin(self, value: bool | None):
         if value is None:
             self._proto.ClearField("use_drill_place_file_origin")
             return
@@ -815,13 +816,13 @@ class PositionExportSettings(Wrapper):
         self._proto.format = value
 
     @property
-    def include_board_edge_for_gerber(self) -> Optional[bool]:
+    def include_board_edge_for_gerber(self) -> bool | None:
         if not self._proto.HasField("include_board_edge_for_gerber"):
             return None
         return self._proto.include_board_edge_for_gerber
 
     @include_board_edge_for_gerber.setter
-    def include_board_edge_for_gerber(self, value: Optional[bool]):
+    def include_board_edge_for_gerber(self, value: bool | None):
         if value is None:
             self._proto.ClearField("include_board_edge_for_gerber")
             return
@@ -841,8 +842,8 @@ class Ipc2581ExportSettings(Wrapper):
 
     def __init__(
         self,
-        proto: Optional[board_jobs_pb2.RunBoardJobExportIpc2581] = None,
-        proto_ref: Optional[board_jobs_pb2.RunBoardJobExportIpc2581] = None,
+        proto: board_jobs_pb2.RunBoardJobExportIpc2581 | None = None,
+        proto_ref: board_jobs_pb2.RunBoardJobExportIpc2581 | None = None,
     ):
         self._proto = (
             proto_ref if proto_ref is not None else board_jobs_pb2.RunBoardJobExportIpc2581()
@@ -883,13 +884,13 @@ class Ipc2581ExportSettings(Wrapper):
         self._proto.version = value
 
     @property
-    def precision(self) -> Optional[int]:
+    def precision(self) -> int | None:
         if not self._proto.HasField("precision"):
             return None
         return self._proto.precision
 
     @precision.setter
-    def precision(self, value: Optional[int]):
+    def precision(self, value: int | None):
         if value is None:
             self._proto.ClearField("precision")
             return
@@ -957,8 +958,8 @@ class SvgExportSettings(Wrapper):
 
     def __init__(
         self,
-        proto: Optional[board_jobs_pb2.RunBoardJobExportSvg] = None,
-        proto_ref: Optional[board_jobs_pb2.RunBoardJobExportSvg] = None,
+        proto: board_jobs_pb2.RunBoardJobExportSvg | None = None,
+        proto_ref: board_jobs_pb2.RunBoardJobExportSvg | None = None,
     ):
         self._proto = proto_ref if proto_ref is not None else board_jobs_pb2.RunBoardJobExportSvg()
         if proto is not None:
@@ -1002,8 +1003,8 @@ class DxfExportSettings(Wrapper):
 
     def __init__(
         self,
-        proto: Optional[board_jobs_pb2.RunBoardJobExportDxf] = None,
-        proto_ref: Optional[board_jobs_pb2.RunBoardJobExportDxf] = None,
+        proto: board_jobs_pb2.RunBoardJobExportDxf | None = None,
+        proto_ref: board_jobs_pb2.RunBoardJobExportDxf | None = None,
     ):
         self._proto = proto_ref if proto_ref is not None else board_jobs_pb2.RunBoardJobExportDxf()
         if proto is not None:
@@ -1055,8 +1056,8 @@ class PdfExportSettings(Wrapper):
 
     def __init__(
         self,
-        proto: Optional[board_jobs_pb2.RunBoardJobExportPdf] = None,
-        proto_ref: Optional[board_jobs_pb2.RunBoardJobExportPdf] = None,
+        proto: board_jobs_pb2.RunBoardJobExportPdf | None = None,
+        proto_ref: board_jobs_pb2.RunBoardJobExportPdf | None = None,
     ):
         self._proto = proto_ref if proto_ref is not None else board_jobs_pb2.RunBoardJobExportPdf()
         if proto is not None:
@@ -1124,8 +1125,8 @@ class PsExportSettings(Wrapper):
 
     def __init__(
         self,
-        proto: Optional[board_jobs_pb2.RunBoardJobExportPs] = None,
-        proto_ref: Optional[board_jobs_pb2.RunBoardJobExportPs] = None,
+        proto: board_jobs_pb2.RunBoardJobExportPs | None = None,
+        proto_ref: board_jobs_pb2.RunBoardJobExportPs | None = None,
     ):
         self._proto = proto_ref if proto_ref is not None else board_jobs_pb2.RunBoardJobExportPs()
         if proto is not None:
@@ -1193,8 +1194,8 @@ class GerberExportSettings(Wrapper):
 
     def __init__(
         self,
-        proto: Optional[board_jobs_pb2.RunBoardJobExportGerbers] = None,
-        proto_ref: Optional[board_jobs_pb2.RunBoardJobExportGerbers] = None,
+        proto: board_jobs_pb2.RunBoardJobExportGerbers | None = None,
+        proto_ref: board_jobs_pb2.RunBoardJobExportGerbers | None = None,
     ):
         self._proto = (
             proto_ref if proto_ref is not None else board_jobs_pb2.RunBoardJobExportGerbers()
@@ -1271,60 +1272,60 @@ class ExcellonFormatOptions(Wrapper):
 
     def __init__(
         self,
-        proto: Optional[board_jobs_pb2.ExcellonFormatOptions] = None,
-        proto_ref: Optional[board_jobs_pb2.ExcellonFormatOptions] = None,
+        proto: board_jobs_pb2.ExcellonFormatOptions | None = None,
+        proto_ref: board_jobs_pb2.ExcellonFormatOptions | None = None,
     ):
         self._proto = proto_ref if proto_ref is not None else board_jobs_pb2.ExcellonFormatOptions()
         if proto is not None:
             self._proto.CopyFrom(proto)
 
     @property
-    def mirror_y(self) -> Optional[bool]:
+    def mirror_y(self) -> bool | None:
         if not self._proto.HasField("mirror_y"):
             return None
         return self._proto.mirror_y
 
     @mirror_y.setter
-    def mirror_y(self, value: Optional[bool]):
+    def mirror_y(self, value: bool | None):
         if value is None:
             self._proto.ClearField("mirror_y")
             return
         self._proto.mirror_y = value
 
     @property
-    def minimal_header(self) -> Optional[bool]:
+    def minimal_header(self) -> bool | None:
         if not self._proto.HasField("minimal_header"):
             return None
         return self._proto.minimal_header
 
     @minimal_header.setter
-    def minimal_header(self, value: Optional[bool]):
+    def minimal_header(self, value: bool | None):
         if value is None:
             self._proto.ClearField("minimal_header")
             return
         self._proto.minimal_header = value
 
     @property
-    def combine_pth_npth(self) -> Optional[bool]:
+    def combine_pth_npth(self) -> bool | None:
         if not self._proto.HasField("combine_pth_npth"):
             return None
         return self._proto.combine_pth_npth
 
     @combine_pth_npth.setter
-    def combine_pth_npth(self, value: Optional[bool]):
+    def combine_pth_npth(self, value: bool | None):
         if value is None:
             self._proto.ClearField("combine_pth_npth")
             return
         self._proto.combine_pth_npth = value
 
     @property
-    def route_oval_holes(self) -> Optional[bool]:
+    def route_oval_holes(self) -> bool | None:
         if not self._proto.HasField("route_oval_holes"):
             return None
         return self._proto.route_oval_holes
 
     @route_oval_holes.setter
-    def route_oval_holes(self, value: Optional[bool]):
+    def route_oval_holes(self, value: bool | None):
         if value is None:
             self._proto.ClearField("route_oval_holes")
             return
@@ -1336,8 +1337,8 @@ class DrillExportSettings(Wrapper):
 
     def __init__(
         self,
-        proto: Optional[board_jobs_pb2.RunBoardJobExportDrill] = None,
-        proto_ref: Optional[board_jobs_pb2.RunBoardJobExportDrill] = None,
+        proto: board_jobs_pb2.RunBoardJobExportDrill | None = None,
+        proto_ref: board_jobs_pb2.RunBoardJobExportDrill | None = None,
     ):
         self._proto = proto_ref if proto_ref is not None else board_jobs_pb2.RunBoardJobExportDrill()
         if proto is not None:
@@ -1400,13 +1401,13 @@ class DrillExportSettings(Wrapper):
         self._proto.gerber_precision = value
 
     @property
-    def gerber_generate_tenting(self) -> Optional[bool]:
+    def gerber_generate_tenting(self) -> bool | None:
         if not self._proto.HasField("gerber_generate_tenting"):
             return None
         return self._proto.gerber_generate_tenting
 
     @gerber_generate_tenting.setter
-    def gerber_generate_tenting(self, value: Optional[bool]):
+    def gerber_generate_tenting(self, value: bool | None):
         if value is None:
             self._proto.ClearField("gerber_generate_tenting")
             return
@@ -1421,13 +1422,13 @@ class DrillExportSettings(Wrapper):
         self._proto.report_format = value
 
     @property
-    def report_filename(self) -> Optional[str]:
+    def report_filename(self) -> str | None:
         if not self._proto.HasField("report_filename"):
             return None
         return self._proto.report_filename
 
     @report_filename.setter
-    def report_filename(self, value: Optional[str]):
+    def report_filename(self, value: str | None):
         if value is None:
             self._proto.ClearField("report_filename")
             return
@@ -1439,8 +1440,8 @@ class GencadExportSettings(Wrapper):
 
     def __init__(
         self,
-        proto: Optional[board_jobs_pb2.RunBoardJobExportGencad] = None,
-        proto_ref: Optional[board_jobs_pb2.RunBoardJobExportGencad] = None,
+        proto: board_jobs_pb2.RunBoardJobExportGencad | None = None,
+        proto_ref: board_jobs_pb2.RunBoardJobExportGencad | None = None,
     ):
         self._proto = proto_ref if proto_ref is not None else board_jobs_pb2.RunBoardJobExportGencad()
         if proto is not None:
@@ -1492,8 +1493,8 @@ class IpcD356ExportSettings(Wrapper):
 
     def __init__(
         self,
-        proto: Optional[board_jobs_pb2.RunBoardJobExportIpcD356] = None,
-        proto_ref: Optional[board_jobs_pb2.RunBoardJobExportIpcD356] = None,
+        proto: board_jobs_pb2.RunBoardJobExportIpcD356 | None = None,
+        proto_ref: board_jobs_pb2.RunBoardJobExportIpcD356 | None = None,
     ):
         self._proto = proto_ref if proto_ref is not None else board_jobs_pb2.RunBoardJobExportIpcD356()
         if proto is not None:
@@ -1505,8 +1506,8 @@ class OdbExportSettings(Wrapper):
 
     def __init__(
         self,
-        proto: Optional[board_jobs_pb2.RunBoardJobExportODB] = None,
-        proto_ref: Optional[board_jobs_pb2.RunBoardJobExportODB] = None,
+        proto: board_jobs_pb2.RunBoardJobExportODB | None = None,
+        proto_ref: board_jobs_pb2.RunBoardJobExportODB | None = None,
     ):
         self._proto = proto_ref if proto_ref is not None else board_jobs_pb2.RunBoardJobExportODB()
         if proto is not None:
@@ -1537,13 +1538,13 @@ class OdbExportSettings(Wrapper):
         self._proto.units = value
 
     @property
-    def precision(self) -> Optional[int]:
+    def precision(self) -> int | None:
         if not self._proto.HasField("precision"):
             return None
         return self._proto.precision
 
     @precision.setter
-    def precision(self, value: Optional[int]):
+    def precision(self, value: int | None):
         if value is None:
             self._proto.ClearField("precision")
             return
@@ -1563,8 +1564,8 @@ class StatsExportSettings(Wrapper):
 
     def __init__(
         self,
-        proto: Optional[board_jobs_pb2.RunBoardJobExportStats] = None,
-        proto_ref: Optional[board_jobs_pb2.RunBoardJobExportStats] = None,
+        proto: board_jobs_pb2.RunBoardJobExportStats | None = None,
+        proto_ref: board_jobs_pb2.RunBoardJobExportStats | None = None,
     ):
         self._proto = proto_ref if proto_ref is not None else board_jobs_pb2.RunBoardJobExportStats()
         if proto is not None:

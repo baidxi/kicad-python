@@ -19,6 +19,7 @@
 # SOFTWARE.
 
 """Classes for interacting with KiCad at a high level"""
+from __future__ import annotations
 
 import os
 import platform
@@ -26,9 +27,9 @@ import random
 import string
 from collections.abc import Sequence
 from tempfile import gettempdir
-from typing import Optional, Union
 
 from google.protobuf.empty_pb2 import Empty
+from typing_extensions import Self
 
 from kipy.board import Board
 from kipy.client import ApiError, KiCadClient
@@ -81,11 +82,11 @@ class KiCadVersion:
         self.full_version = full_version
 
     @staticmethod
-    def from_proto(proto: base_types_pb2.KiCadVersion) -> 'KiCadVersion':
+    def from_proto(proto: base_types_pb2.KiCadVersion) -> KiCadVersion:
         return KiCadVersion(proto.major, proto.minor, proto.patch, proto.full_version)
 
     @staticmethod
-    def from_git_describe(describe: str) -> 'KiCadVersion':
+    def from_git_describe(describe: str) -> KiCadVersion:
         parts = describe.split('-')
         version_part = parts[0]
 
@@ -126,13 +127,13 @@ class KiCadVersion:
         return not self < other
 
 class KiCad:
-    def __init__(self, socket_path: Optional[str]=None,
-                 client_name: Optional[str]=None,
-                 kicad_token: Optional[str]=None,
+    def __init__(self, socket_path: str | None=None,
+                 client_name: str | None=None,
+                 kicad_token: str | None=None,
                  timeout_ms: int=2000,
                  headless: bool=False,
-                 kicad_cli_path: Optional[str]=None,
-                 file_path: Optional[str]=None):
+                 kicad_cli_path: str | None=None,
+                 file_path: str | None=None):
         """Creates a connection to a running KiCad instance
 
         :param socket_path: The path to the IPC API socket (leave default to read from the
@@ -148,7 +149,7 @@ class KiCad:
         :param kicad_cli_path: Optional path to `kicad-cli`.
         :param file_path: Optional path to a board, schematic, or project file to pre-load in headless mode.
         """
-        self._server: Optional[KiCadServer] = None
+        self._server: KiCadServer | None = None
 
         if headless:
             if socket_path is not None:
@@ -193,7 +194,7 @@ class KiCad:
             self._server.stop()
             self._server = None
 
-    def __enter__(self) -> 'KiCad':
+    def __enter__(self) -> Self:
         return self
 
     def __exit__(self, exc_type, exc, traceback):
@@ -345,10 +346,10 @@ class KiCad:
         return Box2.from_proto(reply)
 
     def get_text_as_shapes(
-        self, texts: Union[Text, TextBox, Sequence[Union[Text, TextBox]]]
+        self, texts: Text | TextBox | Sequence[Text | TextBox]
     ) -> list[CompoundShape]:
         """Returns polygonal shapes representing the given text objects"""
-        if isinstance(texts, Text) or isinstance(texts, TextBox):
+        if isinstance(texts, (Text, TextBox)):
             texts = [texts]
 
         cmd = base_commands_pb2.GetTextAsShapes()

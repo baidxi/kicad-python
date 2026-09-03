@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from typing import Optional
+from __future__ import annotations
 
 from kipy.board_types import (
     BoardLayer,
@@ -125,7 +125,7 @@ def _parameter_definitions() -> list[WizardParameter]:
 
 
 class QfpParameters:
-    def __init__(self, incoming: Optional[list[WizardParameter]] = None):
+    def __init__(self, incoming: list[WizardParameter] | None = None):
         definitions = _parameter_definitions()
         self._params = {param.identifier: param for param in definitions}
 
@@ -220,7 +220,7 @@ class QfpWizard(WizardBase):
         return info
 
     def build_generated_content(
-        self, parameters: Optional[list[WizardParameter]] = None
+        self, parameters: list[WizardParameter] | None = None
     ) -> FootprintInstance:
         params = QfpParameters(parameters)
 

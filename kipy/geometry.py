@@ -22,7 +22,6 @@ from __future__ import annotations
 
 import math
 import sys
-from typing import Optional, Union
 
 from kipy.proto.common import types
 from kipy.util import from_mm
@@ -37,7 +36,7 @@ else:
 
 class Vector2(Wrapper):
     """Wraps a kiapi.common.types.Vector2, aka VECTOR2I"""
-    def __init__(self, proto: Optional[types.Vector2] = None):
+    def __init__(self, proto: types.Vector2 | None = None):
         self._proto = types.Vector2()
 
         if proto is not None:
@@ -159,7 +158,7 @@ class Vector2(Wrapper):
 
 class Vector3D(Wrapper):
     """Wraps a kiapi.common.types.Vector3D"""
-    def __init__(self, proto: Optional[types.Vector3D] = None):
+    def __init__(self, proto: types.Vector3D | None = None):
         self._proto = types.Vector3D()
 
         if proto is not None:
@@ -243,8 +242,8 @@ class Vector3D(Wrapper):
 class Box2:
     def __init__(
         self,
-        pos_proto: Optional[types.Vector2] = None,
-        size_proto: Optional[types.Vector2] = None,
+        pos_proto: types.Vector2 | None = None,
+        size_proto: types.Vector2 | None = None,
     ):
         self._pos_proto = types.Vector2()
         self._size_proto = types.Vector2()
@@ -304,7 +303,7 @@ class Box2:
         center_y = self._pos_proto.y_nm + self._size_proto.y_nm // 2
         return Vector2.from_xy(center_x, center_y)
 
-    def merge(self, other: Union[Vector2, Box2]):
+    def merge(self, other: Vector2 | Box2):
         if isinstance(other, Vector2):
             min_x = min(self.pos.x, other.x)
             min_y = min(self.pos.y, other.y)
@@ -330,7 +329,7 @@ class Box2:
         self._size_proto.y_nm = new_height
 
 class Angle(Wrapper):
-    def __init__(self, proto: Optional[types.Angle] = None):
+    def __init__(self, proto: types.Angle | None = None):
         self._proto = types.Angle()
 
         if proto is not None:
@@ -401,8 +400,8 @@ class Angle(Wrapper):
 class ArcStartMidEnd(Wrapper):
     def __init__(
         self,
-        proto: Optional[types.ArcStartMidEnd] = None,
-        proto_ref: Optional[types.ArcStartMidEnd] = None,
+        proto: types.ArcStartMidEnd | None = None,
+        proto_ref: types.ArcStartMidEnd | None = None,
     ):
         self._proto = proto_ref if proto_ref is not None else types.ArcStartMidEnd()
 
@@ -436,7 +435,7 @@ class ArcStartMidEnd(Wrapper):
     def end(self, val: Vector2):
         self._proto.end.CopyFrom(val._proto)
 
-    def center(self) -> Optional[Vector2]:
+    def center(self) -> Vector2 | None:
         """
         Calculates the center of the arc.  Uses a different algorithm than KiCad so may have
         slightly different results.  The KiCad API preserves the start, middle, and end points of
@@ -460,10 +459,10 @@ class ArcStartMidEnd(Wrapper):
         # for situations where matching KiCad's behavior exactly is important
         return arc_radius(self.start, self.mid, self.end)
 
-    def start_angle(self) -> Optional[float]:
+    def start_angle(self) -> float | None:
         return arc_start_angle(self.start, self.mid, self.end)
 
-    def end_angle(self) -> Optional[float]:
+    def end_angle(self) -> float | None:
         return arc_end_angle(self.start, self.mid, self.end)
 
     def bounding_box(self) -> Box2:
@@ -473,8 +472,8 @@ class ArcStartMidEnd(Wrapper):
 class PolyLineNode(Wrapper):
     def __init__(
         self,
-        proto: Optional[types.PolyLineNode] = None,
-        proto_ref: Optional[types.PolyLineNode] = None,
+        proto: types.PolyLineNode | None = None,
+        proto_ref: types.PolyLineNode | None = None,
     ):
         self._proto = proto_ref if proto_ref is not None else types.PolyLineNode()
 
@@ -527,8 +526,8 @@ class PolyLineNode(Wrapper):
 class PolyLine(Wrapper):
     def __init__(
         self,
-        proto: Optional[types.PolyLine] = None,
-        proto_ref: Optional[types.PolyLine] = None,
+        proto: types.PolyLine | None = None,
+        proto_ref: types.PolyLine | None = None,
     ):
         self._proto = proto_ref if proto_ref is not None else types.PolyLine()
 
@@ -586,8 +585,8 @@ class PolyLine(Wrapper):
 class PolygonWithHoles(Wrapper):
     def __init__(
         self,
-        proto: Optional[types.PolygonWithHoles] = None,
-        proto_ref: Optional[types.PolygonWithHoles] = None,
+        proto: types.PolygonWithHoles | None = None,
+        proto_ref: types.PolygonWithHoles | None = None,
     ):
         self._proto = proto_ref if proto_ref is not None else types.PolygonWithHoles()
 
@@ -664,7 +663,7 @@ class PolygonWithHoles(Wrapper):
                     node.arc.mid += delta
                     node.arc.end += delta
 
-    def rotate(self, delta: Angle, center: Optional[Vector2] = None):
+    def rotate(self, delta: Angle, center: Vector2 | None = None):
         if center is None:
             center = self.bounding_box().center()
 
@@ -673,7 +672,7 @@ class PolygonWithHoles(Wrapper):
         for hole in self.holes:
             hole.rotate(delta, center)
 
-def arc_center(start: Vector2, mid: Vector2, end: Vector2) -> Optional[Vector2]:
+def arc_center(start: Vector2, mid: Vector2, end: Vector2) -> Vector2 | None:
     """
     Calculates the center of the arc.  Uses a different algorithm than KiCad so may have
     slightly different results.  The KiCad API preserves the start, middle, and end points of
@@ -758,7 +757,7 @@ def normalize_angle_pi_radians(angle: float) -> float:
 
     return angle
 
-def arc_start_angle(start: Vector2, mid: Vector2, end: Vector2) -> Optional[float]:
+def arc_start_angle(start: Vector2, mid: Vector2, end: Vector2) -> float | None:
     """Calculates the arc's starting angle in radians, normalized to [0, 2*pi)
 
     :return: The starting angle of the arc, or None if the arc is degenerate"""
@@ -768,7 +767,7 @@ def arc_start_angle(start: Vector2, mid: Vector2, end: Vector2) -> Optional[floa
 
     return normalize_angle_radians((start - center).angle())
 
-def arc_end_angle(start: Vector2, mid: Vector2, end: Vector2) -> Optional[float]:
+def arc_end_angle(start: Vector2, mid: Vector2, end: Vector2) -> float | None:
     """Calculates the arc's ending angle in radians, normalized to [0, 2*pi)
 
     :return: The ending angle of the arc, or None if the arc is degenerate"""
@@ -786,7 +785,7 @@ def arc_end_angle(start: Vector2, mid: Vector2, end: Vector2) -> Optional[float]
 
     return normalize_angle_radians(angle)
 
-def arc_angle(start: Vector2, mid: Vector2, end: Vector2) -> Optional[float]:
+def arc_angle(start: Vector2, mid: Vector2, end: Vector2) -> float | None:
         """Calculates the angle between the start and end of the arc in radians
 
         :return: The angle of the arc, or None if the arc is degenerate
@@ -853,7 +852,7 @@ def arc_bounding_box(start: Vector2, mid: Vector2, end: Vector2) -> Box2:
 
     return box
 
-def arc_start_angle_degrees(start: Vector2, mid: Vector2, end: Vector2) -> Optional[float]:
+def arc_start_angle_degrees(start: Vector2, mid: Vector2, end: Vector2) -> float | None:
     """Calculates the arc's starting angle in degrees, normalized to [0, 360)
 
     .. versionadded:: 0.3.0
@@ -864,7 +863,7 @@ def arc_start_angle_degrees(start: Vector2, mid: Vector2, end: Vector2) -> Optio
 
     return normalize_angle_degrees((start - center).angle_degrees())
 
-def arc_end_angle_degrees(start: Vector2, mid: Vector2, end: Vector2) -> Optional[float]:
+def arc_end_angle_degrees(start: Vector2, mid: Vector2, end: Vector2) -> float | None:
     """Calculates the arc's ending angle in degrees, normalized to [0, 360)
 
     .. versionadded:: 0.3.0
