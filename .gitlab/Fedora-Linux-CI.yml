@@ -1,6 +1,21 @@
 ##########################################################################
 # Build KiCad-Python on Fedora
 ##########################################################################
+lint:
+  stage: test
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+  image: $DEFAULT_FEDORA_IMAGE
+  before_script:
+    - git submodule update --init --depth 1
+    - dnf install -y pipx python3-virtualenv
+    - pipx ensurepath
+  script:
+    - pipx install poetry
+    - /root/.local/bin/poetry install -v
+    - /root/.local/bin/poetry run ruff check
+    - /root/.local/bin/poetry run mypy -p kipy
+    - /root/.local/bin/poetry run ruff format --check
 build:
   stage: build
   image: $DEFAULT_FEDORA_IMAGE
