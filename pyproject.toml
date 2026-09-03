@@ -48,7 +48,7 @@ python = "<4.0,>=3.9"
 
 [tool.poetry.group.dev.dependencies]
 nox = "^2025.2.9"
-ruff = "^0.9"
+ruff = "^0.16"
 protoletariat = "^3.3"
 mypy-protobuf = "^3.6"
 mypy = "^1.14.0"
@@ -75,8 +75,10 @@ script = "build.py"
 
 [tool.ruff]
 exclude = [
-    "kipy/proto"
+    "kipy/proto",
+    "kicad"
 ]
+line-length = 99
 
 [tool.mypy]
 exclude = [
