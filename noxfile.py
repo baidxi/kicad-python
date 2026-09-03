@@ -25,7 +25,8 @@ from nox.sessions import Session
 @nox.session
 def lint(session: Session):
     session.install("ruff")
-    session.run("ruff", "check", "examples", "kipy", "tests", "tools")
+    session.run("ruff", "check")
+    session.run("ruff", "format", "--check")
 
 
 @nox.session
