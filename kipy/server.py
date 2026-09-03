@@ -35,6 +35,8 @@ import uuid
 from pathlib import Path
 from typing import IO
 
+from errors import ApiError
+
 _READY_PREFIX = "KiCad API server listening at "
 
 
@@ -233,7 +235,7 @@ class KiCadServer:
                     probe.send(commands.Ping(), Empty)
                     probe.close()
                     return self._socket_path
-                except Exception as e:
+                except (ConnectionError, ApiError) as e:
                     self._last_probe_error = str(e)
                     probe.close()
 

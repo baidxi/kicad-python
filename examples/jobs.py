@@ -47,6 +47,7 @@ from kipy.board_jobs import (
     PositionExportSettings,
     RenderSettings,
 )
+from kipy.errors import ApiError
 
 
 def main() -> None:
@@ -188,7 +189,7 @@ def main() -> None:
     for name, fn in jobs:
         try:
             result = fn()
-        except Exception as e:
+        except ApiError as e:
             print(f"{name} failed: {e}")
             continue
 

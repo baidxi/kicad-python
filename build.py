@@ -60,6 +60,7 @@ def build(setup_kwargs):
         )
     except Exception as e:
         print(f"Failed to build wheel: {e}")
+        raise
 
 if __name__ == "__main__":
     pre_build()

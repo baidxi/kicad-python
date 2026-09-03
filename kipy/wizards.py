@@ -36,6 +36,10 @@ from kipy.wrapper import Wrapper
 WizardParameterValue = Union[int, float, bool, str]
 
 
+class WizardError(Exception):
+    """An error returned by a wizard during generation"""
+
+
 class WizardMetaInfo(Wrapper):
     def __init__(
         self,
@@ -773,7 +777,7 @@ class WizardBase:
 
         try:
             footprint = self.build_generated_content(parameters)
-        except Exception as ex:
+        except (WizardError, NotImplementedError) as ex:
             generated.status = types.WizardGenerationStatus.WGS_ERROR
             generated.error_message = f"Generation failed: {ex!s}"
             return generated

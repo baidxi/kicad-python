@@ -203,13 +203,13 @@ class RoundTracks(RoundTracksDialog):
                         new_config_line["scaling"] = float(params[2])
                         new_config_line["passes"] = int(params[3])
                         new_config[params[0]] = new_config_line
-                    except Exception:
+                    except ValueError:
                         try:
                             new_config_line["new_file"] = params[0] == "True"
                             new_config_line["native"] = params[1] == "True"
                             new_config_line["avoid_junctions"] = params[2] == "True"
                             self.config["checkboxes"] = new_config_line
-                        except Exception:
+                        except ValueError:
                             pass
         self.config["classes"] = new_config
 
@@ -243,7 +243,7 @@ class RoundTracks(RoundTracksDialog):
                         tested_val = float(self.netclasslist.GetTextValue(i, j))
                         if tested_val < 0:
                             self.netclasslist.SetTextValue(str(RADIUS_DEFAULT), i, j)
-                    except Exception:
+                    except ValueError:
                         self.netclasslist.SetTextValue(str(RADIUS_DEFAULT), i, j)
                 if j == 3:
                     # param should be between int 1 and 5
@@ -251,7 +251,7 @@ class RoundTracks(RoundTracksDialog):
                         tested_val = int(self.netclasslist.GetTextValue(i, j))
                         if tested_val < 0 or tested_val > 5:
                             self.netclasslist.SetTextValue(str(PASSES_DEFAULT), i, j)
-                    except Exception:
+                    except ValueError:
                         self.netclasslist.SetTextValue(str(PASSES_DEFAULT), i, j)
             new_config[self.netclasslist.GetTextValue(i, 0)] = {
                 "do_round": self.netclasslist.GetToggleValue(i, 1),
@@ -327,9 +327,7 @@ class RoundTracks(RoundTracksDialog):
                         else:
                             FCuPadsInNet.append(p)
 
-            for layer in tracksPerLayer:
-                tracks = tracksPerLayer[layer]
-
+            for layer, tracks in tracksPerLayer.items():
                 if layer in viasPerLayer:
                     vias = viasPerLayer[layer]
                     viaLocations = {v.position for v in vias}

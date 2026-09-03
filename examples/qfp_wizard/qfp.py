@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 # Copyright The KiCad Developers
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy

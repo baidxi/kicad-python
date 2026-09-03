@@ -201,10 +201,7 @@ class KiCad:
         self.close()
 
     def __del__(self):
-        try:
-            self.close()
-        except Exception:
-            pass
+        self.close()
 
     def get_version(self) -> KiCadVersion:
         """Returns the KiCad version as a string, including any package-specific info"""

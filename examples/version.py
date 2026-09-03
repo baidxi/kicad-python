@@ -23,12 +23,13 @@
 import sys
 
 from kipy import KiCad
+from kipy.errors import ApiError
 
 if __name__=='__main__':
     try:
         kicad = KiCad()
         print(f"KiCad version: {kicad.get_version().full_version}")
-    except BaseException as e:
+    except ApiError as e:
         print(f"Not connected to KiCad: {e}")
         sys.exit()
 
@@ -36,5 +37,5 @@ if __name__=='__main__':
     try:
         if kicad.check_version():
             print("KiCad version and kicad-python version match :)")
-    except BaseException as e:
+    except ApiError as e:
         print(f"{e}")
