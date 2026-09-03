@@ -1386,11 +1386,7 @@ class SchematicSymbol(Wrapper):
 
     @property
     def body_style_count(self) -> int:
-        return self._proto.body_style_count
-
-    @body_style_count.setter
-    def body_style_count(self, value: int):
-        self._proto.body_style_count = value
+        return len(self._proto.body_style)
 
     @property
     def keywords(self) -> str:
@@ -1605,12 +1601,12 @@ class SchematicSymbolInstance(SchematicItem):
 
     @property
     def variants(self) -> Sequence[SchematicSymbolVariant]:
-        return [SchematicSymbolVariant(proto_ref=v) for v in self._proto.variants]
+        return [SchematicSymbolVariant(proto_ref=v) for v in self._proto.variants.variants]
 
     @variants.setter
     def variants(self, value: Sequence[SchematicSymbolVariant]):
-        del self._proto.variants[:]
-        self._proto.variants.extend(v.proto for v in value)
+        del self._proto.variants.variants[:]
+        self._proto.variants.variants.extend(v.proto for v in value)
 
     @property
     def user_fields(self) -> Sequence[SchematicField]:
