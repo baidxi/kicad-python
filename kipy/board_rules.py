@@ -893,19 +893,16 @@ class CustomRuleConstraint(Wrapper):
 
     @property
     def disallow(self) -> CustomRuleDisallowSettings:
-        if "_disallow" in self.__dict__:
-            return self._disallow
+        if "_disallow" not in self.__dict__:
+            if self._proto.WhichOneof("value") == "disallow":
+                self._disallow = CustomRuleDisallowSettings(proto_ref=self._proto.disallow)
+            elif self.type == board_rules_pb2.CustomRuleConstraintType.CRCT_DISALLOW:
+                self._proto.disallow.SetInParent()
+                self._disallow = CustomRuleDisallowSettings(proto_ref=self._proto.disallow)
+            else:
+                raise ValueError("disallow is only available for CRCT_DISALLOW constraints")
 
-        if self._proto.WhichOneof("value") == "disallow":
-            self._disallow = CustomRuleDisallowSettings(proto_ref=self._proto.disallow)
-            return self._disallow
-
-        if self.type == board_rules_pb2.CustomRuleConstraintType.CRCT_DISALLOW:
-            self._proto.disallow.SetInParent()
-            self._disallow = CustomRuleDisallowSettings(proto_ref=self._proto.disallow)
-            return self._disallow
-
-        raise ValueError("disallow is only available for CRCT_DISALLOW constraints")
+        return self._disallow
 
     @disallow.setter
     def disallow(self, value: CustomRuleDisallowSettings | None):
