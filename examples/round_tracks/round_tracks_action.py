@@ -21,17 +21,11 @@
 
 import math
 import os
-import wx
 import time
 from copy import deepcopy
 from typing import Set
 
-from kipy import KiCad
-from kipy.errors import ConnectionError
-from kipy.board_types import ArcTrack, Track, PadType, BoardLayer
-from kipy.geometry import Vector2
-from kipy.util import from_mm
-
+import wx
 from round_tracks_utils import (
     getTrackAngle,
     getTrackAngleDifference,
@@ -42,13 +36,19 @@ from round_tracks_utils import (
 )
 from ui.round_tracks_gui import RoundTracksDialog
 
+from kipy import KiCad
+from kipy.board_types import ArcTrack, BoardLayer, PadType, Track
+from kipy.errors import ConnectionError
+from kipy.geometry import Vector2
+from kipy.util import from_mm
+
 RADIUS_DEFAULT = 2.0
 PASSES_DEFAULT = 3
 
 
 class RoundTracks(RoundTracksDialog):
     def __init__(self):
-        super(RoundTracks, self).__init__(None)
+        super().__init__(None)
         self.kicad = KiCad()
         self.board = self.kicad.get_board()
         self.basefilename = os.path.join(
@@ -56,8 +56,7 @@ class RoundTracks(RoundTracksDialog):
             os.path.splitext(self.board.document.board_filename)[0],
         )
 
-        if self.basefilename.endswith("-rounded"):
-            self.basefilename = self.basefilename[: -len("-rounded")]
+        self.basefilename = self.basefilename.removesuffix("-rounded")
 
         self.configfilepath = self.basefilename + ".round-tracks-config"
         self.config = {}
@@ -182,7 +181,7 @@ class RoundTracks(RoundTracksDialog):
         dt = time.time() - start
         if dt > 0.1:
             wx.MessageBox(
-                "Done, took {:.3f} seconds".format(time.time() - start), parent=self
+                f"Done, took {time.time() - start:.3f} seconds", parent=self
             )
         self.EndModal(wx.ID_OK)
 
@@ -197,7 +196,7 @@ class RoundTracks(RoundTracksDialog):
         new_config = {}
         if os.path.isfile(self.configfilepath):
             with open(self.configfilepath, "r") as configfile:
-                for line in configfile.readlines():
+                for line in configfile:
                     params = line[:-1].split("\t")
                     new_config_line = {}
                     try:
@@ -219,16 +218,13 @@ class RoundTracks(RoundTracksDialog):
         classes = self.config["classes"]
         try:
             with open(self.configfilepath, "w") as configfile:
-                for classname in classes:
-                    configfile.write(
-                        "%s\t%s\t%s\t%s\n"
+                configfile.writelines("%s\t%s\t%s\t%s\n"
                         % (
                             classname,
                             str(classes[classname]["do_round"]),
                             str(classes[classname]["scaling"]),
                             str(classes[classname]["passes"]),
-                        )
-                    )
+                        ) for classname in classes)
                 configfile.write(
                     "%s\t%s\t%s\n"
                     % (

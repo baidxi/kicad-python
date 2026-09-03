@@ -24,13 +24,13 @@ from typing import Optional
 
 from kipy.board_types import (
     BoardLayer,
-    PadType,
-    PadStackShape,
     BoardRectangle,
     BoardSegment,
     BoardText,
     FootprintInstance,
     Pad,
+    PadStackShape,
+    PadType,
 )
 from kipy.geometry import Angle, Vector2
 from kipy.util.units import from_mm, to_mm
@@ -43,6 +43,7 @@ from kipy.wizards import (
     WizardParameterCategory,
     WizardParameterDataType,
 )
+
 
 def _parameter_definitions() -> list[WizardParameter]:
     return [
@@ -351,12 +352,7 @@ class QfpWizard(WizardBase):
 
     @staticmethod
     def _footprint_value(params: QfpParameters) -> str:
-        return "QFP-{n}_{x:g}x{y:g}_Pitch{p:g}mm".format(
-            n=params.n,
-            x=to_mm(params.d1),
-            y=to_mm(params.e1),
-            p=to_mm(params.e),
-        )
+        return f"QFP-{params.n}_{to_mm(params.d1):g}x{to_mm(params.e1):g}_Pitch{to_mm(params.e):g}mm"
 
     @staticmethod
     def _round_to_grid(value_nm: int, grid_nm: int) -> int:

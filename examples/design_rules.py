@@ -19,7 +19,6 @@
 # SOFTWARE.
 
 from kipy import KiCad
-from kipy.util import from_mm
 from kipy.board_rules import (
     CustomRule,
     CustomRuleConstraint,
@@ -31,6 +30,7 @@ from kipy.board_rules import (
     PresetTrackWidth,
     RuleSeverity,
 )
+from kipy.util import from_mm
 
 board = KiCad().get_board()
 

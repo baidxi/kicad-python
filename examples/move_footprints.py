@@ -1,5 +1,5 @@
 from kipy import KiCad
-from kipy.geometry import Vector2, Angle
+from kipy.geometry import Angle, Vector2
 
 board = KiCad().get_board()
 footprints = board.get_footprints()

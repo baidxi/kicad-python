@@ -18,8 +18,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import pytest
 import math
+
+import pytest
+
 from kipy.common_types import Circle
 from kipy.geometry import (
     Box2,
@@ -30,6 +32,7 @@ from kipy.geometry import (
     normalize_angle_pi_radians,
 )
 from kipy.proto.common.types import base_types_pb2
+
 
 def test_arc_center_circle():
     start = Vector2.from_xy(0, 0)

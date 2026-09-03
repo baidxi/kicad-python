@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 ###########################################################################
 ## Python code generated with wxFormBuilder (version 4.2.1-0-g80c4cb6)
@@ -8,8 +7,8 @@
 ###########################################################################
 
 import wx
-import wx.xrc
 import wx.dataview
+import wx.xrc
 
 ###########################################################################
 ## Class RoundTracksDialog
@@ -18,7 +17,7 @@ import wx.dataview
 class RoundTracksDialog ( wx.Dialog ):
 
 	def __init__( self, parent ):
-		wx.Dialog.__init__ ( self, parent, id = wx.ID_ANY, title = u"Round Tracks IPC API Demo", pos = wx.DefaultPosition, size = wx.DefaultSize, style = wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER )
+		wx.Dialog.__init__ ( self, parent, id = wx.ID_ANY, title = "Round Tracks IPC API Demo", pos = wx.DefaultPosition, size = wx.DefaultSize, style = wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER )
 
 		self.SetSizeHints( wx.Size( 510,300 ), wx.DefaultSize )
 
@@ -31,10 +30,10 @@ class RoundTracksDialog ( wx.Dialog ):
 		self.netclasslist = wx.dataview.DataViewListCtrl( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.netclasslist.SetMinSize( wx.Size( 450,100 ) )
 
-		self.net_class = self.netclasslist.AppendTextColumn( u"Net Class", wx.dataview.DATAVIEW_CELL_INERT, 160, wx.ALIGN_LEFT, wx.dataview.DATAVIEW_COL_RESIZABLE|wx.dataview.DATAVIEW_COL_SORTABLE )
-		self.do_rounding = self.netclasslist.AppendToggleColumn( u"Rounding", wx.dataview.DATAVIEW_CELL_ACTIVATABLE, 80, wx.ALIGN_CENTER, wx.dataview.DATAVIEW_COL_SORTABLE )
-		self.scaling = self.netclasslist.AppendTextColumn( u"Radius (mm)", wx.dataview.DATAVIEW_CELL_EDITABLE, 100, wx.ALIGN_CENTER, wx.dataview.DATAVIEW_COL_SORTABLE )
-		self.passes = self.netclasslist.AppendTextColumn( u"Passes #", wx.dataview.DATAVIEW_CELL_EDITABLE, 80, wx.ALIGN_LEFT, wx.dataview.DATAVIEW_COL_SORTABLE )
+		self.net_class = self.netclasslist.AppendTextColumn( "Net Class", wx.dataview.DATAVIEW_CELL_INERT, 160, wx.ALIGN_LEFT, wx.dataview.DATAVIEW_COL_RESIZABLE|wx.dataview.DATAVIEW_COL_SORTABLE )
+		self.do_rounding = self.netclasslist.AppendToggleColumn( "Rounding", wx.dataview.DATAVIEW_CELL_ACTIVATABLE, 80, wx.ALIGN_CENTER, wx.dataview.DATAVIEW_COL_SORTABLE )
+		self.scaling = self.netclasslist.AppendTextColumn( "Radius (mm)", wx.dataview.DATAVIEW_CELL_EDITABLE, 100, wx.ALIGN_CENTER, wx.dataview.DATAVIEW_COL_SORTABLE )
+		self.passes = self.netclasslist.AppendTextColumn( "Passes #", wx.dataview.DATAVIEW_CELL_EDITABLE, 80, wx.ALIGN_LEFT, wx.dataview.DATAVIEW_COL_SORTABLE )
 		grid_vert.Add( self.netclasslist, 1, wx.EXPAND|wx.TOP|wx.RIGHT|wx.LEFT, 5 )
 
 		grid_horiz = wx.FlexGridSizer( 0, 4, 0, 0 )
@@ -42,17 +41,17 @@ class RoundTracksDialog ( wx.Dialog ):
 		grid_horiz.SetFlexibleDirection( wx.BOTH )
 		grid_horiz.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
 
-		self.do_create = wx.CheckBox( self, wx.ID_ANY, u"create a new file", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.do_create = wx.CheckBox( self, wx.ID_ANY, "create a new file", wx.DefaultPosition, wx.DefaultSize, 0 )
 		grid_horiz.Add( self.do_create, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_LEFT, 5 )
 
-		self.use_native = wx.CheckBox( self, wx.ID_ANY, u"use native fillets", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.use_native = wx.CheckBox( self, wx.ID_ANY, "use native fillets", wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.use_native.SetValue(True)
 		grid_horiz.Add( self.use_native, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_LEFT, 5 )
 
-		self.avoid_junctions = wx.CheckBox( self, wx.ID_ANY, u"ignore junctions", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.avoid_junctions = wx.CheckBox( self, wx.ID_ANY, "ignore junctions", wx.DefaultPosition, wx.DefaultSize, 0 )
 		grid_horiz.Add( self.avoid_junctions, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_LEFT, 5 )
 
-		self.apply = wx.Button( self, wx.ID_ANY, u"Run", wx.DefaultPosition, wx.Size( 120,-1 ), 0 )
+		self.apply = wx.Button( self, wx.ID_ANY, "Run", wx.DefaultPosition, wx.Size( 120,-1 ), 0 )
 
 		self.apply.SetDefault()
 		grid_horiz.Add( self.apply, 0, wx.ALL|wx.EXPAND, 5 )
@@ -85,5 +84,3 @@ class RoundTracksDialog ( wx.Dialog ):
 
 	def run( self, event ):
 		event.Skip()
-
-

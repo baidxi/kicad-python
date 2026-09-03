@@ -23,10 +23,9 @@
 from typing import cast
 
 from kipy import KiCad
-from kipy.geometry import Vector2
 from kipy.board import BoardLayer, BoardLayerClass
 from kipy.board_types import BoardText, FootprintInstance
-
+from kipy.geometry import Vector2
 
 if __name__=='__main__':
     kicad = KiCad()

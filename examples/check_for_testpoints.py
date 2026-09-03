@@ -18,7 +18,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from typing import cast, Sequence
+from collections.abc import Sequence
+from typing import cast
+
 from kipy import KiCad
 from kipy.board_types import FootprintInstance, Pad
 from kipy.proto.common.types import KIID, KiCadObjectType
