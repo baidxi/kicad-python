@@ -29,7 +29,6 @@ from kipy.wrapper import Wrapper
 
 
 class JobResult(Wrapper):
-
     def __init__(
         self,
         proto: jobs_pb2.RunJobResponse | None = None,
@@ -527,7 +526,9 @@ class RenderSettings(Wrapper):
         proto: board_jobs_pb2.RunBoardJobExportRender | None = None,
         proto_ref: board_jobs_pb2.RunBoardJobExportRender | None = None,
     ):
-        self._proto = proto_ref if proto_ref is not None else board_jobs_pb2.RunBoardJobExportRender()
+        self._proto = (
+            proto_ref if proto_ref is not None else board_jobs_pb2.RunBoardJobExportRender()
+        )
         if proto is not None:
             self._proto.CopyFrom(proto)
 
@@ -1267,6 +1268,7 @@ class GerberExportSettings(Wrapper):
     def precision(self, value: board_jobs_pb2.GerberPrecision.ValueType):
         self._proto.precision = value
 
+
 class ExcellonFormatOptions(Wrapper):
     """Excellon-specific options for drill export."""
 
@@ -1275,7 +1277,9 @@ class ExcellonFormatOptions(Wrapper):
         proto: board_jobs_pb2.ExcellonFormatOptions | None = None,
         proto_ref: board_jobs_pb2.ExcellonFormatOptions | None = None,
     ):
-        self._proto = proto_ref if proto_ref is not None else board_jobs_pb2.ExcellonFormatOptions()
+        self._proto = (
+            proto_ref if proto_ref is not None else board_jobs_pb2.ExcellonFormatOptions()
+        )
         if proto is not None:
             self._proto.CopyFrom(proto)
 
@@ -1340,7 +1344,9 @@ class DrillExportSettings(Wrapper):
         proto: board_jobs_pb2.RunBoardJobExportDrill | None = None,
         proto_ref: board_jobs_pb2.RunBoardJobExportDrill | None = None,
     ):
-        self._proto = proto_ref if proto_ref is not None else board_jobs_pb2.RunBoardJobExportDrill()
+        self._proto = (
+            proto_ref if proto_ref is not None else board_jobs_pb2.RunBoardJobExportDrill()
+        )
         if proto is not None:
             self._proto.CopyFrom(proto)
 
@@ -1443,7 +1449,9 @@ class GencadExportSettings(Wrapper):
         proto: board_jobs_pb2.RunBoardJobExportGencad | None = None,
         proto_ref: board_jobs_pb2.RunBoardJobExportGencad | None = None,
     ):
-        self._proto = proto_ref if proto_ref is not None else board_jobs_pb2.RunBoardJobExportGencad()
+        self._proto = (
+            proto_ref if proto_ref is not None else board_jobs_pb2.RunBoardJobExportGencad()
+        )
         if proto is not None:
             self._proto.CopyFrom(proto)
 
@@ -1496,7 +1504,9 @@ class IpcD356ExportSettings(Wrapper):
         proto: board_jobs_pb2.RunBoardJobExportIpcD356 | None = None,
         proto_ref: board_jobs_pb2.RunBoardJobExportIpcD356 | None = None,
     ):
-        self._proto = proto_ref if proto_ref is not None else board_jobs_pb2.RunBoardJobExportIpcD356()
+        self._proto = (
+            proto_ref if proto_ref is not None else board_jobs_pb2.RunBoardJobExportIpcD356()
+        )
         if proto is not None:
             self._proto.CopyFrom(proto)
 
@@ -1567,7 +1577,9 @@ class StatsExportSettings(Wrapper):
         proto: board_jobs_pb2.RunBoardJobExportStats | None = None,
         proto_ref: board_jobs_pb2.RunBoardJobExportStats | None = None,
     ):
-        self._proto = proto_ref if proto_ref is not None else board_jobs_pb2.RunBoardJobExportStats()
+        self._proto = (
+            proto_ref if proto_ref is not None else board_jobs_pb2.RunBoardJobExportStats()
+        )
         if proto is not None:
             self._proto.CopyFrom(proto)
 

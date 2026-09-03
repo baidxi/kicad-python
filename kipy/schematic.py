@@ -111,9 +111,7 @@ class Schematic:
         command.document.CopyFrom(self._doc)
         self._kicad.send(command, Empty)
 
-    def save_as(
-        self, filename: str, overwrite: bool = False, include_project: bool = True
-    ):
+    def save_as(self, filename: str, overwrite: bool = False, include_project: bool = True):
         """
         Saves the schematic to a new file.  Does not open the newly-saved file.
 
@@ -151,9 +149,7 @@ class Schematic:
         command.action = CommitAction.CMA_DROP
         self._kicad.send(command, EndCommitResponse)
 
-    def create_items(
-        self, items: Wrapper | Iterable[Wrapper]
-    ) -> list[SchematicItem]:
+    def create_items(self, items: Wrapper | Iterable[Wrapper]) -> list[SchematicItem]:
         command = CreateItems()
         command.header.document.CopyFrom(self._doc)
 
@@ -184,9 +180,7 @@ class Schematic:
             for item in self._kicad.send(command, GetItemsResponse).items
         ]
 
-    def get_items_by_id(
-        self, ids: KIID | Sequence[KIID]
-    ) -> Sequence[SchematicItem]:
+    def get_items_by_id(self, ids: KIID | Sequence[KIID]) -> Sequence[SchematicItem]:
         command = GetItemsById()
         command.header.document.CopyFrom(self._doc)
 
@@ -200,9 +194,7 @@ class Schematic:
             for item in self._kicad.send(command, GetItemsResponse).items
         ]
 
-    def update_items(
-        self, items: SchematicItem | Sequence[SchematicItem]
-    ) -> list[SchematicItem]:
+    def update_items(self, items: SchematicItem | Sequence[SchematicItem]) -> list[SchematicItem]:
         command = UpdateItems()
         command.header.document.CopyFrom(self._doc)
 
@@ -302,8 +294,7 @@ class Schematic:
 
     def get_groups(self) -> Sequence[Group]:
         groups = [
-            cast(Group, item)
-            for item in self.get_items(types=[KiCadObjectType.KOT_SCH_GROUP])
+            cast(Group, item) for item in self.get_items(types=[KiCadObjectType.KOT_SCH_GROUP])
         ]
 
         if len(groups) > 0:
@@ -359,15 +350,11 @@ class Schematic:
     def get_as_string(self) -> str:
         command = editor_commands_pb2.SaveDocumentToString()
         command.document.CopyFrom(self._doc)
-        return self._kicad.send(
-            command, editor_commands_pb2.SavedDocumentResponse
-        ).contents
+        return self._kicad.send(command, editor_commands_pb2.SavedDocumentResponse).contents
 
     def get_selection_as_string(self) -> str:
         command = editor_commands_pb2.SaveSelectionToString()
-        return self._kicad.send(
-            command, editor_commands_pb2.SavedSelectionResponse
-        ).contents
+        return self._kicad.send(command, editor_commands_pb2.SavedSelectionResponse).contents
 
     def get_selection(
         self,
@@ -383,9 +370,7 @@ class Schematic:
 
         return [
             cast(SchematicItem, unwrap(item))
-            for item in self._kicad.send(
-                command, editor_commands_pb2.SelectionResponse
-            ).items
+            for item in self._kicad.send(command, editor_commands_pb2.SelectionResponse).items
         ]
 
     def add_to_selection(
@@ -401,9 +386,7 @@ class Schematic:
 
         return [
             cast(SchematicItem, unwrap(item))
-            for item in self._kicad.send(
-                command, editor_commands_pb2.SelectionResponse
-            ).items
+            for item in self._kicad.send(command, editor_commands_pb2.SelectionResponse).items
         ]
 
     def remove_from_selection(
@@ -419,9 +402,7 @@ class Schematic:
 
         return [
             cast(SchematicItem, unwrap(item))
-            for item in self._kicad.send(
-                command, editor_commands_pb2.SelectionResponse
-            ).items
+            for item in self._kicad.send(command, editor_commands_pb2.SelectionResponse).items
         ]
 
     def clear_selection(self):

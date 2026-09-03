@@ -25,7 +25,7 @@ import sys
 from kipy import KiCad
 from kipy.errors import ApiError
 
-if __name__=='__main__':
+if __name__ == "__main__":
     try:
         kicad = KiCad()
         print(f"KiCad version: {kicad.get_version().full_version}")

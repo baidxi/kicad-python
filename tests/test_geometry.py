@@ -41,12 +41,14 @@ def test_arc_center_circle():
     center = arc_center(start, mid, end)
     assert center == (start + mid) * 0.5
 
+
 def test_arc_center_collinear():
     start = Vector2.from_xy(0, 0)
     mid = Vector2.from_xy(1, 1)
     end = Vector2.from_xy(2, 2)
     center = arc_center(start, mid, end)
     assert center is None
+
 
 def test_arc_center_normal_case():
     start = Vector2.from_xy(1000, 0)
@@ -57,6 +59,7 @@ def test_arc_center_normal_case():
     assert center.x == pytest.approx(250, rel=1e-2)
     assert center.y == pytest.approx(1000, rel=1e-2)
 
+
 def test_arc_center_another_case():
     start = Vector2.from_xy(1000, 0)
     mid = Vector2.from_xy(0, 1000)
@@ -66,6 +69,7 @@ def test_arc_center_another_case():
     assert center.x == pytest.approx(0, rel=1e-2)
     assert center.y == pytest.approx(0, rel=1e-2)
 
+
 def test_box2_merge():
     box1 = Box2.from_pos_size(Vector2.from_xy(0, 0), Vector2.from_xy(1000, 1000))
     box2 = Box2.from_pos_size(Vector2.from_xy(2000, 2000), Vector2.from_xy(1000, 1000))
@@ -73,11 +77,13 @@ def test_box2_merge():
     assert box1.pos == Vector2.from_xy(0, 0)
     assert box1.size == Vector2.from_xy(3000, 3000)
 
+
 def test_box2_inflate():
     box = Box2.from_pos_size(Vector2.from_xy(1000, 1000), Vector2.from_xy(1000, 1000))
     box.inflate(1000)
     assert box.pos == Vector2.from_xy(500, 500)
     assert box.size == Vector2.from_xy(2000, 2000)
+
 
 def test_box2_inflate_negative():
     box = Box2.from_pos_size(Vector2.from_xy(1000, 1000), Vector2.from_xy(2000, 2000))
@@ -85,14 +91,15 @@ def test_box2_inflate_negative():
     assert box.pos == Vector2.from_xy(1500, 1500)
     assert box.size == Vector2.from_xy(1000, 1000)
 
+
 def test_arc_angle_minor():
-    """Test arc centered at (0,0), radius 1000, and a 90 degree angle.
-    """
+    """Test arc centered at (0,0), radius 1000, and a 90 degree angle."""
     start = Vector2.from_xy(1000, 0)
     mid = Vector2.from_xy(707, 707)
     end = Vector2.from_xy(0, 1000)
     angle = arc_angle(start, mid, end)
-    assert angle == pytest.approx(math.pi/2, rel=1e-2)
+    assert angle == pytest.approx(math.pi / 2, rel=1e-2)
+
 
 def test_arc_angle_major():
     """Test arc centered at (0, 0), radius 1000, and a 270 degree angle."""
@@ -100,7 +107,8 @@ def test_arc_angle_major():
     mid = Vector2.from_xy(-707, 707)
     end = Vector2.from_xy(0, -1000)
     angle = arc_angle(start, mid, end)
-    assert angle == pytest.approx((3/2) * math.pi, rel=1e-2)
+    assert angle == pytest.approx((3 / 2) * math.pi, rel=1e-2)
+
 
 def test_arc_angle_full_circle():
     """Test arc centered at (0, 0), with start and end points equal"""
@@ -110,6 +118,7 @@ def test_arc_angle_full_circle():
     angle = arc_angle(start, mid, end)
     assert angle == pytest.approx(2 * math.pi, rel=1e-2)
 
+
 def test_arc_angle_degenerate():
     """Test arc with start, mid, and end points all on the same line."""
     start = Vector2.from_xy(1000, 0)
@@ -118,6 +127,7 @@ def test_arc_angle_degenerate():
     angle = arc_angle(start, mid, end)
     assert angle is None
 
+
 def test_arc_angle_zero():
     """Test arc with start, mid, and end points all the same."""
     start = Vector2.from_xy(1000, 0)
@@ -125,6 +135,7 @@ def test_arc_angle_zero():
     end = Vector2.from_xy(1000, 0)
     angle = arc_angle(start, mid, end)
     assert angle == 0
+
 
 def test_normalize_angle_pi_radians():
     """Test normalization of angles to the range (-pi, pi]"""
@@ -138,6 +149,7 @@ def test_normalize_angle_pi_radians():
     assert normalize_angle_pi_radians(3 * math.pi / 2) == -math.pi / 2
     assert normalize_angle_pi_radians(-3 * math.pi / 2) == math.pi / 2
 
+
 def test_box2_construction():
     box1 = Box2.from_pos_size(Vector2.from_xy(1, 2), Vector2.from_xy(0, 0))
     box1.merge(Vector2.from_xy(3, 4))
@@ -145,11 +157,13 @@ def test_box2_construction():
     assert box1.pos == box2.pos
     assert box1.size == box2.size
 
+
 def test_seg_bounding_box():
     box = Box2.from_pos_size(Vector2.from_xy(1, 2), Vector2.from_xy(0, 0))
     box.merge(Vector2.from_xy(3, 4))
     assert box.pos == Vector2.from_xy(1, 2)
     assert box.size == Vector2.from_xy(2, 2)
+
 
 def test_arc_bounding_box():
     start = Vector2.from_xy(10000, 0)
@@ -162,6 +176,7 @@ def test_arc_bounding_box():
     # epsilon because we have a calculated center; won't exactly match KiCad due to rounding
     assert (box.size - Vector2.from_xy(20000, 20000)).length() < 2
 
+
 def test_arc_bounding_box_long_sweep():
     start = Vector2.from_xy(5, 0)
     mid = Vector2.from_xy(0, 5)
@@ -172,6 +187,7 @@ def test_arc_bounding_box_long_sweep():
     assert box.pos == Vector2.from_xy(-5, -5)
     assert box.size == Vector2.from_xy(10, 10)
 
+
 def test_arc_bounding_box_degenerate():
     start = Vector2.from_xy(1, 2)
     mid = Vector2.from_xy(2, 3)
@@ -181,6 +197,7 @@ def test_arc_bounding_box_degenerate():
 
     assert box.pos == Vector2.from_xy(1, 2)
     assert box.size == Vector2.from_xy(2, 2)
+
 
 def test_circle_bounding_box():
     proto = base_types_pb2.GraphicShape()

@@ -25,7 +25,7 @@ from kipy.board import BoardLayer, BoardLayerClass
 from kipy.board_types import BoardText, FootprintInstance
 from kipy.geometry import Vector2
 
-if __name__=='__main__':
+if __name__ == "__main__":
     kicad = KiCad()
     board = kicad.get_board()
     stackup = board.get_stackup()
@@ -39,9 +39,11 @@ if __name__=='__main__':
 
     char_width = kicad.get_text_extents(sizing_text.as_text()).size.x
 
-    copper_layers = [layer for layer in stackup.layers
-                     if layer.layer <= BoardLayer.BL_B_Cu
-                     and layer.layer >= BoardLayer.BL_F_Cu]
+    copper_layers = [
+        layer
+        for layer in stackup.layers
+        if layer.layer <= BoardLayer.BL_B_Cu and layer.layer >= BoardLayer.BL_F_Cu
+    ]
 
     fpi = FootprintInstance()
     fpi.layer = BoardLayer.BL_F_Cu

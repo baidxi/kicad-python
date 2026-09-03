@@ -72,17 +72,13 @@ class SchematicField(SchematicItem):
         proto: schematic_types_pb2.SchematicField | None = None,
         proto_ref: schematic_types_pb2.SchematicField | None = None,
     ):
-        self._proto = (
-            proto_ref if proto_ref is not None else schematic_types_pb2.SchematicField()
-        )
+        self._proto = proto_ref if proto_ref is not None else schematic_types_pb2.SchematicField()
 
         if proto is not None:
             self._proto.CopyFrom(proto)
 
     def __repr__(self) -> str:
-        return (
-            f"SchematicField({self.name}={self.text.value}, pos={self.text.position})"
-        )
+        return f"SchematicField({self.name}={self.text.value}, pos={self.text.position})"
 
     @property
     def name(self) -> str:
@@ -143,9 +139,7 @@ class SchematicLine(SchematicItem):
         proto: schematic_types_pb2.SchematicLine | None = None,
         proto_ref: schematic_types_pb2.SchematicLine | None = None,
     ):
-        self._proto = (
-            proto_ref if proto_ref is not None else schematic_types_pb2.SchematicLine()
-        )
+        self._proto = proto_ref if proto_ref is not None else schematic_types_pb2.SchematicLine()
 
         if proto is not None:
             self._proto.CopyFrom(proto)
@@ -206,9 +200,7 @@ class Junction(SchematicItem):
         proto: schematic_types_pb2.Junction | None = None,
         proto_ref: schematic_types_pb2.Junction | None = None,
     ):
-        self._proto = (
-            proto_ref if proto_ref is not None else schematic_types_pb2.Junction()
-        )
+        self._proto = proto_ref if proto_ref is not None else schematic_types_pb2.Junction()
 
         if proto is not None:
             self._proto.CopyFrom(proto)
@@ -259,11 +251,7 @@ class NoConnectMarker(SchematicItem):
         proto: schematic_types_pb2.NoConnectMarker | None = None,
         proto_ref: schematic_types_pb2.NoConnectMarker | None = None,
     ):
-        self._proto = (
-            proto_ref
-            if proto_ref is not None
-            else schematic_types_pb2.NoConnectMarker()
-        )
+        self._proto = proto_ref if proto_ref is not None else schematic_types_pb2.NoConnectMarker()
 
         if proto is not None:
             self._proto.CopyFrom(proto)
@@ -306,9 +294,7 @@ class BusEntry(SchematicItem):
         proto: schematic_types_pb2.BusEntry | None = None,
         proto_ref: schematic_types_pb2.BusEntry | None = None,
     ):
-        self._proto = (
-            proto_ref if proto_ref is not None else schematic_types_pb2.BusEntry()
-        )
+        self._proto = proto_ref if proto_ref is not None else schematic_types_pb2.BusEntry()
 
         if proto is not None:
             self._proto.CopyFrom(proto)
@@ -367,9 +353,7 @@ class SchematicText(SchematicItem):
         proto: schematic_types_pb2.SchematicText | None = None,
         proto_ref: schematic_types_pb2.SchematicText | None = None,
     ):
-        self._proto = (
-            proto_ref if proto_ref is not None else schematic_types_pb2.SchematicText()
-        )
+        self._proto = proto_ref if proto_ref is not None else schematic_types_pb2.SchematicText()
 
         if proto is not None:
             self._proto.CopyFrom(proto)
@@ -425,9 +409,7 @@ class SchematicTextBox(SchematicItem):
         proto_ref: schematic_types_pb2.SchematicTextBox | None = None,
     ):
         self._proto = (
-            proto_ref
-            if proto_ref is not None
-            else schematic_types_pb2.SchematicTextBox()
+            proto_ref if proto_ref is not None else schematic_types_pb2.SchematicTextBox()
         )
 
         if proto is not None:
@@ -536,9 +518,7 @@ class SchematicGraphicShape(SchematicItem):
         proto_ref: schematic_types_pb2.SchematicGraphicShape | None = None,
     ):
         self._proto = (
-            proto_ref
-            if proto_ref is not None
-            else schematic_types_pb2.SchematicGraphicShape()
+            proto_ref if proto_ref is not None else schematic_types_pb2.SchematicGraphicShape()
         )
 
         if proto is not None:
@@ -578,9 +558,7 @@ class SchematicImage(SchematicItem):
         proto: schematic_types_pb2.SchematicImage | None = None,
         proto_ref: schematic_types_pb2.SchematicImage | None = None,
     ):
-        self._proto = (
-            proto_ref if proto_ref is not None else schematic_types_pb2.SchematicImage()
-        )
+        self._proto = proto_ref if proto_ref is not None else schematic_types_pb2.SchematicImage()
 
         if proto is not None:
             self._proto.CopyFrom(proto)
@@ -703,9 +681,7 @@ class LocalLabel(BaseLabel):
         proto: schematic_types_pb2.LocalLabel | None = None,
         proto_ref: schematic_types_pb2.LocalLabel | None = None,
     ):
-        self._proto = (
-            proto_ref if proto_ref is not None else schematic_types_pb2.LocalLabel()
-        )
+        self._proto = proto_ref if proto_ref is not None else schematic_types_pb2.LocalLabel()
 
         if proto is not None:
             self._proto.CopyFrom(proto)
@@ -721,9 +697,7 @@ class GlobalLabel(ShapeLabel):
         proto: schematic_types_pb2.GlobalLabel | None = None,
         proto_ref: schematic_types_pb2.GlobalLabel | None = None,
     ):
-        self._proto = (
-            proto_ref if proto_ref is not None else schematic_types_pb2.GlobalLabel()
-        )
+        self._proto = proto_ref if proto_ref is not None else schematic_types_pb2.GlobalLabel()
 
         if proto is not None:
             self._proto.CopyFrom(proto)
@@ -748,9 +722,7 @@ class HierarchicalLabel(ShapeLabel):
         proto_ref: schematic_types_pb2.HierarchicalLabel | None = None,
     ):
         self._proto = (
-            proto_ref
-            if proto_ref is not None
-            else schematic_types_pb2.HierarchicalLabel()
+            proto_ref if proto_ref is not None else schematic_types_pb2.HierarchicalLabel()
         )
 
         if proto is not None:
@@ -767,9 +739,7 @@ class DirectiveLabel(ShapeLabel):
         proto: schematic_types_pb2.DirectiveLabel | None = None,
         proto_ref: schematic_types_pb2.DirectiveLabel | None = None,
     ):
-        self._proto = (
-            proto_ref if proto_ref is not None else schematic_types_pb2.DirectiveLabel()
-        )
+        self._proto = proto_ref if proto_ref is not None else schematic_types_pb2.DirectiveLabel()
 
         if proto is not None:
             self._proto.CopyFrom(proto)
@@ -785,9 +755,7 @@ class Group(SchematicItem):
         proto: schematic_types_pb2.Group | None = None,
         proto_ref: schematic_types_pb2.Group | None = None,
     ):
-        self._proto = (
-            proto_ref if proto_ref is not None else schematic_types_pb2.Group()
-        )
+        self._proto = proto_ref if proto_ref is not None else schematic_types_pb2.Group()
 
         if proto is not None:
             self._proto.CopyFrom(proto)
@@ -836,9 +804,7 @@ class SheetPin(ShapeLabel):
         proto: schematic_types_pb2.SheetPin | None = None,
         proto_ref: schematic_types_pb2.SheetPin | None = None,
     ):
-        self._proto = (
-            proto_ref if proto_ref is not None else schematic_types_pb2.SheetPin()
-        )
+        self._proto = proto_ref if proto_ref is not None else schematic_types_pb2.SheetPin()
 
         if proto is not None:
             self._proto.CopyFrom(proto)
@@ -865,9 +831,7 @@ class SheetSymbol(SchematicItem):
         proto: schematic_types_pb2.SheetSymbol | None = None,
         proto_ref: schematic_types_pb2.SheetSymbol | None = None,
     ):
-        self._proto = (
-            proto_ref if proto_ref is not None else schematic_types_pb2.SheetSymbol()
-        )
+        self._proto = proto_ref if proto_ref is not None else schematic_types_pb2.SheetSymbol()
 
         if proto is not None:
             self._proto.CopyFrom(proto)
@@ -1012,9 +976,7 @@ class SchematicPinAlternate(Wrapper):
         proto_ref: schematic_types_pb2.SchematicPinAlternate | None = None,
     ):
         self._proto = (
-            proto_ref
-            if proto_ref is not None
-            else schematic_types_pb2.SchematicPinAlternate()
+            proto_ref if proto_ref is not None else schematic_types_pb2.SchematicPinAlternate()
         )
 
         if proto is not None:
@@ -1055,9 +1017,7 @@ class SchematicPin(SchematicItem):
         proto: schematic_types_pb2.SchematicPin | None = None,
         proto_ref: schematic_types_pb2.SchematicPin | None = None,
     ):
-        self._proto = (
-            proto_ref if proto_ref is not None else schematic_types_pb2.SchematicPin()
-        )
+        self._proto = proto_ref if proto_ref is not None else schematic_types_pb2.SchematicPin()
 
         if proto is not None:
             self._proto.CopyFrom(proto)
@@ -1153,11 +1113,7 @@ class SchematicPin(SchematicItem):
 
     @property
     def active_alternate(self) -> str | None:
-        return (
-            self._proto.active_alternate
-            if self._proto.HasField("active_alternate")
-            else None
-        )
+        return self._proto.active_alternate if self._proto.HasField("active_alternate") else None
 
     @active_alternate.setter
     def active_alternate(self, value: str | None):
@@ -1178,9 +1134,7 @@ class SchematicSymbolChild(Wrapper):
         proto_ref: schematic_types_pb2.SchematicSymbolChild | None = None,
     ):
         self._proto = (
-            proto_ref
-            if proto_ref is not None
-            else schematic_types_pb2.SchematicSymbolChild()
+            proto_ref if proto_ref is not None else schematic_types_pb2.SchematicSymbolChild()
         )
 
         if proto is not None:
@@ -1207,9 +1161,7 @@ class SchematicSymbolChild(Wrapper):
 
     @property
     def body_style(self) -> int | None:
-        return (
-            self._proto.body_style.style if self._proto.HasField("body_style") else None
-        )
+        return self._proto.body_style.style if self._proto.HasField("body_style") else None
 
     @body_style.setter
     def body_style(self, value: int | None):
@@ -1238,9 +1190,7 @@ class SchematicSymbolAttributes(Wrapper):
         proto_ref: schematic_types_pb2.SchematicSymbolAttributes | None = None,
     ):
         self._proto = (
-            proto_ref
-            if proto_ref is not None
-            else schematic_types_pb2.SchematicSymbolAttributes()
+            proto_ref if proto_ref is not None else schematic_types_pb2.SchematicSymbolAttributes()
         )
 
         if proto is not None:
@@ -1298,9 +1248,7 @@ class SchematicSymbolVariant(Wrapper):
         proto_ref: schematic_types_pb2.SchematicSymbolVariant | None = None,
     ):
         self._proto = (
-            proto_ref
-            if proto_ref is not None
-            else schematic_types_pb2.SchematicSymbolVariant()
+            proto_ref if proto_ref is not None else schematic_types_pb2.SchematicSymbolVariant()
         )
 
         if proto is not None:
@@ -1350,11 +1298,7 @@ class SchematicSymbol(Wrapper):
         proto: schematic_types_pb2.SchematicSymbol | None = None,
         proto_ref: schematic_types_pb2.SchematicSymbol | None = None,
     ):
-        self._proto = (
-            proto_ref
-            if proto_ref is not None
-            else schematic_types_pb2.SchematicSymbol()
-        )
+        self._proto = proto_ref if proto_ref is not None else schematic_types_pb2.SchematicSymbol()
 
         if proto is not None:
             self._proto.CopyFrom(proto)
@@ -1477,9 +1421,7 @@ class SchematicSymbolTransform(Wrapper):
         proto_ref: schematic_types_pb2.SchematicSymbolTransform | None = None,
     ):
         self._proto = (
-            proto_ref
-            if proto_ref is not None
-            else schematic_types_pb2.SchematicSymbolTransform()
+            proto_ref if proto_ref is not None else schematic_types_pb2.SchematicSymbolTransform()
         )
 
         if proto is not None:
@@ -1521,9 +1463,7 @@ class SchematicSymbolInstance(SchematicItem):
         proto_ref: schematic_types_pb2.SchematicSymbolInstance | None = None,
     ):
         self._proto = (
-            proto_ref
-            if proto_ref is not None
-            else schematic_types_pb2.SchematicSymbolInstance()
+            proto_ref if proto_ref is not None else schematic_types_pb2.SchematicSymbolInstance()
         )
 
         if proto is not None:
@@ -1630,9 +1570,7 @@ class SchematicSymbolInstance(SchematicItem):
 
     @property
     def body_style(self) -> int | None:
-        return (
-            self._proto.body_style.style if self._proto.HasField("body_style") else None
-        )
+        return self._proto.body_style.style if self._proto.HasField("body_style") else None
 
     @body_style.setter
     def body_style(self, value: int | None):
@@ -1696,9 +1634,7 @@ class SheetInstance(Wrapper):
         proto: schematic_types_pb2.SheetInstance | None = None,
         proto_ref: schematic_types_pb2.SheetInstance | None = None,
     ):
-        self._proto = (
-            proto_ref if proto_ref is not None else schematic_types_pb2.SheetInstance()
-        )
+        self._proto = proto_ref if proto_ref is not None else schematic_types_pb2.SheetInstance()
 
         if proto is not None:
             self._proto.CopyFrom(proto)
@@ -1753,9 +1689,7 @@ class SchematicNetSheetContents(Wrapper):
         proto_ref: schematic_types_pb2.SchematicNetSheetContents | None = None,
     ):
         self._proto = (
-            proto_ref
-            if proto_ref is not None
-            else schematic_types_pb2.SchematicNetSheetContents()
+            proto_ref if proto_ref is not None else schematic_types_pb2.SchematicNetSheetContents()
         )
 
         if proto is not None:
@@ -1785,9 +1719,7 @@ class SchematicNet(Wrapper):
         proto: schematic_types_pb2.SchematicNet | None = None,
         proto_ref: schematic_types_pb2.SchematicNet | None = None,
     ):
-        self._proto = (
-            proto_ref if proto_ref is not None else schematic_types_pb2.SchematicNet()
-        )
+        self._proto = proto_ref if proto_ref is not None else schematic_types_pb2.SchematicNet()
 
         if proto is not None:
             self._proto.CopyFrom(proto)

@@ -152,11 +152,15 @@ def main() -> None:
         ),
         (
             "export_drill",
-            lambda: board.export_drill(str(out / f"{board_name}-drill"), format=DrillFormat.DF_EXCELLON),
+            lambda: board.export_drill(
+                str(out / f"{board_name}-drill"), format=DrillFormat.DF_EXCELLON
+            ),
         ),
         (
             "export_position",
-            lambda: board.export_position(str(out / f"{board_name}-position.csv"), settings=position),
+            lambda: board.export_position(
+                str(out / f"{board_name}-position.csv"), settings=position
+            ),
         ),
         ("export_gencad", lambda: board.export_gencad(str(out / f"{board_name}.cad"))),
         (

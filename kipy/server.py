@@ -124,9 +124,7 @@ def find_kicad_cli(hint: str | None = None) -> str:
         if path_match is not None:
             return path_match
 
-    raise FileNotFoundError(
-        "Unable to find kicad-cli. Pass kicad_cli_path=... to KiCad(...)."
-    )
+    raise FileNotFoundError("Unable to find kicad-cli. Pass kicad_cli_path=... to KiCad(...).")
 
 
 class KiCadServer:
@@ -219,7 +217,7 @@ class KiCadServer:
 
                 if line.startswith(_READY_PREFIX):
                     self._ready_line = line
-                    self._socket_path = line[len(_READY_PREFIX):].strip()
+                    self._socket_path = line[len(_READY_PREFIX) :].strip()
 
             now = time.monotonic()
 
@@ -259,17 +257,20 @@ class KiCadServer:
 
         self.stop()
 
-        details = "\n".join([
-            *( ["stdout:", *stdout] if stdout else [] ),
-            *( ["stderr:", *stderr] if stderr else [] ),
-            *( ["last probe error:", self._last_probe_error]
-               if self._last_probe_error is not None else [] ),
-        ])
+        details = "\n".join(
+            [
+                *(["stdout:", *stdout] if stdout else []),
+                *(["stderr:", *stderr] if stderr else []),
+                *(
+                    ["last probe error:", self._last_probe_error]
+                    if self._last_probe_error is not None
+                    else []
+                ),
+            ]
+        )
 
         if details:
-            raise TimeoutError(
-                "Timed out waiting for kicad-cli api-server readiness\n" + details
-            )
+            raise TimeoutError("Timed out waiting for kicad-cli api-server readiness\n" + details)
 
         raise TimeoutError("Timed out waiting for kicad-cli api-server readiness")
 

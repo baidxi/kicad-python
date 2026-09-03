@@ -56,4 +56,6 @@ for net, parent_ids in net_footprint_ids:
         if not testpoints:
             print(f"Net {net.name} has no testpoints")
         else:
-            print(f"Net {net.name} has testpoints: {[tp.reference_field.text.value for tp in testpoints]}")
+            print(
+                f"Net {net.name} has testpoints: {[tp.reference_field.text.value for tp in testpoints]}"
+            )

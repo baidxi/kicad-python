@@ -24,19 +24,20 @@ from collections.abc import Sequence
 from typing import Self
 
 from kipy.proto.board import board_commands_pb2, board_rules_pb2, board_types_pb2
-from kipy.proto.board.board_rules_pb2 import (  #noqa
+from kipy.proto.board.board_rules_pb2 import (  # noqa
     CustomRuleConstraintType,
     CustomRuleDisallowType,
     CustomRuleLayerMode,
     DrcErrorType,
 )
 from kipy.proto.common.types import base_types_pb2
-from kipy.proto.common.types.base_types_pb2 import MinOptMax, RuleSeverity  #noqa
+from kipy.proto.common.types.base_types_pb2 import MinOptMax, RuleSeverity  # noqa
 from kipy.wrapper import Wrapper
 
 
 class MinimumConstraints(Wrapper):
     """Board-level minimum design rules"""
+
     def __init__(
         self,
         proto: board_rules_pb2.MinimumConstraints | None = None,
@@ -236,7 +237,9 @@ class PresetDiffPairDimension(Wrapper):
         proto: board_rules_pb2.PresetDiffPairDimension | None = None,
         proto_ref: board_rules_pb2.PresetDiffPairDimension | None = None,
     ):
-        self._proto = proto_ref if proto_ref is not None else board_rules_pb2.PresetDiffPairDimension()
+        self._proto = (
+            proto_ref if proto_ref is not None else board_rules_pb2.PresetDiffPairDimension()
+        )
 
         if proto is not None:
             self._proto.CopyFrom(proto)
@@ -327,7 +330,9 @@ class SolderMaskPasteDefaults(Wrapper):
         proto: board_rules_pb2.SolderMaskPasteDefaults | None = None,
         proto_ref: board_rules_pb2.SolderMaskPasteDefaults | None = None,
     ):
-        self._proto = proto_ref if proto_ref is not None else board_rules_pb2.SolderMaskPasteDefaults()
+        self._proto = (
+            proto_ref if proto_ref is not None else board_rules_pb2.SolderMaskPasteDefaults()
+        )
 
         if proto is not None:
             self._proto.CopyFrom(proto)
@@ -387,7 +392,9 @@ class TeardropTargetParams(Wrapper):
         proto: board_rules_pb2.TeardropTargetParams | None = None,
         proto_ref: board_rules_pb2.TeardropTargetParams | None = None,
     ):
-        self._proto = proto_ref if proto_ref is not None else board_rules_pb2.TeardropTargetParams()
+        self._proto = (
+            proto_ref if proto_ref is not None else board_rules_pb2.TeardropTargetParams()
+        )
 
         if proto is not None:
             self._proto.CopyFrom(proto)
@@ -547,7 +554,9 @@ class TeardropDefaults(Wrapper):
     @property
     def target_params(self) -> list[TeardropTargetEntry]:
         if "_target_params" not in self.__dict__:
-            self._target_params = [TeardropTargetEntry(param) for param in self._proto.target_params]
+            self._target_params = [
+                TeardropTargetEntry(param) for param in self._proto.target_params
+            ]
         return self._target_params
 
     @target_params.setter
@@ -566,7 +575,9 @@ class ViaProtectionDefaults(Wrapper):
         proto: board_rules_pb2.ViaProtectionDefaults | None = None,
         proto_ref: board_rules_pb2.ViaProtectionDefaults | None = None,
     ):
-        self._proto = proto_ref if proto_ref is not None else board_rules_pb2.ViaProtectionDefaults()
+        self._proto = (
+            proto_ref if proto_ref is not None else board_rules_pb2.ViaProtectionDefaults()
+        )
 
         if proto is not None:
             self._proto.CopyFrom(proto)
@@ -694,6 +705,7 @@ class DrcExclusion(Wrapper):
 
 class BoardDesignRules(Wrapper):
     """The base board design and netclass rules (not including custom rules)"""
+
     def __init__(
         self,
         proto: board_rules_pb2.BoardDesignRules | None = None,
@@ -749,16 +761,20 @@ class BoardDesignRules(Wrapper):
         self._proto.via_protection.CopyFrom(value.proto)
 
     @property
-    def severities(self) -> dict[board_rules_pb2.DrcErrorType.ValueType, base_types_pb2.RuleSeverity.ValueType]:
+    def severities(
+        self,
+    ) -> dict[board_rules_pb2.DrcErrorType.ValueType, base_types_pb2.RuleSeverity.ValueType]:
         if "_severities" not in self.__dict__:
             self._severities = {
-                severity.rule_type: severity.severity
-                for severity in self._proto.severities
+                severity.rule_type: severity.severity for severity in self._proto.severities
             }
         return self._severities
 
     @severities.setter
-    def severities(self, value: dict[board_rules_pb2.DrcErrorType.ValueType, base_types_pb2.RuleSeverity.ValueType]):
+    def severities(
+        self,
+        value: dict[board_rules_pb2.DrcErrorType.ValueType, base_types_pb2.RuleSeverity.ValueType],
+    ):
         self._severities = dict(value)
 
     @property
@@ -821,12 +837,15 @@ class CustomRuleDisallowSettings(Wrapper):
 
 class CustomRuleConstraint(Wrapper):
     """Represents a (constraint ...) clause in a custom rule"""
+
     def __init__(
         self,
         proto: board_rules_pb2.CustomRuleConstraint | None = None,
         proto_ref: board_rules_pb2.CustomRuleConstraint | None = None,
     ):
-        self._proto = proto_ref if proto_ref is not None else board_rules_pb2.CustomRuleConstraint()
+        self._proto = (
+            proto_ref if proto_ref is not None else board_rules_pb2.CustomRuleConstraint()
+        )
 
         if proto is not None:
             self._proto.CopyFrom(proto)
@@ -977,7 +996,9 @@ class CustomRule(Wrapper):
     @property
     def constraints(self) -> list[CustomRuleConstraint]:
         if "_constraints" not in self.__dict__:
-            self._constraints = [CustomRuleConstraint(constraint) for constraint in self._proto.constraints]
+            self._constraints = [
+                CustomRuleConstraint(constraint) for constraint in self._proto.constraints
+            ]
         return self._constraints
 
     @constraints.setter

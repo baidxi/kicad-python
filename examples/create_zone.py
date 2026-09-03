@@ -23,7 +23,7 @@ from kipy.common_types import PolygonWithHoles
 from kipy.geometry import PolyLine, PolyLineNode
 from kipy.util import from_mm
 
-if __name__=='__main__':
+if __name__ == "__main__":
     kicad = KiCad()
     board = kicad.get_board()
 

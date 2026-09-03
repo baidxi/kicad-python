@@ -69,7 +69,7 @@ from kipy.common_types import Color, Commit, TextAttributes, TitleBlockInfo
 from kipy.geometry import Box2, PolygonWithHoles, Vector2
 from kipy.project import NetClass, Project
 from kipy.proto.board import board_commands_pb2, board_jobs_pb2, board_pb2, board_types_pb2
-from kipy.proto.board.board_commands_pb2 import (  #noqa
+from kipy.proto.board.board_commands_pb2 import (  # noqa
     BoardFlipDirection,
     BoardOriginType,
     CustomRulesStatus,
@@ -156,6 +156,7 @@ BoardJobCommand = Union[
     board_jobs_pb2.RunBoardJobExportStats,
 ]
 
+
 class ImportNetlistResult(Wrapper):
     """Result of importing a schematic netlist into the board."""
 
@@ -165,9 +166,7 @@ class ImportNetlistResult(Wrapper):
         proto_ref: board_commands_pb2.ImportNetlistResponse | None = None,
     ):
         self._proto = (
-            proto_ref
-            if proto_ref is not None
-            else board_commands_pb2.ImportNetlistResponse()
+            proto_ref if proto_ref is not None else board_commands_pb2.ImportNetlistResponse()
         )
         if proto is not None:
             self._proto.CopyFrom(proto)
@@ -196,13 +195,16 @@ class ImportNetlistResult(Wrapper):
     def new_footprint_count(self) -> int:
         return self._proto.new_footprint_count
 
+
 class BoardLayerGraphicsDefaults(Wrapper):
     """The default properties for graphic items added on a given class of board layer"""
+
     def __init__(self, proto: board_pb2.BoardLayerGraphicsDefaults | None = None):
         self._proto = board_pb2.BoardLayerGraphicsDefaults()
 
         if proto is not None:
             self._proto.CopyFrom(proto)
+
     @property
     def layer(self) -> board_pb2.BoardLayerClass.ValueType:
         """The layer class that these defaults apply to"""
@@ -223,6 +225,7 @@ class BoardLayerGraphicsDefaults(Wrapper):
     @property
     def text(self) -> TextAttributes:
         return TextAttributes(self._proto.text)
+
 
 class BoardStackupDielectricProperties(Wrapper):
     def __init__(self, proto: board_pb2.BoardStackupDielectricProperties | None = None):
@@ -667,6 +670,7 @@ class BoardStackup(Wrapper):
         """The stackup layers, in order from top to bottom of the board"""
         return [BoardStackupLayer(layer) for layer in self._proto.layers]
 
+
 class Board:
     def __init__(self, kicad: KiCadClient, document: DocumentSpecifier):
         """Represents an open board (.kicad_pcb) document in KiCad"""
@@ -871,7 +875,7 @@ class Board:
         # Common options
         origin: board_jobs_pb2.DrillOrigin.ValueType = DrillOrigin.DO_UNKNOWN,
         map_format: board_jobs_pb2.DrillMapFormat.ValueType = DrillMapFormat.DMF_UNKNOWN,
-        report_filename: str = '',
+        report_filename: str = "",
         # Gerber specific
         precision: board_jobs_pb2.DrillGerberPrecision.ValueType = DrillGerberPrecision.DGP_UNKNOWN,
         generate_tenting: bool = False,
@@ -889,9 +893,11 @@ class Board:
         # For both drills
         command.origin = origin
         command.map_format = map_format
-        command.report_format = DrillReportFormat.DRF_STANDARD if report_filename else DrillReportFormat.DRF_UNKNOWN
+        command.report_format = (
+            DrillReportFormat.DRF_STANDARD if report_filename else DrillReportFormat.DRF_UNKNOWN
+        )
         if report_filename:
-             command.report_filename = os.path.join(output_path, report_filename)
+            command.report_filename = os.path.join(output_path, report_filename)
         # For Gerber
         command.gerber_precision = precision
         command.gerber_generate_tenting = generate_tenting
@@ -912,19 +918,19 @@ class Board:
         output_path: str,
         origin: board_jobs_pb2.DrillOrigin.ValueType = DrillOrigin.DO_UNKNOWN,
         map_format: board_jobs_pb2.DrillMapFormat.ValueType = DrillMapFormat.DMF_UNKNOWN,
-        report_filename: str = '',
+        report_filename: str = "",
         precision: board_jobs_pb2.DrillGerberPrecision.ValueType = DrillGerberPrecision.DGP_UNKNOWN,
         generate_tenting: bool = False,
     ) -> JobResult:
         """Exports gerber NC drill files from the board."""
         return self.export_drill(
-               output_path,
-               format=DrillFormat.DF_GERBER,
-               origin=origin,
-               map_format=map_format,
-               report_filename=report_filename,
-               precision=precision,
-               generate_tenting=generate_tenting,
+            output_path,
+            format=DrillFormat.DF_GERBER,
+            origin=origin,
+            map_format=map_format,
+            report_filename=report_filename,
+            precision=precision,
+            generate_tenting=generate_tenting,
         )
 
     def export_drill_excellon(
@@ -932,7 +938,7 @@ class Board:
         output_path: str,
         origin: board_jobs_pb2.DrillOrigin.ValueType = DrillOrigin.DO_UNKNOWN,
         map_format: board_jobs_pb2.DrillMapFormat.ValueType = DrillMapFormat.DMF_UNKNOWN,
-        report_filename: str = '',
+        report_filename: str = "",
         units: Units.ValueType = Units.U_UNKNOWN,
         zeros_format: board_jobs_pb2.DrillZerosFormat.ValueType = DrillZerosFormat.DZF_UNKNOWN,
         route_oval_holes: bool = False,
@@ -942,17 +948,17 @@ class Board:
     ) -> JobResult:
         """Exports excellon NC drill files from the board."""
         return self.export_drill(
-               output_path,
-               format=DrillFormat.DF_EXCELLON,
-               origin=origin,
-               map_format=map_format,
-               report_filename=report_filename,
-               units=units,
-               zeros_format=zeros_format,
-               route_oval_holes=route_oval_holes,
-               combine_pth_npth=combine_pth_npth,
-               minimal_header=minimal_header,
-               mirror_y=mirror_y,
+            output_path,
+            format=DrillFormat.DF_EXCELLON,
+            origin=origin,
+            map_format=map_format,
+            report_filename=report_filename,
+            units=units,
+            zeros_format=zeros_format,
+            route_oval_holes=route_oval_holes,
+            combine_pth_npth=combine_pth_npth,
+            minimal_header=minimal_header,
+            mirror_y=mirror_y,
         )
 
     def export_position(
@@ -1149,9 +1155,7 @@ class Board:
             [unwrap(item) for item in self._kicad.send(command, GetItemsResponse).items]
         )
 
-    def get_items_by_id(
-        self, ids: KIID | Sequence[KIID]
-    ) -> Sequence[Item]:
+    def get_items_by_id(self, ids: KIID | Sequence[KIID]) -> Sequence[Item]:
         """Retrieves items from the board by their KIID (internal unique identifier)
 
         .. versionadded:: 0.7.0 (KiCad 10.0.0)
@@ -1303,8 +1307,7 @@ class Board:
 
         .. versionadded:: 0.7.0"""
         return [
-            cast(Barcode, item)
-            for item in self.get_items(types=[KiCadObjectType.KOT_PCB_BARCODE])
+            cast(Barcode, item) for item in self.get_items(types=[KiCadObjectType.KOT_PCB_BARCODE])
         ]
 
     def get_reference_images(self) -> Sequence[ReferenceImage]:
@@ -1324,7 +1327,9 @@ class Board:
         """Retrieves all groups on the board
 
         .. versionadded:: 0.7.0 (KiCad 10.0.0)"""
-        groups = [cast(Group, item) for item in self.get_items(types=[KiCadObjectType.KOT_PCB_GROUP])]
+        groups = [
+            cast(Group, item) for item in self.get_items(types=[KiCadObjectType.KOT_PCB_GROUP])
+        ]
 
         # Unwrap items in groups
         if len(groups) > 0:
@@ -1366,9 +1371,7 @@ class Board:
         return self._to_concrete_items(
             [
                 unwrap(result.item)
-                for result in self._kicad.send(
-                    command, UpdateItemsResponse
-                ).updated_items
+                for result in self._kicad.send(command, UpdateItemsResponse).updated_items
             ]
         )
 
@@ -1483,9 +1486,7 @@ class Board:
             ]
         )
 
-    def get_nets(
-        self, netclass_filter: str | Sequence[str] | None = None
-    ) -> Sequence[Net]:
+    def get_nets(self, netclass_filter: str | Sequence[str] | None = None) -> Sequence[Net]:
         """Retrieves all nets on the board, optionally filtering by net class"""
         command = board_commands_pb2.GetNets()
         command.board.CopyFrom(self._doc)
@@ -1496,8 +1497,7 @@ class Board:
             command.netclass_filter.extend(netclass_filter)
 
         return [
-            Net(net)
-            for net in self._kicad.send(command, board_commands_pb2.NetsResponse).nets
+            Net(net) for net in self._kicad.send(command, board_commands_pb2.NetsResponse).nets
         ]
 
     def get_netclass_for_nets(self, nets: Net | Sequence[Net]) -> dict[str, NetClass]:
@@ -1523,16 +1523,14 @@ class Board:
         else:
             cmd.types.extend(types or [])
 
-        return self._to_concrete_items([
-            unwrap(item)
-            for item in self._kicad.send(
-                cmd, editor_commands_pb2.SelectionResponse
-            ).items
-        ])
+        return self._to_concrete_items(
+            [
+                unwrap(item)
+                for item in self._kicad.send(cmd, editor_commands_pb2.SelectionResponse).items
+            ]
+        )
 
-    def add_to_selection(
-        self, items: BoardItem | Sequence[BoardItem]
-    ) -> Sequence[Wrapper]:
+    def add_to_selection(self, items: BoardItem | Sequence[BoardItem]) -> Sequence[Wrapper]:
         """Adds one or more items to the current selection on the board
 
         :param items: The items to add to the selection
@@ -1548,14 +1546,10 @@ class Board:
 
         return [
             unwrap(item)
-            for item in self._kicad.send(
-                cmd, editor_commands_pb2.SelectionResponse
-            ).items
+            for item in self._kicad.send(cmd, editor_commands_pb2.SelectionResponse).items
         ]
 
-    def remove_from_selection(
-        self, items: BoardItem | Sequence[BoardItem]
-    ) -> Sequence[Wrapper]:
+    def remove_from_selection(self, items: BoardItem | Sequence[BoardItem]) -> Sequence[Wrapper]:
         """Removes one or more items from the current selection on the board
 
         :param items: The items to remove from the selection
@@ -1571,9 +1565,7 @@ class Board:
 
         return [
             unwrap(item)
-            for item in self._kicad.send(
-                cmd, editor_commands_pb2.SelectionResponse
-            ).items
+            for item in self._kicad.send(cmd, editor_commands_pb2.SelectionResponse).items
         ]
 
     def clear_selection(self):
@@ -1643,12 +1635,24 @@ class Board:
         cmd.board.CopyFrom(self._doc)
         reply = self._kicad.send(cmd, board_commands_pb2.GraphicsDefaultsResponse)
         return {
-            board_pb2.BoardLayerClass.BLC_SILKSCREEN:  BoardLayerGraphicsDefaults(reply.defaults.layers[0]),
-            board_pb2.BoardLayerClass.BLC_COPPER:      BoardLayerGraphicsDefaults(reply.defaults.layers[1]),
-            board_pb2.BoardLayerClass.BLC_EDGES:       BoardLayerGraphicsDefaults(reply.defaults.layers[2]),
-            board_pb2.BoardLayerClass.BLC_COURTYARD:   BoardLayerGraphicsDefaults(reply.defaults.layers[3]),
-            board_pb2.BoardLayerClass.BLC_FABRICATION: BoardLayerGraphicsDefaults(reply.defaults.layers[4]),
-            board_pb2.BoardLayerClass.BLC_OTHER:       BoardLayerGraphicsDefaults(reply.defaults.layers[5])
+            board_pb2.BoardLayerClass.BLC_SILKSCREEN: BoardLayerGraphicsDefaults(
+                reply.defaults.layers[0]
+            ),
+            board_pb2.BoardLayerClass.BLC_COPPER: BoardLayerGraphicsDefaults(
+                reply.defaults.layers[1]
+            ),
+            board_pb2.BoardLayerClass.BLC_EDGES: BoardLayerGraphicsDefaults(
+                reply.defaults.layers[2]
+            ),
+            board_pb2.BoardLayerClass.BLC_COURTYARD: BoardLayerGraphicsDefaults(
+                reply.defaults.layers[3]
+            ),
+            board_pb2.BoardLayerClass.BLC_FABRICATION: BoardLayerGraphicsDefaults(
+                reply.defaults.layers[4]
+            ),
+            board_pb2.BoardLayerClass.BLC_OTHER: BoardLayerGraphicsDefaults(
+                reply.defaults.layers[5]
+            ),
         }
 
     def get_design_rules(self) -> BoardDesignRulesResponse:
@@ -1721,8 +1725,9 @@ class Board:
         cmd.type = origin_type
         return Vector2(self._kicad.send(cmd, base_types_pb2.Vector2))
 
-    def set_origin(self, origin_type: board_commands_pb2.BoardOriginType.ValueType,
-                   origin: Vector2):
+    def set_origin(
+        self, origin_type: board_commands_pb2.BoardOriginType.ValueType, origin: Vector2
+    ):
         """Sets the specified (grid or drill/place) board origin
 
         .. versionadded:: 0.3.0"""
@@ -1754,12 +1759,10 @@ class Board:
         return self._kicad.send(cmd, board_commands_pb2.BoardLayerResponse).layer
 
     @overload
-    def expand_text_variables(self, text: str) -> str:
-        ...
+    def expand_text_variables(self, text: str) -> str: ...
 
     @overload
-    def expand_text_variables(self, text: list[str]) -> list[str]:
-        ...
+    def expand_text_variables(self, text: list[str]) -> list[str]: ...
 
     def expand_text_variables(self, text: str | list[str]) -> str | list[str]:
         """Expands text variables in a string or list of strings.  Any text variables that do not
@@ -1790,9 +1793,7 @@ class Board:
     ) -> list[Box2 | None]: ...
 
     def get_item_bounding_box(
-        self,
-        items: BoardItem | Sequence[BoardItem],
-        include_text: bool = False
+        self, items: BoardItem | Sequence[BoardItem], include_text: bool = False
     ) -> Box2 | None | list[Box2 | None]:
         """Gets the KiCad-calculated bounding box for an item or items, returning None if the item
         does not exist or has no bounding box"""
@@ -1850,7 +1851,9 @@ class Board:
         if isinstance(pads, Pad):
             return PolygonWithHoles(response.polygons[0]) if len(response.polygons) == 1 else None
 
-        pad_to_polygon = {pad.value: polygon for pad, polygon in zip(response.pads, response.polygons)}
+        pad_to_polygon = {
+            pad.value: polygon for pad, polygon in zip(response.pads, response.polygons)
+        }
         return [
             PolygonWithHoles(p)
             for p in (pad_to_polygon.get(pad.id.value, None) for pad in pads)
@@ -1860,7 +1863,8 @@ class Board:
     def check_padstack_presence_on_layers(
         self,
         items: BoardItem | Iterable[BoardItem],
-        layers: board_types_pb2.BoardLayer.ValueType | Iterable[board_types_pb2.BoardLayer.ValueType]
+        layers: board_types_pb2.BoardLayer.ValueType
+        | Iterable[board_types_pb2.BoardLayer.ValueType],
     ) -> dict[BoardItem, dict[board_types_pb2.BoardLayer.ValueType, bool]]:
         """Checks if the given items with padstacks (pads or vias) have content on the given layers.
 
@@ -1923,10 +1927,10 @@ class Board:
 
     def refill_zones(
         self,
-        zones: KIID | Iterable[KIID] | None=None,
+        zones: KIID | Iterable[KIID] | None = None,
         block=True,
         max_poll_seconds: float = 30.0,
-        poll_interval_seconds: float = 0.5
+        poll_interval_seconds: float = 0.5,
     ):
         """Refills all zones on the board.  If block is True, this function will block until the
         refill operation is complete.  If block is False, this function will return immediately,

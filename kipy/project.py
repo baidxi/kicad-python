@@ -67,12 +67,10 @@ class Project:
         return [NetClass(p) for p in response.net_classes]
 
     @overload
-    def expand_text_variables(self, text: str) -> str:
-        ...
+    def expand_text_variables(self, text: str) -> str: ...
 
     @overload
-    def expand_text_variables(self, text: list[str]) -> list[str]:
-        ...
+    def expand_text_variables(self, text: list[str]) -> list[str]: ...
 
     def expand_text_variables(self, text: str | list[str]) -> str | list[str]:
         command = project_commands_pb2.ExpandTextVariables()

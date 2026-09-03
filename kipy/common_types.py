@@ -358,9 +358,7 @@ class GraphicFillAttributes(Wrapper):
         proto: types.GraphicFillAttributes | None = None,
         proto_ref: types.GraphicFillAttributes | None = None,
     ):
-        self._proto = (
-            proto_ref if proto_ref is not None else types.GraphicFillAttributes()
-        )
+        self._proto = proto_ref if proto_ref is not None else types.GraphicFillAttributes()
 
         if proto is not None:
             self._proto.CopyFrom(proto)
@@ -372,9 +370,7 @@ class GraphicFillAttributes(Wrapper):
     @filled.setter
     def filled(self, fill: bool):
         self._proto.fill_type = (
-            types.GraphicFillType.GFT_FILLED
-            if fill
-            else types.GraphicFillType.GFT_UNFILLED
+            types.GraphicFillType.GFT_FILLED if fill else types.GraphicFillType.GFT_UNFILLED
         )
 
     @property
@@ -413,9 +409,7 @@ class GraphicAttributes(Wrapper):
 class Text(Wrapper):
     """Common text properties (wrapper for KiCad's EDA_TEXT) shared between board and schematic"""
 
-    def __init__(
-        self, proto: types.Text | None = None, proto_ref: types.Text | None = None
-    ):
+    def __init__(self, proto: types.Text | None = None, proto_ref: types.Text | None = None):
         self._proto = proto_ref if proto_ref is not None else types.Text()
 
         if proto is not None:
@@ -517,9 +511,7 @@ class GraphicShape(Wrapper):
         self._graphic_proto.attributes.CopyFrom(attributes.proto)
 
     def bounding_box(self) -> Box2:
-        raise NotImplementedError(
-            f"bounding_box() not implemented for {type(self).__name__}"
-        )
+        raise NotImplementedError(f"bounding_box() not implemented for {type(self).__name__}")
 
 
 class Segment(GraphicShape):
@@ -530,9 +522,7 @@ class Segment(GraphicShape):
         proto: base_types_pb2.GraphicShape | None = None,
         proto_ref: base_types_pb2.GraphicShape | None = None,
     ):
-        self._graphic_proto = (
-            proto_ref if proto_ref is not None else base_types_pb2.GraphicShape()
-        )
+        self._graphic_proto = proto_ref if proto_ref is not None else base_types_pb2.GraphicShape()
 
         if proto is not None:
             self._graphic_proto.CopyFrom(proto)
@@ -568,9 +558,7 @@ class Arc(GraphicShape):
         proto: base_types_pb2.GraphicShape | None = None,
         proto_ref: base_types_pb2.GraphicShape | None = None,
     ):
-        self._graphic_proto = (
-            proto_ref if proto_ref is not None else base_types_pb2.GraphicShape()
-        )
+        self._graphic_proto = proto_ref if proto_ref is not None else base_types_pb2.GraphicShape()
 
         if proto is not None:
             self._graphic_proto.CopyFrom(proto)
@@ -650,9 +638,7 @@ class Circle(GraphicShape):
         proto: base_types_pb2.GraphicShape | None = None,
         proto_ref: base_types_pb2.GraphicShape | None = None,
     ):
-        self._graphic_proto = (
-            proto_ref if proto_ref is not None else base_types_pb2.GraphicShape()
-        )
+        self._graphic_proto = proto_ref if proto_ref is not None else base_types_pb2.GraphicShape()
 
         if proto is not None:
             self._graphic_proto.CopyFrom(proto)
@@ -699,9 +685,7 @@ class Rectangle(GraphicShape):
         proto: base_types_pb2.GraphicShape | None = None,
         proto_ref: base_types_pb2.GraphicShape | None = None,
     ):
-        self._graphic_proto = (
-            proto_ref if proto_ref is not None else base_types_pb2.GraphicShape()
-        )
+        self._graphic_proto = proto_ref if proto_ref is not None else base_types_pb2.GraphicShape()
 
         if proto is not None:
             self._graphic_proto.CopyFrom(proto)
@@ -737,9 +721,7 @@ class Polygon(GraphicShape):
         proto: base_types_pb2.GraphicShape | None = None,
         proto_ref: base_types_pb2.GraphicShape | None = None,
     ):
-        self._graphic_proto = (
-            proto_ref if proto_ref is not None else base_types_pb2.GraphicShape()
-        )
+        self._graphic_proto = proto_ref if proto_ref is not None else base_types_pb2.GraphicShape()
 
         if proto is not None:
             self._graphic_proto.CopyFrom(proto)
@@ -751,9 +733,7 @@ class Polygon(GraphicShape):
 
     def _pack(self):
         self._graphic_proto.polygon.ClearField("polygons")
-        self._graphic_proto.polygon.polygons.extend(
-            [polygon.proto for polygon in self._polygons]
-        )
+        self._graphic_proto.polygon.polygons.extend([polygon.proto for polygon in self._polygons])
 
     @property
     def polygons(self) -> list[PolygonWithHoles]:
@@ -778,9 +758,7 @@ class Bezier(GraphicShape):
         proto: base_types_pb2.GraphicShape | None = None,
         proto_ref: base_types_pb2.GraphicShape | None = None,
     ):
-        self._graphic_proto = (
-            proto_ref if proto_ref is not None else base_types_pb2.GraphicShape()
-        )
+        self._graphic_proto = proto_ref if proto_ref is not None else base_types_pb2.GraphicShape()
 
         if proto is not None:
             self._graphic_proto.CopyFrom(proto)
@@ -853,8 +831,7 @@ class CompoundShape(Wrapper):
         return [
             shape
             for shape in (
-                to_concrete_shape(GraphicShape(subshape))
-                for subshape in self._proto.shapes
+                to_concrete_shape(GraphicShape(subshape)) for subshape in self._proto.shapes
             )
             if shape is not None
         ]
@@ -964,9 +941,7 @@ class PageSettings(Wrapper):
         proto: base_types_pb2.PageSettings | None = None,
         proto_ref: base_types_pb2.PageSettings | None = None,
     ):
-        self._proto = (
-            proto_ref if proto_ref is not None else base_types_pb2.PageSettings()
-        )
+        self._proto = proto_ref if proto_ref is not None else base_types_pb2.PageSettings()
 
         if proto is not None:
             self._proto.CopyFrom(proto)

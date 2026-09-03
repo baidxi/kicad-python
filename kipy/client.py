@@ -45,8 +45,12 @@ class KiCadClient:
             self._conn.close()
 
         try:
-            self._conn = pynng.Req0(dial=self._socket_path, block_on_dial=True,
-                                    send_timeout=self._timeout_ms, recv_timeout=self._timeout_ms)
+            self._conn = pynng.Req0(
+                dial=self._socket_path,
+                block_on_dial=True,
+                send_timeout=self._timeout_ms,
+                recv_timeout=self._timeout_ms,
+            )
             self._connected = True
         except pynng.exceptions.NNGException as e:
             self._connected = False
@@ -56,7 +60,7 @@ class KiCadClient:
     def connected(self):
         return self._connected
 
-    R = TypeVar('R', bound=Message)
+    R = TypeVar("R", bound=Message)
 
     def send(self, command: Message, response_type: type[R]) -> R:
         if not self._connected:
@@ -93,5 +97,8 @@ class KiCadClient:
 
             return response
         else:
-            raise ApiError(f"KiCad returned error: {reply.status.error_message}",
-                           raw_message=reply.status.error_message, code=reply.status.status)
+            raise ApiError(
+                f"KiCad returned error: {reply.status.error_message}",
+                raw_message=reply.status.error_message,
+                code=reply.status.status,
+            )

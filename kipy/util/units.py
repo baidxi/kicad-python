@@ -18,6 +18,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+
 def from_mm(value_mm: float) -> int:
     """
     KiCad uses several internal unit systems, but for the IPC API, all distance units are defined as
@@ -27,11 +28,13 @@ def from_mm(value_mm: float) -> int:
     """
     return int(value_mm * 1_000_000)
 
+
 def to_mm(value_nm: int) -> float:
     """
     Converts a KiCad API length/distance value (in nanometers) to millimeters
     """
     return float(value_nm) / 1_000_000
+
 
 def from_mils(value_mils: float) -> int:
     """
@@ -41,6 +44,7 @@ def from_mils(value_mils: float) -> int:
     :return: the quantity in KiCad API units
     """
     return int(value_mils * 25_400)
+
 
 def to_mils(value_mils: int) -> float:
     """

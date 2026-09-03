@@ -53,7 +53,7 @@ def _parameter_definitions() -> list[WizardParameter]:
             32,
             min_value=4,
             multiple=4,
-            description="Total number of pads (must be a multiple of 4)"
+            description="Total number of pads (must be a multiple of 4)",
         ),
         WizardParameter.create(
             "e",
@@ -253,11 +253,15 @@ class QfpWizard(WizardBase):
 
         for i in range(pads_per_row):
             y = half_row_len - i * pad_pitch
-            pad_positions.append((2 * pads_per_row + i + 1, Vector2.from_xy(h_pitch // 2, y), True))
+            pad_positions.append(
+                (2 * pads_per_row + i + 1, Vector2.from_xy(h_pitch // 2, y), True)
+            )
 
         for i in range(pads_per_row):
             x = half_row_len - i * pad_pitch
-            pad_positions.append((3 * pads_per_row + i + 1, Vector2.from_xy(x, -v_pitch // 2), False))
+            pad_positions.append(
+                (3 * pads_per_row + i + 1, Vector2.from_xy(x, -v_pitch // 2), False)
+            )
 
         for number, position, rotate_90 in pad_positions:
             footprint.definition.add_item(
@@ -350,7 +354,9 @@ class QfpWizard(WizardBase):
 
     @staticmethod
     def _footprint_value(params: QfpParameters) -> str:
-        return f"QFP-{params.n}_{to_mm(params.d1):g}x{to_mm(params.e1):g}_Pitch{to_mm(params.e):g}mm"
+        return (
+            f"QFP-{params.n}_{to_mm(params.d1):g}x{to_mm(params.e1):g}_Pitch{to_mm(params.e):g}mm"
+        )
 
     @staticmethod
     def _round_to_grid(value_nm: int, grid_nm: int) -> int:
@@ -416,6 +422,7 @@ class QfpWizard(WizardBase):
             pad.padstack.angle = Angle.from_degrees(90.0)
 
         return pad
+
 
 if __name__ == "__main__":
     wizard = QfpWizard()

@@ -708,6 +708,7 @@ class WizardInfo(Wrapper):
     def parameters(self, value: list[WizardParameter]):
         self._parameters = value
 
+
 class WizardBase:
     def __init__(self, description: str) -> None:
         self.description = description
@@ -715,9 +716,7 @@ class WizardBase:
     def build_wizard_info(self) -> WizardInfo:
         raise NotImplementedError("Implement build_wizard_info to describe your wizard")
 
-    def build_generated_content(
-        self, parameters: list[WizardParameter] | None = None
-    ) -> Wrapper:
+    def build_generated_content(self, parameters: list[WizardParameter] | None = None) -> Wrapper:
         raise NotImplementedError(
             "Implement generate to generate content based on the provided parameters"
         )
