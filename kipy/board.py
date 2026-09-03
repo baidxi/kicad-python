@@ -18,8 +18,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from collections.abc import Iterable, Sequence
 from time import sleep
-from typing import List, Dict, Union, Iterable, Optional, Sequence, cast, overload
+from typing import Dict, List, Optional, Union, cast, overload
+
 from google.protobuf.empty_pb2 import Empty
 
 from kipy.board_types import (
@@ -27,60 +29,62 @@ from kipy.board_types import (
     Barcode,
     BoardEditorAppearanceSettings,
     BoardItem,
-    ReferenceImage,
+    BoardShape,
     BoardText,
     BoardTextBox,
     Dimension,
     FootprintInstance,
+    Group,
     Net,
     Pad,
-    BoardShape,
+    ReferenceImage,
     Track,
     Via,
     Zone,
-    Group,
     to_concrete_board_shape,
     to_concrete_dimension,
-    unwrap
+    unwrap,
 )
 from kipy.client import ApiError, KiCadClient
-from kipy.common_types import Color, Commit, TitleBlockInfo, TextAttributes
+from kipy.common_types import Color, Commit, TextAttributes, TitleBlockInfo
 from kipy.geometry import Box2, PolygonWithHoles, Vector2
-from kipy.project import Project, NetClass
-from kipy.proto.board import board_types_pb2
-from kipy.proto.common.commands import editor_commands_pb2, project_commands_pb2
+from kipy.project import NetClass, Project
+from kipy.proto.board import board_commands_pb2, board_pb2, board_types_pb2
+from kipy.proto.board.board_commands_pb2 import BoardFlipDirection, BoardOriginType  #noqa
+
+# Re-exported protobuf enum types
+from kipy.proto.board.board_pb2 import (  # noqa
+    BoardEdgeConnectorType,
+    BoardLayerClass,
+    BoardStackupDielectricType,
+    DielectricModel,
+)
+from kipy.proto.board.board_types_pb2 import BoardLayer
+from kipy.proto.common.commands import Ping, editor_commands_pb2, project_commands_pb2
+from kipy.proto.common.commands.editor_commands_pb2 import (
+    BeginCommit,
+    BeginCommitResponse,
+    CommitAction,
+    CreateItems,
+    CreateItemsResponse,
+    DeleteItems,
+    DeleteItemsResponse,
+    EndCommit,
+    EndCommitResponse,
+    GetItems,
+    GetItemsById,
+    GetItemsResponse,
+    HitTest,
+    HitTestResponse,
+    HitTestResult,
+    UpdateItems,
+    UpdateItemsResponse,
+)
 from kipy.proto.common.envelope_pb2 import ApiStatusCode
+from kipy.proto.common.types import KIID, DocumentSpecifier, KiCadObjectType, base_types_pb2
 from kipy.util import pack_any
 from kipy.wrapper import Item, Wrapper
 
-from kipy.proto.common.commands import Ping
-from kipy.proto.common.types import DocumentSpecifier, KIID, KiCadObjectType, base_types_pb2
-from kipy.proto.common.commands.editor_commands_pb2 import (
-    BeginCommit, BeginCommitResponse, CommitAction,
-    EndCommit, EndCommitResponse,
-    CreateItems, CreateItemsResponse,
-    UpdateItems, UpdateItemsResponse,
-    GetItems, GetItemsById, GetItemsResponse,
-    DeleteItems, DeleteItemsResponse,
-    HitTest, HitTestResponse, HitTestResult
-)
-from kipy.proto.board import board_pb2
-from kipy.proto.board import board_commands_pb2
-
-# Re-exported protobuf enum types
-from kipy.proto.board.board_pb2 import (    # noqa
-    BoardLayerClass,
-    BoardEdgeConnectorType,
-    DielectricModel,
-    BoardStackupDielectricType,
-)
-from kipy.proto.board.board_types_pb2 import ( #noqa
-    BoardLayer
-)
-from kipy.proto.board.board_commands_pb2 import ( #noqa
-    BoardOriginType,
-    BoardFlipDirection
-)
 
 class BoardLayerGraphicsDefaults(Wrapper):
     """The default properties for graphic items added on a given class of board layer"""
@@ -1434,7 +1438,7 @@ class Board:
             sleep(poll_interval_seconds)
             try:
                 self._kicad.send(Ping(), Empty)
-            except IOError:
+            except OSError:
                 # transport-layer timeout
                 continue
             except ApiError as e:

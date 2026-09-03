@@ -18,10 +18,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 from kipy import KiCad
-from kipy.board_types import (
-    BoardLayer,
-    Zone
-)
+from kipy.board_types import BoardLayer, Zone
 from kipy.common_types import PolygonWithHoles
 from kipy.geometry import PolyLine, PolyLineNode
 from kipy.util import from_mm

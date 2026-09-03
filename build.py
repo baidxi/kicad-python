@@ -19,6 +19,7 @@
 # SOFTWARE.
 
 import os
+
 import setuptools
 
 from tools.generate_protos import generate_protos

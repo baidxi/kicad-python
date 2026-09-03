@@ -172,6 +172,6 @@ def layer_from_canonical_name(name: str) -> BoardLayer.ValueType:
 
 def iter_copper_layers():
     """Yields all copper layers."""
-    for layer in CANONICAL_LAYER_NAMES.keys():
+    for layer in CANONICAL_LAYER_NAMES:
         if is_copper_layer(layer):
             yield layer

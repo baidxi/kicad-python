@@ -18,13 +18,14 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import pynng
 from typing import TypeVar
 
+import pynng
 from google.protobuf.message import Message
 
 from kipy.errors import ApiError, ConnectionError
 from kipy.proto.common import ApiRequest, ApiResponse, ApiStatusCode
+
 
 class KiCadClient:
     def __init__(self, socket_path: str, client_name: str, kicad_token: str, timeout_ms: int):

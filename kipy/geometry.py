@@ -20,9 +20,10 @@
 
 from __future__ import annotations
 
+import math
 import sys
 from typing import Optional, Union
-import math
+
 from kipy.proto.common import types
 from kipy.util import from_mm
 from kipy.wrapper import Wrapper

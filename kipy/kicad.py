@@ -24,20 +24,22 @@ import os
 import platform
 import random
 import string
+from collections.abc import Sequence
 from tempfile import gettempdir
-from typing import Optional, Sequence, Union
+from typing import Optional, Union
+
 from google.protobuf.empty_pb2 import Empty
 
 from kipy.board import Board
-from kipy.client import KiCadClient, ApiError
-from kipy.common_types import Text, TextBox, CompoundShape
+from kipy.client import ApiError, KiCadClient
+from kipy.common_types import CompoundShape, Text, TextBox
 from kipy.errors import FutureVersionError
 from kipy.geometry import Box2
+from kipy.kicad_api_version import KICAD_API_VERSION
 from kipy.project import Project
 from kipy.proto.common import commands
-from kipy.proto.common.types import base_types_pb2, DocumentType, DocumentSpecifier
 from kipy.proto.common.commands import base_commands_pb2
-from kipy.kicad_api_version import KICAD_API_VERSION
+from kipy.proto.common.types import DocumentSpecifier, DocumentType, base_types_pb2
 
 
 def _default_socket_path() -> str:
