@@ -89,6 +89,11 @@ exclude = [
 module = "pynng"
 ignore_missing_imports = true
 
+# Can remove once minimum Python version is higher than 3.9
+[[tool.mypy.overrides]]
+module = "jsonschema"
+follow_untyped_imports = true
+
 [tool.pytest.ini_options]
 testpaths = [
     "tests",
