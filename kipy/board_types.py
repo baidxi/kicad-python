@@ -37,6 +37,7 @@ from kipy.common_types import (
     Rectangle,
     Segment,
     SheetPath,
+    StrokeAttributes,
     Text,
     TextAttributes,
     TextBox,
@@ -79,6 +80,7 @@ from kipy.proto.board.board_types_pb2 import (  # noqa
     PadType,
     SolderMaskMode,
     SolderPasteMode,
+    TableStrokeMode,
     UnconnectedLayerRemoval,
     ViaType,
     ZoneBorderStyle,
@@ -3049,6 +3051,253 @@ class Group(BoardItem):
         return self._proto.parent if self._proto.HasField("parent") else None
 
 
+class TableCell(Wrapper):
+    """A single cell of a table
+
+    .. versionadded:: 0.9.0 (KiCad 10.0.7)"""
+
+    def __init__(
+        self,
+        proto: board_types_pb2.TableCell | None = None,
+        proto_ref: board_types_pb2.TableCell | None = None,
+    ):
+        self._proto = proto_ref if proto_ref is not None else board_types_pb2.TableCell()
+
+        if proto is not None:
+            self._proto.CopyFrom(proto)
+
+    def __repr__(self) -> str:
+        return f"TableCell(text={self.text_box.value}, column_span={self.column_span})"
+
+    @property
+    def text(self) -> BoardTextBox:
+        return BoardTextBox(proto_ref=self._proto.text_box)
+
+    @text.setter
+    def text_box(self, text_box: BoardTextBox):
+        self._proto.text_box.CopyFrom(text_box.proto)
+
+    @property
+    def column_span(self) -> int:
+        return self._proto.column_span
+
+    @column_span.setter
+    def column_span(self, span: int):
+        self._proto.column_span = span
+
+    @property
+    def row_span(self) -> int:
+        return self._proto.row_span
+
+    @row_span.setter
+    def row_span(self, span: int):
+        self._proto.row_span = span
+
+
+class Table(BoardItem):
+    """Represents a table on a board or footprint
+
+    .. versionadded:: 0.9.0 (KiCad 10.0.7)"""
+
+    def __init__(
+        self,
+        proto: board_types_pb2.Table | None = None,
+        proto_ref: board_types_pb2.Table | None = None,
+    ):
+        self._proto = proto_ref if proto_ref is not None else board_types_pb2.Table()
+
+        if proto is not None:
+            self._proto.CopyFrom(proto)
+
+    def __repr__(self) -> str:
+        return (
+            f"Table(cells={self.column_count}x{len(self.cells)}, "
+            f"layer={BoardLayer.Name(self.layer)})"
+        )
+
+    @property
+    def id(self) -> KIID:
+        return self._proto.id
+
+    @property
+    def column_count(self) -> int:
+        return self._proto.column_count
+
+    @column_count.setter
+    def column_count(self, count: int):
+        self._proto.column_count = count
+
+    @property
+    def column_widths(self) -> list[int]:
+        return list(self._proto.column_widths)
+
+    @column_widths.setter
+    def column_widths(self, widths: list[int]):
+        del self._proto.column_widths[:]
+        self._proto.column_widths.extend(widths)
+
+    @property
+    def row_heights(self) -> list[int]:
+        return list(self._proto.row_heights)
+
+    @row_heights.setter
+    def row_heights(self, heights: list[int]):
+        del self._proto.row_heights[:]
+        self._proto.row_heights.extend(heights)
+
+    @property
+    def layer(self) -> BoardLayer.ValueType:
+        return self._proto.layer
+
+    @layer.setter
+    def layer(self, layer: BoardLayer.ValueType):
+        self._proto.layer = layer
+
+    @property
+    def locked(self) -> bool:
+        return self._proto.locked == LockedState.LS_LOCKED
+
+    @locked.setter
+    def locked(self, locked: bool):
+        self._proto.locked = {
+            True: LockedState.LS_LOCKED,
+            False: LockedState.LS_UNLOCKED,
+        }.get(locked, LockedState.LS_UNLOCKED)
+
+    @property
+    def cells(self) -> list[TableCell]:
+        return [TableCell(proto_ref=cell) for cell in self._proto.cells]
+
+    @cells.setter
+    def cells(self, cells: list[TableCell]):
+        del self._proto.cells[:]
+        self._proto.cells.extend(cell.proto for cell in cells)
+
+    @property
+    def external_border(self) -> TableStrokeMode.ValueType:
+        return self._proto.external_border
+
+    @external_border.setter
+    def external_border(self, mode: TableStrokeMode.ValueType):
+        self._proto.external_border = mode
+
+    @property
+    def header_separator(self) -> TableStrokeMode.ValueType:
+        return self._proto.header_separator
+
+    @header_separator.setter
+    def header_separator(self, mode: TableStrokeMode.ValueType):
+        self._proto.header_separator = mode
+
+    @property
+    def row_separators(self) -> TableStrokeMode.ValueType:
+        return self._proto.row_separators
+
+    @row_separators.setter
+    def row_separators(self, mode: TableStrokeMode.ValueType):
+        self._proto.row_separators = mode
+
+    @property
+    def column_separators(self) -> TableStrokeMode.ValueType:
+        return self._proto.column_separators
+
+    @column_separators.setter
+    def column_separators(self, mode: TableStrokeMode.ValueType):
+        self._proto.column_separators = mode
+
+    @property
+    def border_stroke(self) -> StrokeAttributes:
+        return StrokeAttributes(proto_ref=self._proto.border_stroke)
+
+    @border_stroke.setter
+    def border_stroke(self, stroke: StrokeAttributes):
+        self._proto.border_stroke.CopyFrom(stroke.proto)
+
+    @property
+    def separators_stroke(self) -> StrokeAttributes:
+        return StrokeAttributes(proto_ref=self._proto.separators_stroke)
+
+    @separators_stroke.setter
+    def separators_stroke(self, stroke: StrokeAttributes):
+        self._proto.separators_stroke.CopyFrom(stroke.proto)
+
+    @property
+    def parent(self) -> KIID | None:
+        """The ID of the parent container for this item (such as a Board or Footprint), if any.
+        Read-only; item parents can only be changed by add/remove calls on the parent container.
+        """
+        return self._proto.parent if self._proto.HasField("parent") else None
+
+
+class ReferencePoint(BoardItem):
+    """Represents a reference point marker on a board
+
+    .. versionadded:: 0.9.0 (KiCad 10.0.7)"""
+
+    def __init__(
+        self,
+        proto: board_types_pb2.ReferencePoint | None = None,
+        proto_ref: board_types_pb2.ReferencePoint | None = None,
+    ):
+        self._proto = proto_ref if proto_ref is not None else board_types_pb2.ReferencePoint()
+
+        if proto is not None:
+            self._proto.CopyFrom(proto)
+
+    def __repr__(self) -> str:
+        return (
+            f"ReferencePoint(position={self.position}, layer={BoardLayer.Name(self.layer)}, "
+            f"size={self.size})"
+        )
+
+    @property
+    def id(self) -> KIID:
+        return self._proto.id
+
+    @property
+    def layer(self) -> BoardLayer.ValueType:
+        return self._proto.layer
+
+    @layer.setter
+    def layer(self, layer: BoardLayer.ValueType):
+        self._proto.layer = layer
+
+    @property
+    def position(self) -> Vector2:
+        return Vector2(self._proto.position)
+
+    @position.setter
+    def position(self, position: Vector2):
+        self._proto.position.CopyFrom(position.proto)
+
+    @property
+    def size(self) -> int:
+        """Marker size in nanometers"""
+        return self._proto.size.value_nm
+
+    @size.setter
+    def size(self, size_nm: int):
+        self._proto.size.value_nm = size_nm
+
+    @property
+    def locked(self) -> bool:
+        return self._proto.locked == LockedState.LS_LOCKED
+
+    @locked.setter
+    def locked(self, locked: bool):
+        self._proto.locked = {
+            True: LockedState.LS_LOCKED,
+            False: LockedState.LS_UNLOCKED,
+        }.get(locked, LockedState.LS_UNLOCKED)
+
+    @property
+    def parent(self) -> KIID | None:
+        """The ID of the parent container for this item (such as a Board or Footprint), if any.
+        Read-only; item parents can only be changed by add/remove calls on the parent container.
+        """
+        return self._proto.parent if self._proto.HasField("parent") else None
+
+
 _proto_to_object: dict[type[Message], type[Wrapper]] = {
     board_types_pb2.Arc: ArcTrack,
     board_types_pb2.Barcode: Barcode,
@@ -3066,6 +3315,8 @@ _proto_to_object: dict[type[Message], type[Wrapper]] = {
     board_types_pb2.Via: Via,
     board_types_pb2.Zone: Zone,
     board_types_pb2.Group: Group,
+    board_types_pb2.Table: Table,
+    board_types_pb2.ReferencePoint: ReferencePoint,
 }
 
 
