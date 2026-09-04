@@ -82,13 +82,24 @@ exclude = [
 line-length = 99
 
 [tool.mypy]
+python_version = 3.9
 exclude = [
     "kipy/proto"
 ]
 
 [[tool.mypy.overrides]]
+module = "kipy.proto.*"
+ignore_errors = true
+follow_imports = "silent"
+
+[[tool.mypy.overrides]]
 module = "pynng"
 ignore_missing_imports = true
+
+# Can remove once minimum Python version is higher than 3.9
+[[tool.mypy.overrides]]
+module = "jsonschema"
+follow_untyped_imports = true
 
 [tool.pytest.ini_options]
 testpaths = [
