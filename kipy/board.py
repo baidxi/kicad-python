@@ -48,7 +48,14 @@ from kipy.board_types import (
     unwrap,
 )
 from kipy.client import ApiError, KiCadClient
-from kipy.common_types import Color, Commit, TextAttributes, TitleBlockInfo
+from kipy.common_types import (
+    Color,
+    Commit,
+    EmbeddedFile,
+    EmbeddedFiles,
+    TextAttributes,
+    TitleBlockInfo,
+)
 from kipy.geometry import Box2, PolygonWithHoles, Vector2
 from kipy.project import NetClass, Project
 from kipy.proto.board import board_commands_pb2, board_pb2, board_types_pb2
@@ -83,7 +90,13 @@ from kipy.proto.common.commands.editor_commands_pb2 import (
     UpdateItemsResponse,
 )
 from kipy.proto.common.envelope_pb2 import ApiStatusCode
-from kipy.proto.common.types import KIID, DocumentSpecifier, KiCadObjectType, base_types_pb2
+from kipy.proto.common.types import (
+    KIID,
+    DocumentSpecifier,
+    KiCadObjectType,
+    base_types_pb2,
+    embedded_files_pb2,
+)
 from kipy.util import pack_any
 from kipy.wrapper import Item, Wrapper
 
@@ -1218,6 +1231,35 @@ class Board:
                 reply.defaults.layers[5]
             ),
         }
+
+    def get_embedded_files(self) -> EmbeddedFiles:
+        """Retrieves the files embedded in the board
+
+        .. versionadded:: 0.9.0 (KiCad 10.0.7)"""
+        cmd = board_commands_pb2.GetEmbeddedFiles()
+        cmd.board.CopyFrom(self._doc)
+        response = self._kicad.send(cmd, embedded_files_pb2.EmbeddedFiles)
+        return EmbeddedFiles(response)
+
+    def add_embedded_files(self, files: EmbeddedFile | Sequence[EmbeddedFile]):
+        """Appends the given file(s) to the board's embedded files
+
+        .. versionadded:: 0.9.0 (KiCad 10.0.7)"""
+        cmd = board_commands_pb2.AddEmbeddedFiles()
+        cmd.board.CopyFrom(self._doc)
+        files_list = [files] if isinstance(files, EmbeddedFile) else files
+        cmd.files.files.extend([file.proto for file in files_list])
+        self._kicad.send(cmd, Empty)
+
+    def set_embedded_files(self, files: EmbeddedFile | Sequence[EmbeddedFile]):
+        """Replaces all files embedded in the board with the given file(s)
+
+        .. versionadded:: 0.9.0 (KiCad 10.0.7)"""
+        cmd = board_commands_pb2.SetEmbeddedFiles()
+        cmd.board.CopyFrom(self._doc)
+        files_list = [files] if isinstance(files, EmbeddedFile) else files
+        cmd.files.files.extend([file.proto for file in files_list])
+        self._kicad.send(cmd, Empty)
 
     def get_title_block_info(self) -> TitleBlockInfo:
         """Retrieves the title block information for the board"""

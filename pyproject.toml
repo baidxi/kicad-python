@@ -22,6 +22,7 @@ dependencies = [
     # 3.11: Self
     # 3.13: @deprecated
     "typing_extensions >=4.13.2 ; python_version < '3.13'",
+    "zstandard (>=0.25.0,<0.26.0)",
 ]
 
 [project.scripts]
