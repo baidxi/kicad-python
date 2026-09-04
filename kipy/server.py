@@ -35,7 +35,7 @@ import uuid
 from pathlib import Path
 from typing import IO
 
-from kipy.errors import ApiError
+from kipy.errors import ApiError, ConnectionError
 
 _READY_PREFIX = "KiCad API server listening at "
 
