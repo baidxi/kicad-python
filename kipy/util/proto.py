@@ -45,6 +45,8 @@ _any_urls = {
     "type.googleapis.com/kiapi.board.types.Dimension": board_types_pb2.Dimension,
     "type.googleapis.com/kiapi.board.types.ReferenceImage": board_types_pb2.ReferenceImage,
     "type.googleapis.com/kiapi.board.types.Group": board_types_pb2.Group,
+    "type.googleapis.com/kiapi.board.types.Table": board_types_pb2.Table,
+    "type.googleapis.com/kiapi.board.types.ReferencePoint": board_types_pb2.ReferencePoint,
     "type.googleapis.com/kiapi.board.types.Field": board_types_pb2.Field,
     "type.googleapis.com/kiapi.board.types.FootprintInstance": board_types_pb2.FootprintInstance,
     "type.googleapis.com/kiapi.board.types.Footprint3DModel": board_types_pb2.Footprint3DModel,

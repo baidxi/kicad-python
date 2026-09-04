@@ -38,6 +38,8 @@ from kipy.board_types import (
     Net,
     Pad,
     ReferenceImage,
+    ReferencePoint,
+    Table,
     Track,
     Via,
     Zone,
@@ -856,6 +858,23 @@ class Board:
         return [
             cast(ReferenceImage, item)
             for item in self.get_items(types=[KiCadObjectType.KOT_PCB_REFERENCE_IMAGE])
+        ]
+
+    def get_tables(self) -> Sequence[Table]:
+        """Retrieves all table objects on the board
+
+        .. versionadded:: 0.9.0 (KiCad 10.0.7)"""
+        return [
+            cast(Table, item) for item in self.get_items(types=[KiCadObjectType.KOT_PCB_TABLE])
+        ]
+
+    def get_reference_points(self) -> Sequence[ReferencePoint]:
+        """Retrieves all reference point objects on the board
+
+        .. versionadded:: 0.9.0 (KiCad 10.0.7)"""
+        return [
+            cast(ReferencePoint, item)
+            for item in self.get_items(types=[KiCadObjectType.KOT_PCB_POINT])
         ]
 
     def get_zones(self) -> Sequence[Zone]:
