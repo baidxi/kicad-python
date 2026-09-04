@@ -20,8 +20,13 @@
 
 from __future__ import annotations
 
+import sys
 from collections.abc import Sequence
-from typing import Self
+
+if sys.version_info >= (3, 11):
+    from typing import Self
+else:
+    from typing_extensions import Self
 
 from kipy.proto.board import board_commands_pb2, board_rules_pb2, board_types_pb2
 from kipy.proto.board.board_rules_pb2 import (  # noqa

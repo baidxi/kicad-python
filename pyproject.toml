@@ -82,9 +82,15 @@ exclude = [
 line-length = 99
 
 [tool.mypy]
+python_version = 3.9
 exclude = [
     "kipy/proto"
 ]
+
+[[tool.mypy.overrides]]
+module = "kipy.proto.*"
+ignore_errors = true
+follow_imports = "silent"
 
 [[tool.mypy.overrides]]
 module = "pynng"
