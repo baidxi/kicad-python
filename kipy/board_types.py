@@ -3067,14 +3067,14 @@ class TableCell(Wrapper):
             self._proto.CopyFrom(proto)
 
     def __repr__(self) -> str:
-        return f"TableCell(text={self.text_box.value}, column_span={self.column_span})"
+        return f"TableCell(text={self.text.value}, column_span={self.column_span})"
 
     @property
     def text(self) -> BoardTextBox:
         return BoardTextBox(proto_ref=self._proto.text_box)
 
     @text.setter
-    def text_box(self, text_box: BoardTextBox):
+    def text(self, text_box: BoardTextBox):
         self._proto.text_box.CopyFrom(text_box.proto)
 
     @property
