@@ -1882,6 +1882,22 @@ class FootprintAttributes(Wrapper):
         self._proto.do_not_populate = do_not_populate
 
     @property
+    def exempt_from_courtyard_requirement(self) -> bool:
+        return self._proto.exempt_from_courtyard_requirement
+
+    @exempt_from_courtyard_requirement.setter
+    def exempt_from_courtyard_requirement(self, exempt_from_courtyard_requirement: bool):
+        self._proto.exempt_from_courtyard_requirement = exempt_from_courtyard_requirement
+
+    @property
+    def allow_soldermask_bridges(self) -> bool:
+        return self._proto.allow_soldermask_bridges
+
+    @allow_soldermask_bridges.setter
+    def allow_soldermask_bridges(self, allow_soldermask_bridges: bool):
+        self._proto.allow_soldermask_bridges = allow_soldermask_bridges
+
+    @property
     def mounting_style(self) -> board_types_pb2.FootprintMountingStyle.ValueType:
         """
         The mounting style of the footprint (SMD, through-hole, or unspecified)
@@ -1893,6 +1909,22 @@ class FootprintAttributes(Wrapper):
     @mounting_style.setter
     def mounting_style(self, style: board_types_pb2.FootprintMountingStyle.ValueType):
         self._proto.mounting_style = style
+
+    @property
+    def description(self) -> str:
+        return self._proto.description
+
+    @description.setter
+    def description(self, description: str):
+        self._proto.description = description
+
+    @property
+    def keywords(self) -> str:
+        return self._proto.keywords
+
+    @keywords.setter
+    def keywords(self, keywords: str):
+        self._proto.keywords = keywords
 
 
 class Footprint3DModel(Wrapper):
