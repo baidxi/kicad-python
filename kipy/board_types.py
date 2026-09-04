@@ -1898,6 +1898,14 @@ class FootprintAttributes(Wrapper):
         self._proto.allow_soldermask_bridges = allow_soldermask_bridges
 
     @property
+    def exclude_from_simulation(self) -> bool:
+        return self._proto.exclude_from_simulation
+
+    @exclude_from_simulation.setter
+    def exclude_from_simulation(self, exclude_from_simulation: bool):
+        self._proto.exclude_from_simulation = exclude_from_simulation
+
+    @property
     def mounting_style(self) -> board_types_pb2.FootprintMountingStyle.ValueType:
         """
         The mounting style of the footprint (SMD, through-hole, or unspecified)
