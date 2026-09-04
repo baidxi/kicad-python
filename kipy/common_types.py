@@ -1094,3 +1094,38 @@ class EmbeddedFiles(Wrapper):
     def files(self, files: Sequence[EmbeddedFile]):
         del self._proto.files[:]
         self._proto.files.extend(f.proto for f in files)
+
+
+class CustomProperty(Wrapper):
+    """A user-defined key/value property stored on a board/schematic object
+
+    .. versionadded:: 0.x.0 (KiCad 11)"""
+
+    def __init__(
+        self,
+        proto: base_types_pb2.CustomProperty | None = None,
+        proto_ref: base_types_pb2.CustomProperty | None = None,
+    ):
+        self._proto = proto_ref if proto_ref is not None else base_types_pb2.CustomProperty()
+
+        if proto is not None:
+            self._proto.CopyFrom(proto)
+
+    @property
+    def key(self) -> str:
+        return self._proto.key
+
+    @key.setter
+    def key(self, key: str):
+        self._proto.key = key
+
+    @property
+    def value(self) -> str:
+        return self._proto.value
+
+    @value.setter
+    def value(self, value: str):
+        self._proto.value = value
+
+    def __repr__(self) -> str:
+        return f"CustomProperty(key={self.key!r})"

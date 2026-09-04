@@ -27,6 +27,7 @@ from google.protobuf.message import Message
 
 from kipy.common_types import (
     Color,
+    CustomProperty,
     GraphicAttributes,
     GraphicFillAttributes,
     GraphicShape,
@@ -187,6 +188,18 @@ class SchematicLine(SchematicItem):
     def stroke(self, value: StrokeAttributes):
         self._proto.stroke.CopyFrom(value.proto)
 
+    @property
+    def custom_properties(self) -> Sequence[CustomProperty]:
+        """User-defined properties attached to the line
+
+        .. versionadded:: 0.x.0 (KiCad 11)"""
+        return [CustomProperty(proto_ref=prop) for prop in self._proto.custom_properties]
+
+    @custom_properties.setter
+    def custom_properties(self, value: Sequence[CustomProperty]):
+        del self._proto.custom_properties[:]
+        self._proto.custom_properties.extend(prop.proto for prop in value)
+
 
 class Junction(SchematicItem):
     """
@@ -240,6 +253,18 @@ class Junction(SchematicItem):
     def color(self, value: Color):
         self._proto.color.CopyFrom(value.proto)
 
+    @property
+    def custom_properties(self) -> Sequence[CustomProperty]:
+        """User-defined properties attached to the junction
+
+        .. versionadded:: 0.x.0 (KiCad 11)"""
+        return [CustomProperty(proto_ref=prop) for prop in self._proto.custom_properties]
+
+    @custom_properties.setter
+    def custom_properties(self, value: Sequence[CustomProperty]):
+        del self._proto.custom_properties[:]
+        self._proto.custom_properties.extend(prop.proto for prop in value)
+
 
 class NoConnectMarker(SchematicItem):
     """
@@ -282,6 +307,18 @@ class NoConnectMarker(SchematicItem):
     @size.setter
     def size(self, value: int):
         self._proto.size.value_nm = value
+
+    @property
+    def custom_properties(self) -> Sequence[CustomProperty]:
+        """User-defined properties attached to the no-connect marker
+
+        .. versionadded:: 0.x.0 (KiCad 11)"""
+        return [CustomProperty(proto_ref=prop) for prop in self._proto.custom_properties]
+
+    @custom_properties.setter
+    def custom_properties(self, value: Sequence[CustomProperty]):
+        del self._proto.custom_properties[:]
+        self._proto.custom_properties.extend(prop.proto for prop in value)
 
 
 class BusEntry(SchematicItem):
@@ -342,6 +379,18 @@ class BusEntry(SchematicItem):
     def type(self, value: BusEntryType.ValueType):
         self._proto.type = value
 
+    @property
+    def custom_properties(self) -> Sequence[CustomProperty]:
+        """User-defined properties attached to the bus entry
+
+        .. versionadded:: 0.x.0 (KiCad 11)"""
+        return [CustomProperty(proto_ref=prop) for prop in self._proto.custom_properties]
+
+    @custom_properties.setter
+    def custom_properties(self, value: Sequence[CustomProperty]):
+        del self._proto.custom_properties[:]
+        self._proto.custom_properties.extend(prop.proto for prop in value)
+
 
 class SchematicText(SchematicItem):
     """
@@ -400,6 +449,18 @@ class SchematicText(SchematicItem):
     @exclude_from_sim.setter
     def exclude_from_sim(self, value: bool):
         self._proto.exclude_from_sim = value
+
+    @property
+    def custom_properties(self) -> Sequence[CustomProperty]:
+        """User-defined properties attached to the text
+
+        .. versionadded:: 0.x.0 (KiCad 11)"""
+        return [CustomProperty(proto_ref=prop) for prop in self._proto.custom_properties]
+
+    @custom_properties.setter
+    def custom_properties(self, value: Sequence[CustomProperty]):
+        del self._proto.custom_properties[:]
+        self._proto.custom_properties.extend(prop.proto for prop in value)
 
 
 class SchematicTextBox(SchematicItem):
@@ -506,6 +567,18 @@ class SchematicTextBox(SchematicItem):
     def margin_bottom(self, value: int):
         self._proto.margin_bottom.value_nm = value
 
+    @property
+    def custom_properties(self) -> Sequence[CustomProperty]:
+        """User-defined properties attached to the text box
+
+        .. versionadded:: 0.x.0 (KiCad 11)"""
+        return [CustomProperty(proto_ref=prop) for prop in self._proto.custom_properties]
+
+    @custom_properties.setter
+    def custom_properties(self, value: Sequence[CustomProperty]):
+        del self._proto.custom_properties[:]
+        self._proto.custom_properties.extend(prop.proto for prop in value)
+
 
 class SchematicGraphicShape(SchematicItem):
     """
@@ -546,6 +619,18 @@ class SchematicGraphicShape(SchematicItem):
                 "SchematicGraphicShape cannot be a segment; use SchematicLine instead"
             )
         self._proto.shape.CopyFrom(value._graphic_proto)
+
+    @property
+    def custom_properties(self) -> Sequence[CustomProperty]:
+        """User-defined properties attached to the shape
+
+        .. versionadded:: 0.x.0 (KiCad 11)"""
+        return [CustomProperty(proto_ref=prop) for prop in self._proto.custom_properties]
+
+    @custom_properties.setter
+    def custom_properties(self, value: Sequence[CustomProperty]):
+        del self._proto.custom_properties[:]
+        self._proto.custom_properties.extend(prop.proto for prop in value)
 
 
 class SchematicImage(SchematicItem):
@@ -606,6 +691,18 @@ class SchematicImage(SchematicItem):
     def image_data(self, value: bytes):
         self._proto.image_data = value
 
+    @property
+    def custom_properties(self) -> Sequence[CustomProperty]:
+        """User-defined properties attached to the image
+
+        .. versionadded:: 0.x.0 (KiCad 11)"""
+        return [CustomProperty(proto_ref=prop) for prop in self._proto.custom_properties]
+
+    @custom_properties.setter
+    def custom_properties(self, value: Sequence[CustomProperty]):
+        del self._proto.custom_properties[:]
+        self._proto.custom_properties.extend(prop.proto for prop in value)
+
 
 class BaseLabel(SchematicItem):
     """
@@ -655,6 +752,18 @@ class BaseLabel(SchematicItem):
     def fields(self, value: Sequence[SchematicField]):
         del self.proto.fields[:]
         self.proto.fields.extend(field.proto for field in value)
+
+    @property
+    def custom_properties(self) -> Sequence[CustomProperty]:
+        """User-defined properties attached to the label
+
+        .. versionadded:: 0.9.0"""
+        return [CustomProperty(proto_ref=prop) for prop in self.proto.custom_properties]
+
+    @custom_properties.setter
+    def custom_properties(self, value: Sequence[CustomProperty]):
+        del self.proto.custom_properties[:]
+        self.proto.custom_properties.extend(prop.proto for prop in value)
 
 
 class ShapeLabel(BaseLabel):
@@ -792,6 +901,18 @@ class Group(SchematicItem):
         self._unwrapped_items = value
         for item in value:
             self._proto.items.append(item.id)
+
+    @property
+    def custom_properties(self) -> Sequence[CustomProperty]:
+        """User-defined properties attached to the group
+
+        .. versionadded:: 0.9.0"""
+        return [CustomProperty(proto_ref=prop) for prop in self._proto.custom_properties]
+
+    @custom_properties.setter
+    def custom_properties(self, value: Sequence[CustomProperty]):
+        del self._proto.custom_properties[:]
+        self._proto.custom_properties.extend(prop.proto for prop in value)
 
 
 class SheetPin(ShapeLabel):
@@ -963,6 +1084,18 @@ class SheetSymbol(SchematicItem):
     @dnp.setter
     def dnp(self, value: bool):
         self._proto.dnp = value
+
+    @property
+    def custom_properties(self) -> Sequence[CustomProperty]:
+        """User-defined properties attached to the sheet
+
+        .. versionadded:: 0.9.0"""
+        return [CustomProperty(proto_ref=prop) for prop in self._proto.custom_properties]
+
+    @custom_properties.setter
+    def custom_properties(self, value: Sequence[CustomProperty]):
+        del self._proto.custom_properties[:]
+        self._proto.custom_properties.extend(prop.proto for prop in value)
 
 
 class SchematicPinAlternate(Wrapper):
@@ -1616,6 +1749,18 @@ class SchematicSymbolInstance(SchematicItem):
     def user_fields(self, value: Sequence[SchematicField]):
         del self._proto.user_fields[:]
         self._proto.user_fields.extend(f.proto for f in value)
+
+    @property
+    def custom_properties(self) -> Sequence[CustomProperty]:
+        """User-defined properties attached to the symbol instance
+
+        .. versionadded:: 0.9.0"""
+        return [CustomProperty(proto_ref=prop) for prop in self._proto.custom_properties]
+
+    @custom_properties.setter
+    def custom_properties(self, value: Sequence[CustomProperty]):
+        del self._proto.custom_properties[:]
+        self._proto.custom_properties.extend(prop.proto for prop in value)
 
 
 class SheetInstance(Wrapper):

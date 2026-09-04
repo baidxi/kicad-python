@@ -30,6 +30,7 @@ from kipy.common_types import (
     Arc,
     Bezier,
     Circle,
+    CustomProperty,
     EmbeddedFiles,
     GraphicAttributes,
     LibraryIdentifier,
@@ -1695,6 +1696,17 @@ class Pad(BoardItem):
         self._proto.pad_to_die_length.value_nm = length
 
     @property
+    def custom_properties(self) -> list[CustomProperty]:
+        """
+        .. versionadded:: 0.x.0 (KiCad 11)"""
+        return [CustomProperty(proto_ref=p) for p in self._proto.custom_properties]
+
+    @custom_properties.setter
+    def custom_properties(self, properties: list[CustomProperty]):
+        del self._proto.custom_properties[:]
+        self._proto.custom_properties.extend(p.proto for p in properties)
+
+    @property
     def parent(self) -> KIID | None:
         """The ID of the parent container for this item (such as a Board or Footprint), if any.
         Read-only; item parents can only be changed by add/remove calls on the parent container.
@@ -1803,6 +1815,17 @@ class Via(BoardItem):
     @drill_diameter.setter
     def drill_diameter(self, diameter: int):
         self.padstack.drill.diameter = Vector2.from_xy(diameter, diameter)
+
+    @property
+    def custom_properties(self) -> list[CustomProperty]:
+        """
+        .. versionadded:: 0.x.0 (KiCad 11)"""
+        return [CustomProperty(proto_ref=p) for p in self._proto.custom_properties]
+
+    @custom_properties.setter
+    def custom_properties(self, properties: list[CustomProperty]):
+        del self._proto.custom_properties[:]
+        self._proto.custom_properties.extend(p.proto for p in properties)
 
     @property
     def parent(self) -> KIID | None:
@@ -2299,6 +2322,17 @@ class FootprintInstance(BoardItem):
             self._proto.ClearField("embedded_files")
 
     @property
+    def custom_properties(self) -> list[CustomProperty]:
+        """
+        .. versionadded:: 0.x.0 (KiCad 11)"""
+        return [CustomProperty(proto_ref=p) for p in self._proto.custom_properties]
+
+    @custom_properties.setter
+    def custom_properties(self, properties: list[CustomProperty]):
+        del self._proto.custom_properties[:]
+        self._proto.custom_properties.extend(p.proto for p in properties)
+
+    @property
     def parent(self) -> KIID | None:
         """The ID of the parent container for this item (such as a Board or Footprint), if any.
         Read-only; item parents can only be changed by add/remove calls on the parent container.
@@ -2514,6 +2548,17 @@ class Zone(BoardItem):
         if self.is_rule_area():
             return None
         return self._proto.copper_settings.teardrop
+
+    @property
+    def custom_properties(self) -> list[CustomProperty]:
+        """
+        .. versionadded:: 0.x.0 (KiCad 11)"""
+        return [CustomProperty(proto_ref=p) for p in self._proto.custom_properties]
+
+    @custom_properties.setter
+    def custom_properties(self, properties: list[CustomProperty]):
+        del self._proto.custom_properties[:]
+        self._proto.custom_properties.extend(p.proto for p in properties)
 
     @property
     def border_style(self) -> ZoneBorderStyle.ValueType:
@@ -3043,6 +3088,17 @@ class Group(BoardItem):
         return f"Group(id={self.id}, items={self.items})"
 
     @property
+    def custom_properties(self) -> list[CustomProperty]:
+        """
+        .. versionadded:: 0.x.0 (KiCad 11)"""
+        return [CustomProperty(proto_ref=p) for p in self._proto.custom_properties]
+
+    @custom_properties.setter
+    def custom_properties(self, properties: list[CustomProperty]):
+        del self._proto.custom_properties[:]
+        self._proto.custom_properties.extend(p.proto for p in properties)
+
+    @property
     def parent(self) -> KIID | None:
         """The ID of the parent container for this item (such as a Board or Footprint), if any.
         Read-only; item parents can only be changed by add/remove calls on the parent container.
@@ -3092,6 +3148,17 @@ class TableCell(Wrapper):
     @row_span.setter
     def row_span(self, span: int):
         self._proto.row_span = span
+
+    @property
+    def custom_properties(self) -> list[CustomProperty]:
+        """
+        .. versionadded:: 0.x.0 (KiCad 11)"""
+        return [CustomProperty(proto_ref=p) for p in self._proto.custom_properties]
+
+    @custom_properties.setter
+    def custom_properties(self, properties: list[CustomProperty]):
+        del self._proto.custom_properties[:]
+        self._proto.custom_properties.extend(p.proto for p in properties)
 
 
 class Table(BoardItem):
@@ -3228,6 +3295,17 @@ class Table(BoardItem):
         """
         return self._proto.parent if self._proto.HasField("parent") else None
 
+    @property
+    def custom_properties(self) -> list[CustomProperty]:
+        """
+        .. versionadded:: 0.x.0 (KiCad 11)"""
+        return [CustomProperty(proto_ref=p) for p in self._proto.custom_properties]
+
+    @custom_properties.setter
+    def custom_properties(self, properties: list[CustomProperty]):
+        del self._proto.custom_properties[:]
+        self._proto.custom_properties.extend(p.proto for p in properties)
+
 
 class ReferencePoint(BoardItem):
     """Represents a reference point marker on a board
@@ -3296,6 +3374,17 @@ class ReferencePoint(BoardItem):
         Read-only; item parents can only be changed by add/remove calls on the parent container.
         """
         return self._proto.parent if self._proto.HasField("parent") else None
+
+    @property
+    def custom_properties(self) -> list[CustomProperty]:
+        """
+        .. versionadded:: 0.x.0 (KiCad 11)"""
+        return [CustomProperty(proto_ref=p) for p in self._proto.custom_properties]
+
+    @custom_properties.setter
+    def custom_properties(self, properties: list[CustomProperty]):
+        del self._proto.custom_properties[:]
+        self._proto.custom_properties.extend(p.proto for p in properties)
 
 
 _proto_to_object: dict[type[Message], type[Wrapper]] = {
