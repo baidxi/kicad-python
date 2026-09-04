@@ -30,6 +30,7 @@ from kipy.common_types import (
     Arc,
     Bezier,
     Circle,
+    EmbeddedFiles,
     GraphicAttributes,
     LibraryIdentifier,
     Polygon,
@@ -2278,6 +2279,22 @@ class FootprintInstance(BoardItem):
         .. versionadded:: 0.4.0 with KiCad 9.0.3
         """
         return SheetPath(self._proto.symbol_path)
+
+    @property
+    def embedded_files(self) -> EmbeddedFiles | None:
+        """Files embedded in this footprint instance
+
+        .. versionadded:: 0.9.0 (KiCad 10.0.7)"""
+        if self._proto.HasField("embedded_files"):
+            return EmbeddedFiles(proto_ref=self._proto.embedded_files)
+        return None
+
+    @embedded_files.setter
+    def embedded_files(self, files: EmbeddedFiles | None):
+        if files is not None:
+            self._proto.embedded_files.CopyFrom(files.proto)
+        else:
+            self._proto.ClearField("embedded_files")
 
     @property
     def parent(self) -> KIID | None:

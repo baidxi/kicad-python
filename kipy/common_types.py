@@ -20,8 +20,12 @@
 
 from __future__ import annotations
 
+import base64
 import sys
 from collections.abc import Sequence
+from pathlib import Path
+
+import zstandard
 
 from kipy.geometry import (
     Box2,
@@ -35,7 +39,7 @@ from kipy.geometry import (
     arc_start_angle,
 )
 from kipy.proto.common import types
-from kipy.proto.common.types import base_types_pb2
+from kipy.proto.common.types import base_types_pb2, embedded_files_pb2
 from kipy.proto.common.types.base_types_pb2 import (  # noqa
     KIID,
     PageOrientation,
@@ -43,6 +47,9 @@ from kipy.proto.common.types.base_types_pb2 import (  # noqa
 )
 
 # Re-exported protobuf enum types
+from kipy.proto.common.types.embedded_files_pb2 import (
+    EmbeddedFileType,
+)
 from kipy.proto.common.types.enums_pb2 import (  # noqa
     HorizontalAlignment,
     VerticalAlignment,
@@ -977,3 +984,113 @@ class PageSettings(Wrapper):
     @drawing_sheet.setter
     def drawing_sheet(self, value: str):
         self._proto.drawing_sheet = value
+
+
+class EmbeddedFile(Wrapper):
+    """A file embedded in a document, such as a font, datasheet, or 3D model
+
+    .. versionadded:: 0.9.0 (KiCad 10.0.7)"""
+
+    def __init__(
+        self,
+        proto: embedded_files_pb2.EmbeddedFile | None = None,
+        proto_ref: embedded_files_pb2.EmbeddedFile | None = None,
+    ):
+        self._proto = proto_ref if proto_ref is not None else embedded_files_pb2.EmbeddedFile()
+
+        if proto is not None:
+            self._proto.CopyFrom(proto)
+
+    @property
+    def name(self) -> str:
+        return self._proto.name
+
+    @name.setter
+    def name(self, name: str):
+        self._proto.name = name
+
+    @property
+    def type(self) -> EmbeddedFileType.ValueType:
+        return self._proto.type
+
+    @type.setter
+    def type(self, type: EmbeddedFileType.ValueType):
+        self._proto.type = type
+
+    @property
+    def data(self) -> bytes:
+        return self._proto.data
+
+    @data.setter
+    def data(self, data: bytes):
+        self._proto.data = data
+
+    @property
+    def data_hash(self) -> str:
+        return self._proto.data_hash
+
+    @data_hash.setter
+    def data_hash(self, data_hash: str):
+        self._proto.data_hash = data_hash
+
+    @classmethod
+    def from_path(
+        cls, path: str | Path, type: EmbeddedFileType.ValueType | None = None
+    ) -> EmbeddedFile:
+        """Creates a new embedded file from a file path.
+
+        :param path: Path of the file to embed.
+        :param type: Embedded file type, guessed from the extension when omitted.
+        """
+        path = Path(path)
+        suffix = path.suffix.lstrip(".").lower()
+
+        if type is None:
+            if suffix in ("stp", "stpz", "step", "wrl", "wrz"):
+                type = EmbeddedFileType.EFT_MODEL
+            elif suffix in ("woff", "woff2", "ttf", "otf"):
+                type = EmbeddedFileType.EFT_FONT
+            elif suffix == "pdf":
+                type = EmbeddedFileType.EFT_DATASHEET
+            elif suffix == "kicad_wks":
+                type = EmbeddedFileType.EFT_WORKSHEET
+            else:
+                type = EmbeddedFileType.EFT_OTHER
+
+        return cls.from_bytes(path.read_bytes(), name=path.name, type=type)
+
+    @classmethod
+    def from_bytes(
+        cls, data: bytes, name: str, type: EmbeddedFileType.ValueType = EmbeddedFileType.EFT_OTHER
+    ) -> EmbeddedFile:
+        """Creates a new embedded file from raw bytes."""
+        file = cls()
+        file.name = name
+        file.type = type
+        file.data = base64.b64encode(zstandard.compress(data, level=15))
+        # Will be filled in by KiCad when the file is added
+        file.data_hash = ""
+        return file
+
+
+class EmbeddedFiles(Wrapper):
+    """.. versionadded:: 0.9.0 (KiCad 10.0.7)"""
+
+    def __init__(
+        self,
+        proto: embedded_files_pb2.EmbeddedFiles | None = None,
+        proto_ref: embedded_files_pb2.EmbeddedFiles | None = None,
+    ):
+        self._proto = proto_ref if proto_ref is not None else embedded_files_pb2.EmbeddedFiles()
+
+        if proto is not None:
+            self._proto.CopyFrom(proto)
+
+    @property
+    def files(self) -> Sequence[EmbeddedFile]:
+        return [EmbeddedFile(proto_ref=f) for f in self._proto.files]
+
+    @files.setter
+    def files(self, files: Sequence[EmbeddedFile]):
+        del self._proto.files[:]
+        self._proto.files.extend(f.proto for f in files)
