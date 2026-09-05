@@ -3018,7 +3018,7 @@ class HatchFillSettings(Wrapper):
 class ThievingFillSettings(Wrapper):
     """Thieving fill (fill pattern that is not connected to any net) settings for a copper zone
 
-    .. versionadded:: 0.9.0 (KiCad 10.0.7)"""
+    .. versionadded:: 0.x.0 (KiCad 11)"""
 
     def __init__(
         self,
@@ -3379,7 +3379,7 @@ class Zone(BoardItem):
     def hatch_settings(self) -> HatchFillSettings | None:
         """Hatch fill settings for this copper zone
 
-        .. versionadded:: 0.9.0 (KiCad 10.0.7)"""
+        .. versionadded:: 0.x.0"""
         if self.is_rule_area() or not self._proto.copper_settings.HasField("hatch_settings"):
             return None
         return HatchFillSettings(proto_ref=self._proto.copper_settings.hatch_settings)
@@ -3397,7 +3397,7 @@ class Zone(BoardItem):
     def thieving_settings(self) -> ThievingFillSettings | None:
         """Thieving fill settings for this copper zone
 
-        .. versionadded:: 0.9.0 (KiCad 10.0.7)"""
+        .. versionadded:: 0.x.0 (KiCad 11)"""
         if self.is_rule_area() or not self._proto.copper_settings.HasField("thieving_settings"):
             return None
         return ThievingFillSettings(proto_ref=self._proto.copper_settings.thieving_settings)
@@ -4009,7 +4009,7 @@ class Group(BoardItem):
     @property
     def locked(self) -> bool:
         """
-        .. versionadded:: 0.9.0 (KiCad 10.0.7)"""
+        .. versionadded:: 0.9.0"""
         return self._proto.locked == LockedState.LS_LOCKED
 
     @locked.setter
