@@ -51,8 +51,10 @@ from kipy.board_types import (
     BoardShape,
     BoardText,
     BoardTextBox,
+    Constraint,
     Dimension,
     FootprintInstance,
+    GridItem,
     Group,
     Net,
     Pad,
@@ -1335,6 +1337,24 @@ class Board:
         .. versionadded:: 0.9.0 (KiCad 10.0.7)"""
         return [
             cast(Table, item) for item in self.get_items(types=[KiCadObjectType.KOT_PCB_TABLE])
+        ]
+
+    def get_grid_items(self) -> Sequence[GridItem]:
+        """Retrieves all grid items on the board.
+
+        .. versionadded:: 0.x.0 (KiCad 11)"""
+        return [
+            cast(GridItem, item)
+            for item in self.get_items(types=[KiCadObjectType.KOT_PCB_GRIDITEM])
+        ]
+
+    def get_constraints(self) -> Sequence[Constraint]:
+        """Retrieves all constraint objects on the board.
+
+        .. versionadded:: 0.x.0 (KiCad 11)"""
+        return [
+            cast(Constraint, item)
+            for item in self.get_items(types=[KiCadObjectType.KOT_PCB_CONSTRAINT])
         ]
 
     def get_reference_points(self) -> Sequence[ReferencePoint]:

@@ -73,20 +73,33 @@ from kipy.proto.board.board_types_pb2 import (  # noqa
     BarcodeKind,
     BoardLayer,
     ChamferedRectCorners,
+    ConstraintAnchor,
+    ConstraintType,
     DrillShape,
     IslandRemovalMode,
     PadFabricationProperty,
+    PadSimElectricalType,
     PadStackShape,
     PadStackType,
+    PadTeardropMode,
     PadType,
+    PlacementRuleSourceType,
     SolderMaskMode,
     SolderPasteMode,
     TableStrokeMode,
+    ThievingPattern,
     UnconnectedLayerRemoval,
+    ViaCoveringMode,
+    ViaDrillCappingMode,
+    ViaDrillFillingMode,
+    ViaDrillPostMachiningMode,
+    ViaPluggingMode,
     ViaType,
     ZoneBorderStyle,
     ZoneConnectionStyle,
+    ZoneCornerSmoothingMode,
     ZoneFillMode,
+    ZoneHatchFillBorderMode,
     ZoneTeardropType,
     ZoneType,
 )
@@ -236,6 +249,13 @@ class Track(BoardItem):
         """Calculates track length in nanometers"""
         return (self.end - self.start).length()
 
+    @property
+    def solder_mask(self) -> SolderMaskOverrides:
+        """Solder mask overrides for this track
+
+        .. versionadded:: 0.9.0 (KiCad 10.0.7)"""
+        return SolderMaskOverrides(proto_ref=self._proto.solder_mask)
+
 
 class ArcTrack(BoardItem):
     """Represents an arc track segment"""
@@ -326,6 +346,13 @@ class ArcTrack(BoardItem):
         .. versionadded:: 0.8.0 (KiCad 10.0.6)"""
         return self._proto.parent if self._proto.HasField("parent") else None
 
+    @property
+    def solder_mask(self) -> SolderMaskOverrides:
+        """Solder mask overrides for this arc track
+
+        .. versionadded:: 0.9.0 (KiCad 10.0.7)"""
+        return SolderMaskOverrides(proto_ref=self._proto.solder_mask)
+
     def center(self) -> Vector2 | None:
         """
         Calculates the center of the arc.  Uses a different algorithm than KiCad so may have
@@ -414,6 +441,13 @@ class BoardShape(BoardItem):
     @layer.setter
     def layer(self, layer: BoardLayer.ValueType):
         self._proto.layer = layer
+
+    @property
+    def solder_mask(self) -> SolderMaskOverrides:
+        """Solder mask overrides for this shape (only applies to shapes on outer copper layers)
+
+        .. versionadded:: 0.9.0 (KiCad 10.0.7)"""
+        return SolderMaskOverrides(proto_ref=self._proto.solder_mask)
 
     @property
     def net(self) -> Net:
@@ -1264,6 +1298,17 @@ class SolderMaskOverrides(Wrapper):
     def solder_mask_margin(self, margin_nm: int):
         self._proto.solder_mask_margin.value_nm = margin_nm
 
+    @property
+    def expose_copper(self) -> bool:
+        """Whether to expose (remove) solder mask over this item
+
+        .. versionadded:: 0.9.0 (KiCad 10.0.7)"""
+        return self._proto.expose_copper
+
+    @expose_copper.setter
+    def expose_copper(self, expose: bool):
+        self._proto.expose_copper = expose
+
 
 class SolderPasteOverrides(Wrapper):
     def __init__(
@@ -1303,6 +1348,113 @@ class SolderPasteOverrides(Wrapper):
             self._proto.ClearField("solder_paste_margin_ratio")
         else:
             self._proto.solder_paste_margin_ratio.value = ratio
+
+
+class PadTeardropSettings(Wrapper):
+    """Settings for teardrops applied to pads and vias
+
+    .. versionadded:: 0.9.0 (KiCad 10.0.7)"""
+
+    def __init__(
+        self,
+        proto: board_types_pb2.PadTeardropSettings | None = None,
+        proto_ref: board_types_pb2.PadTeardropSettings | None = None,
+    ):
+        self._proto = proto_ref if proto_ref is not None else board_types_pb2.PadTeardropSettings()
+
+        if proto is not None:
+            self._proto.CopyFrom(proto)
+
+    @property
+    def mode(self) -> PadTeardropMode.ValueType:
+        return self._proto.mode
+
+    @mode.setter
+    def mode(self, mode: PadTeardropMode.ValueType):
+        self._proto.mode = mode
+
+    @property
+    def curved_edges(self) -> bool:
+        return self._proto.curved_edges
+
+    @curved_edges.setter
+    def curved_edges(self, curved_edges: bool):
+        self._proto.curved_edges = curved_edges
+
+    @property
+    def allow_multiple_track_segments(self) -> bool:
+        """True to allow a teardrop to extend over multiple connected track segments if the
+        first segment is too short to achieve the best teardrop length"""
+        return self._proto.allow_multiple_track_segments
+
+    @allow_multiple_track_segments.setter
+    def allow_multiple_track_segments(self, allow: bool):
+        self._proto.allow_multiple_track_segments = allow
+
+    @property
+    def prefer_zone_connection(self) -> bool:
+        """True to prefer zone connections over teardrops for pads connected to a copper zone"""
+        return self._proto.prefer_zone_connection
+
+    @prefer_zone_connection.setter
+    def prefer_zone_connection(self, prefer: bool):
+        self._proto.prefer_zone_connection = prefer
+
+    @property
+    def max_length(self) -> int | None:
+        """Maximum teardrop length in nanometers, or None if no constraint is applied"""
+        if self._proto.HasField("max_length"):
+            return self._proto.max_length.value_nm
+        return None
+
+    @max_length.setter
+    def max_length(self, length_nm: int | None):
+        if length_nm is None:
+            self._proto.ClearField("max_length")
+        else:
+            self._proto.max_length.value_nm = length_nm
+
+    @property
+    def max_width(self) -> int | None:
+        """Maximum teardrop width in nanometers, or None if no constraint is applied"""
+        if self._proto.HasField("max_width"):
+            return self._proto.max_width.value_nm
+        return None
+
+    @max_width.setter
+    def max_width(self, width_nm: int | None):
+        if width_nm is None:
+            self._proto.ClearField("max_width")
+        else:
+            self._proto.max_width.value_nm = width_nm
+
+    @property
+    def best_length_ratio(self) -> float:
+        """Preferred teardrop length as a ratio of the pad/via size"""
+        return self._proto.best_length_ratio
+
+    @best_length_ratio.setter
+    def best_length_ratio(self, ratio: float):
+        self._proto.best_length_ratio = ratio
+
+    @property
+    def best_width_ratio(self) -> float:
+        """Preferred teardrop width as a ratio of the pad/via size"""
+        return self._proto.best_width_ratio
+
+    @best_width_ratio.setter
+    def best_width_ratio(self, ratio: float):
+        self._proto.best_width_ratio = ratio
+
+    @property
+    def max_track_width_ratio(self) -> float:
+        """Maximum ratio between the pad/via size and connected track width that will create a
+        teardrop (1.0 always creates a teardrop; 0.0 never does)"""
+        return self._proto.max_track_width_ratio
+
+    @max_track_width_ratio.setter
+    def max_track_width_ratio(self, ratio: float):
+        self._proto.max_track_width_ratio = ratio
 
 
 class PadStackLayer(Wrapper):
@@ -1452,6 +1604,74 @@ class DrillProperties(Wrapper):
     def shape(self, shape: board_types_pb2.DrillShape.ValueType):
         self._proto.shape = shape
 
+    @property
+    def capped(self) -> ViaDrillCappingMode.ValueType:
+        """Whether the drill is capped (e.g. for tented back drills)"""
+        return self._proto.capped
+
+    @capped.setter
+    def capped(self, capped: ViaDrillCappingMode.ValueType):
+        self._proto.capped = capped
+
+    @property
+    def filled(self) -> ViaDrillFillingMode.ValueType:
+        """Whether the drill is filled"""
+        return self._proto.filled
+
+    @filled.setter
+    def filled(self, filled: ViaDrillFillingMode.ValueType):
+        self._proto.filled = filled
+
+
+class PostMachiningProperties(Wrapper):
+    """Post-machining properties for a drill (counterbore or countersink)
+
+    .. versionadded:: 0.9.0"""
+
+    def __init__(
+        self,
+        proto: board_types_pb2.PostMachiningProperties | None = None,
+        proto_ref: board_types_pb2.PostMachiningProperties | None = None,
+    ):
+        self._proto = (
+            proto_ref if proto_ref is not None else board_types_pb2.PostMachiningProperties()
+        )
+
+        if proto is not None:
+            self._proto.CopyFrom(proto)
+
+    @property
+    def mode(self) -> ViaDrillPostMachiningMode.ValueType:
+        return self._proto.mode
+
+    @mode.setter
+    def mode(self, mode: ViaDrillPostMachiningMode.ValueType):
+        self._proto.mode = mode
+
+    @property
+    def size(self) -> int:
+        return self._proto.size
+
+    @size.setter
+    def size(self, size: int):
+        self._proto.size = size
+
+    @property
+    def depth(self) -> int:
+        return self._proto.depth
+
+    @depth.setter
+    def depth(self, depth: int):
+        self._proto.depth = depth
+
+    @property
+    def angle(self) -> int:
+        return self._proto.angle
+
+    @angle.setter
+    def angle(self, angle: int):
+        self._proto.angle = angle
+
 
 class PadStackOuterLayer(Wrapper):
     def __init__(
@@ -1495,6 +1715,26 @@ class PadStackOuterLayer(Wrapper):
     @solder_paste_settings.setter
     def solder_paste_settings(self, settings: SolderPasteOverrides):
         self._proto.solder_paste_settings.CopyFrom(settings.proto)
+
+    @property
+    def plugging_mode(self) -> ViaPluggingMode.ValueType:
+        """
+        .. versionadded:: 0.9.0 (KiCad 10.0.7)"""
+        return self._proto.plugging_mode
+
+    @plugging_mode.setter
+    def plugging_mode(self, mode: ViaPluggingMode.ValueType):
+        self._proto.plugging_mode = mode
+
+    @property
+    def covering_mode(self) -> ViaCoveringMode.ValueType:
+        """
+        .. versionadded:: 0.9.0 (KiCad 10.0.7)"""
+        return self._proto.covering_mode
+
+    @covering_mode.setter
+    def covering_mode(self, mode: ViaCoveringMode.ValueType):
+        self._proto.covering_mode = mode
 
 
 class PadStack(BoardItem):
@@ -1587,6 +1827,46 @@ class PadStack(BoardItem):
     def zone_settings(self) -> ZoneConnectionSettings:
         return ZoneConnectionSettings(proto_ref=self._proto.zone_settings)
 
+    @property
+    def secondary_drill(self) -> DrillProperties:
+        """
+        .. versionadded:: 0.9.0"""
+        return DrillProperties(proto_ref=self._proto.secondary_drill)
+
+    @secondary_drill.setter
+    def secondary_drill(self, drill: DrillProperties):
+        self._proto.secondary_drill.CopyFrom(drill.proto)
+
+    @property
+    def tertiary_drill(self) -> DrillProperties:
+        """
+        .. versionadded:: 0.9.0"""
+        return DrillProperties(proto_ref=self._proto.tertiary_drill)
+
+    @tertiary_drill.setter
+    def tertiary_drill(self, drill: DrillProperties):
+        self._proto.tertiary_drill.CopyFrom(drill.proto)
+
+    @property
+    def front_post_machining(self) -> PostMachiningProperties:
+        """
+        .. versionadded:: 0.9.0"""
+        return PostMachiningProperties(proto_ref=self._proto.front_post_machining)
+
+    @front_post_machining.setter
+    def front_post_machining(self, properties: PostMachiningProperties):
+        self._proto.front_post_machining.CopyFrom(properties.proto)
+
+    @property
+    def back_post_machining(self) -> PostMachiningProperties:
+        """
+        .. versionadded:: 0.9.0"""
+        return PostMachiningProperties(proto_ref=self._proto.back_post_machining)
+
+    @back_post_machining.setter
+    def back_post_machining(self, properties: PostMachiningProperties):
+        self._proto.back_post_machining.CopyFrom(properties.proto)
+
     def is_masked(self, layer: BoardLayer.ValueType = BoardLayer.BL_UNDEFINED) -> bool:
         """
         Returns true if the padstack is masked on the given copper layer, or on either layer if
@@ -1607,6 +1887,52 @@ class PadStack(BoardItem):
         self._proto.copper_layers.append(board_types_pb2.PadStackLayer())
         self._proto.copper_layers[-1].layer = layer
         return self._proto.copper_layers[-1]
+
+
+class SymbolPinInfo(Wrapper):
+    """Information about the symbol pin associated with a pad, if one exists
+
+    .. versionadded:: 0.9.0 (KiCad 10.0.7)"""
+
+    def __init__(
+        self,
+        proto: board_types_pb2.SymbolPinInfo | None = None,
+        proto_ref: board_types_pb2.SymbolPinInfo | None = None,
+    ):
+        self._proto = proto_ref if proto_ref is not None else board_types_pb2.SymbolPinInfo()
+
+        if proto is not None:
+            self._proto.CopyFrom(proto)
+
+    def __repr__(self) -> str:
+        return f"SymbolPinInfo(name={self.name}, type={self.type}, no_connect={self.no_connect})"
+
+    @property
+    def name(self) -> str:
+        """The pin name for the associated symbol pin (empty if none exists)"""
+        return self._proto.name
+
+    @name.setter
+    def name(self, name: str):
+        self._proto.name = name
+
+    @property
+    def type(self) -> base_types_pb2.ElectricalPinType.ValueType:
+        """The electrical type of the associated symbol pin (EPT_UNKNOWN if not)"""
+        return self._proto.type
+
+    @type.setter
+    def type(self, type: base_types_pb2.ElectricalPinType.ValueType):
+        self._proto.type = type
+
+    @property
+    def no_connect(self) -> bool:
+        """True if the pin is attached to a no-connect marker in the schematic"""
+        return self._proto.no_connect
+
+    @no_connect.setter
+    def no_connect(self, no_connect: bool):
+        self._proto.no_connect = no_connect
 
 
 class Pad(BoardItem):
@@ -1694,6 +2020,71 @@ class Pad(BoardItem):
     @pad_to_die_length.setter
     def pad_to_die_length(self, length: int):
         self._proto.pad_to_die_length.value_nm = length
+
+    @property
+    def teardrop(self) -> PadTeardropSettings:
+        """Teardrop settings for this pad
+
+        .. versionadded:: 0.9.0 (KiCad 10.0.7)"""
+        return PadTeardropSettings(proto_ref=self._proto.teardrop)
+
+    @teardrop.setter
+    def teardrop(self, settings: PadTeardropSettings):
+        self._proto.teardrop.CopyFrom(settings.proto)
+
+    @property
+    def sim_electrical_type(self) -> PadSimElectricalType.ValueType:
+        """The electrical type of this pad for simulation purposes
+
+        .. versionadded:: 0.9.0"""
+        return self._proto.sim_electrical_type
+
+    @sim_electrical_type.setter
+    def sim_electrical_type(self, sim_type: PadSimElectricalType.ValueType):
+        self._proto.sim_electrical_type = sim_type
+
+    @property
+    def copper_clearance_override(self) -> int | None:
+        """Copper-to-copper clearance override in nanometers
+
+        .. versionadded:: 0.9.0"""
+        if self._proto.HasField("copper_clearance_override"):
+            return self._proto.copper_clearance_override.value_nm
+        return None
+
+    @copper_clearance_override.setter
+    def copper_clearance_override(self, clearance_nm: int | None):
+        if clearance_nm is None:
+            self._proto.ClearField("copper_clearance_override")
+        else:
+            self._proto.copper_clearance_override.value_nm = clearance_nm
+
+    @property
+    def pad_to_die_delay(self) -> int | None:
+        """Pad-to-die delay in attoseconds
+
+        .. versionadded:: 0.9.0"""
+        if self._proto.HasField("pad_to_die_delay"):
+            return self._proto.pad_to_die_delay.value_as
+        return None
+
+    @pad_to_die_delay.setter
+    def pad_to_die_delay(self, delay: int | None):
+        if delay is None:
+            self._proto.ClearField("pad_to_die_delay")
+        else:
+            self._proto.pad_to_die_delay.value_as = delay
+
+    @property
+    def symbol_pin(self) -> SymbolPinInfo:
+        """Information about the associated symbol pin, if one exists
+
+        .. versionadded:: 0.9.0 (KiCad 10.0.7)"""
+        return SymbolPinInfo(proto_ref=self._proto.symbol_pin)
+
+    @symbol_pin.setter
+    def symbol_pin(self, pin: SymbolPinInfo):
+        self._proto.symbol_pin.CopyFrom(pin.proto)
 
     @property
     def custom_properties(self) -> list[CustomProperty]:
@@ -1815,6 +2206,28 @@ class Via(BoardItem):
     @drill_diameter.setter
     def drill_diameter(self, diameter: int):
         self.padstack.drill.diameter = Vector2.from_xy(diameter, diameter)
+
+    @property
+    def is_free(self) -> bool:
+        """Whether the via is a free (locked-from-autorouter perspective) via
+
+        .. versionadded:: 0.9.0 (KiCad 10.0.7)"""
+        return self._proto.is_free
+
+    @is_free.setter
+    def is_free(self, is_free: bool):
+        self._proto.is_free = is_free
+
+    @property
+    def teardrop(self) -> PadTeardropSettings:
+        """Teardrop settings for this via
+
+        .. versionadded:: 0.9.0 (KiCad 10.0.7)"""
+        return PadTeardropSettings(proto_ref=self._proto.teardrop)
+
+    @teardrop.setter
+    def teardrop(self, settings: PadTeardropSettings):
+        self._proto.teardrop.CopyFrom(settings.proto)
 
     @property
     def custom_properties(self) -> list[CustomProperty]:
@@ -2072,6 +2485,91 @@ class FootprintDesignRuleOverrides(Wrapper):
         self._proto.zone_connection = value
 
 
+class NetTieDefinition(Wrapper):
+    """Definition of one net-tie group in a footprint: a set of pad numbers that are
+    shorted together
+
+    .. versionadded:: 0.9.0 (KiCad 10.0.7)"""
+
+    def __init__(
+        self,
+        proto: board_types_pb2.NetTieDefinition | None = None,
+        proto_ref: board_types_pb2.NetTieDefinition | None = None,
+    ):
+        self._proto = proto_ref if proto_ref is not None else board_types_pb2.NetTieDefinition()
+
+        if proto is not None:
+            self._proto.CopyFrom(proto)
+
+    @property
+    def pad_numbers(self) -> list[str]:
+        return list(self._proto.pad_number)
+
+    @pad_numbers.setter
+    def pad_numbers(self, pad_numbers: list[str]):
+        del self._proto.pad_number[:]
+        self._proto.pad_number.extend(pad_numbers)
+
+
+class JumperGroup(Wrapper):
+    """A group of pad names in a footprint that are jumpered together
+
+    .. versionadded:: 0.9.0 (KiCad 10.0.7)"""
+
+    def __init__(
+        self,
+        proto: board_types_pb2.JumperGroup | None = None,
+        proto_ref: board_types_pb2.JumperGroup | None = None,
+    ):
+        self._proto = proto_ref if proto_ref is not None else board_types_pb2.JumperGroup()
+
+        if proto is not None:
+            self._proto.CopyFrom(proto)
+
+    @property
+    def pad_names(self) -> list[str]:
+        return list(self._proto.pad_names)
+
+    @pad_names.setter
+    def pad_names(self, pad_names: list[str]):
+        del self._proto.pad_names[:]
+        self._proto.pad_names.extend(pad_names)
+
+
+class JumperSettings(Wrapper):
+    """Jumper settings for a footprint
+
+    .. versionadded:: 0.9.0 (KiCad 10.0.7)"""
+
+    def __init__(
+        self,
+        proto: board_types_pb2.JumperSettings | None = None,
+        proto_ref: board_types_pb2.JumperSettings | None = None,
+    ):
+        self._proto = proto_ref if proto_ref is not None else board_types_pb2.JumperSettings()
+
+        if proto is not None:
+            self._proto.CopyFrom(proto)
+
+    @property
+    def duplicate_names_are_jumpered(self) -> bool:
+        """If true, duplicate pad names in this footprint are jumpered together"""
+        return self._proto.duplicate_names_are_jumpered
+
+    @duplicate_names_are_jumpered.setter
+    def duplicate_names_are_jumpered(self, value: bool):
+        self._proto.duplicate_names_are_jumpered = value
+
+    @property
+    def groups(self) -> list[JumperGroup]:
+        return [JumperGroup(proto_ref=g) for g in self._proto.groups]
+
+    @groups.setter
+    def groups(self, groups: list[JumperGroup]):
+        del self._proto.groups[:]
+        self._proto.groups.extend(g.proto for g in groups)
+
+
 class Footprint(Wrapper):
     """Represents the definition of a footprint (existing in a footprint library or on a board),
     which contains the child objects of the footprint (pads, text, etc).  Footprint definitions are
@@ -2147,6 +2645,52 @@ class Footprint(Wrapper):
 
     def add_item(self, item: Wrapper):
         self._unwrapped_items.append(item)
+
+    @property
+    def anchor(self) -> Vector2:
+        """The anchor (origin) position of the footprint
+
+        .. versionadded:: 0.9.0 (KiCad 10.0.7)"""
+        return Vector2(self._proto.anchor)
+
+    @anchor.setter
+    def anchor(self, anchor: Vector2):
+        self._proto.anchor.CopyFrom(anchor.proto)
+
+    @property
+    def net_ties(self) -> list[NetTieDefinition]:
+        """The net-tie groups defined in this footprint
+
+        .. versionadded:: 0.9.0 (KiCad 10.0.7)"""
+        return [NetTieDefinition(proto_ref=t) for t in self._proto.net_ties]
+
+    @net_ties.setter
+    def net_ties(self, net_ties: list[NetTieDefinition]):
+        del self._proto.net_ties[:]
+        self._proto.net_ties.extend(t.proto for t in net_ties)
+
+    @property
+    def private_layers(self) -> list[BoardLayer.ValueType]:
+        """The private layers of this footprint, which are removed alongside the footprint
+
+        .. versionadded:: 0.9.0 (KiCad 10.0.7)"""
+        return list(self._proto.private_layers)
+
+    @private_layers.setter
+    def private_layers(self, layers: list[BoardLayer.ValueType]):
+        del self._proto.private_layers[:]
+        self._proto.private_layers.extend(layers)
+
+    @property
+    def jumpers(self) -> JumperSettings:
+        """The jumper settings for this footprint
+
+        .. versionadded:: 0.9.0 (KiCad 10.0.7)"""
+        return JumperSettings(proto_ref=self._proto.jumpers)
+
+    @jumpers.setter
+    def jumpers(self, settings: JumperSettings):
+        self._proto.jumpers.CopyFrom(settings.proto)
 
 
 class FootprintInstance(BoardItem):
@@ -2407,6 +2951,248 @@ class ZoneFilledPolygons(Wrapper):
         return [PolygonWithHoles(proto_ref=p) for p in self._proto.shapes.polygons]
 
 
+class HatchFillSettings(Wrapper):
+    """Hatch fill settings for a copper zone
+
+    .. versionadded:: 0.9.0 (KiCad 10.0.7)"""
+
+    def __init__(
+        self,
+        proto: board_types_pb2.HatchFillSettings | None = None,
+        proto_ref: board_types_pb2.HatchFillSettings | None = None,
+    ):
+        self._proto = proto_ref if proto_ref is not None else board_types_pb2.HatchFillSettings()
+
+        if proto is not None:
+            self._proto.CopyFrom(proto)
+
+    @property
+    def thickness(self) -> int:
+        return self._proto.thickness.value_nm
+
+    @thickness.setter
+    def thickness(self, thickness_nm: int):
+        self._proto.thickness.value_nm = thickness_nm
+
+    @property
+    def gap(self) -> int:
+        return self._proto.gap.value_nm
+
+    @gap.setter
+    def gap(self, gap_nm: int):
+        self._proto.gap.value_nm = gap_nm
+
+    @property
+    def orientation(self) -> Angle:
+        return Angle(self._proto.orientation)
+
+    @orientation.setter
+    def orientation(self, orientation: Angle):
+        self._proto.orientation.CopyFrom(orientation.proto)
+
+    @property
+    def hatch_smoothing_ratio(self) -> float:
+        return self._proto.hatch_smoothing_ratio
+
+    @hatch_smoothing_ratio.setter
+    def hatch_smoothing_ratio(self, ratio: float):
+        self._proto.hatch_smoothing_ratio = ratio
+
+    @property
+    def hatch_hole_min_area_ratio(self) -> float:
+        return self._proto.hatch_hole_min_area_ratio
+
+    @hatch_hole_min_area_ratio.setter
+    def hatch_hole_min_area_ratio(self, ratio: float):
+        self._proto.hatch_hole_min_area_ratio = ratio
+
+    @property
+    def border_mode(self) -> ZoneHatchFillBorderMode.ValueType:
+        return self._proto.border_mode
+
+    @border_mode.setter
+    def border_mode(self, mode: ZoneHatchFillBorderMode.ValueType):
+        self._proto.border_mode = mode
+
+
+class ThievingFillSettings(Wrapper):
+    """Thieving fill (fill pattern that is not connected to any net) settings for a copper zone
+
+    .. versionadded:: 0.9.0 (KiCad 10.0.7)"""
+
+    def __init__(
+        self,
+        proto: board_types_pb2.ThievingFillSettings | None = None,
+        proto_ref: board_types_pb2.ThievingFillSettings | None = None,
+    ):
+        self._proto = (
+            proto_ref if proto_ref is not None else board_types_pb2.ThievingFillSettings()
+        )
+
+        if proto is not None:
+            self._proto.CopyFrom(proto)
+
+    @property
+    def pattern(self) -> ThievingPattern.ValueType:
+        return self._proto.pattern
+
+    @pattern.setter
+    def pattern(self, pattern: ThievingPattern.ValueType):
+        self._proto.pattern = pattern
+
+    @property
+    def element_size(self) -> int:
+        return self._proto.element_size.value_nm
+
+    @element_size.setter
+    def element_size(self, size_nm: int):
+        self._proto.element_size.value_nm = size_nm
+
+    @property
+    def gap(self) -> int:
+        return self._proto.gap.value_nm
+
+    @gap.setter
+    def gap(self, gap_nm: int):
+        self._proto.gap.value_nm = gap_nm
+
+    @property
+    def line_width(self) -> int:
+        return self._proto.line_width.value_nm
+
+    @line_width.setter
+    def line_width(self, width_nm: int):
+        self._proto.line_width.value_nm = width_nm
+
+    @property
+    def stagger(self) -> bool:
+        return self._proto.stagger
+
+    @stagger.setter
+    def stagger(self, stagger: bool):
+        self._proto.stagger = stagger
+
+    @property
+    def orientation(self) -> Angle:
+        return Angle(self._proto.orientation)
+
+    @orientation.setter
+    def orientation(self, orientation: Angle):
+        self._proto.orientation.CopyFrom(orientation.proto)
+
+
+class RuleAreaSettings(Wrapper):
+    """Settings that apply only to rule area zones
+
+    .. versionadded:: 0.9.0"""
+
+    def __init__(
+        self,
+        proto: board_types_pb2.RuleAreaSettings | None = None,
+        proto_ref: board_types_pb2.RuleAreaSettings | None = None,
+    ):
+        self._proto = proto_ref if proto_ref is not None else board_types_pb2.RuleAreaSettings()
+
+        if proto is not None:
+            self._proto.CopyFrom(proto)
+
+    @property
+    def keepout_copper(self) -> bool:
+        return self._proto.keepout_copper
+
+    @keepout_copper.setter
+    def keepout_copper(self, keepout: bool):
+        self._proto.keepout_copper = keepout
+
+    @property
+    def keepout_vias(self) -> bool:
+        return self._proto.keepout_vias
+
+    @keepout_vias.setter
+    def keepout_vias(self, keepout: bool):
+        self._proto.keepout_vias = keepout
+
+    @property
+    def keepout_tracks(self) -> bool:
+        return self._proto.keepout_tracks
+
+    @keepout_tracks.setter
+    def keepout_tracks(self, keepout: bool):
+        self._proto.keepout_tracks = keepout
+
+    @property
+    def keepout_pads(self) -> bool:
+        return self._proto.keepout_pads
+
+    @keepout_pads.setter
+    def keepout_pads(self, keepout: bool):
+        self._proto.keepout_pads = keepout
+
+    @property
+    def keepout_footprints(self) -> bool:
+        return self._proto.keepout_footprints
+
+    @keepout_footprints.setter
+    def keepout_footprints(self, keepout: bool):
+        self._proto.keepout_footprints = keepout
+
+    @property
+    def placement_enabled(self) -> bool:
+        return self._proto.placement_enabled
+
+    @placement_enabled.setter
+    def placement_enabled(self, enabled: bool):
+        self._proto.placement_enabled = enabled
+
+    @property
+    def placement_source_type(self) -> PlacementRuleSourceType.ValueType:
+        return self._proto.placement_source_type
+
+    @placement_source_type.setter
+    def placement_source_type(self, source_type: PlacementRuleSourceType.ValueType):
+        self._proto.placement_source_type = source_type
+
+    @property
+    def placement_source(self) -> str:
+        return self._proto.placement_source
+
+    @placement_source.setter
+    def placement_source(self, source: str):
+        self._proto.placement_source = source
+
+
+class ZoneLayerProperties(Wrapper):
+    """Layer-specific properties for a zone
+
+    .. versionadded:: 0.9.0"""
+
+    def __init__(
+        self,
+        proto: board_types_pb2.ZoneLayerProperties | None = None,
+        proto_ref: board_types_pb2.ZoneLayerProperties | None = None,
+    ):
+        self._proto = proto_ref if proto_ref is not None else board_types_pb2.ZoneLayerProperties()
+
+        if proto is not None:
+            self._proto.CopyFrom(proto)
+
+    @property
+    def layer(self) -> BoardLayer.ValueType:
+        return self._proto.layer
+
+    @layer.setter
+    def layer(self, layer: BoardLayer.ValueType):
+        self._proto.layer = layer
+
+    @property
+    def hatching_offset(self) -> Vector2:
+        return Vector2(self._proto.hatching_offset)
+
+    @hatching_offset.setter
+    def hatching_offset(self, offset: Vector2):
+        self._proto.hatching_offset.CopyFrom(offset.proto)
+
+
 class Zone(BoardItem):
     """Represents a copper, graphical, or rule area zone on a board"""
 
@@ -2588,6 +3374,99 @@ class Zone(BoardItem):
         if self.is_rule_area():
             return None
         return self._proto.copper_settings.teardrop
+
+    @property
+    def hatch_settings(self) -> HatchFillSettings | None:
+        """Hatch fill settings for this copper zone
+
+        .. versionadded:: 0.9.0 (KiCad 10.0.7)"""
+        if self.is_rule_area() or not self._proto.copper_settings.HasField("hatch_settings"):
+            return None
+        return HatchFillSettings(proto_ref=self._proto.copper_settings.hatch_settings)
+
+    @hatch_settings.setter
+    def hatch_settings(self, settings: HatchFillSettings | None):
+        if self.is_rule_area():
+            raise ValueError("hatch settings do not apply to rule areas")
+        if settings is None:
+            self._proto.copper_settings.ClearField("hatch_settings")
+        else:
+            self._proto.copper_settings.hatch_settings.CopyFrom(settings.proto)
+
+    @property
+    def thieving_settings(self) -> ThievingFillSettings | None:
+        """Thieving fill settings for this copper zone
+
+        .. versionadded:: 0.9.0 (KiCad 10.0.7)"""
+        if self.is_rule_area() or not self._proto.copper_settings.HasField("thieving_settings"):
+            return None
+        return ThievingFillSettings(proto_ref=self._proto.copper_settings.thieving_settings)
+
+    @thieving_settings.setter
+    def thieving_settings(self, settings: ThievingFillSettings | None):
+        if self.is_rule_area():
+            raise ValueError("thieving settings do not apply to rule areas")
+        if settings is None:
+            self._proto.copper_settings.ClearField("thieving_settings")
+        else:
+            self._proto.copper_settings.thieving_settings.CopyFrom(settings.proto)
+
+    @property
+    def corner_smoothing(self) -> ZoneCornerSmoothingMode.ValueType | None:
+        """Corner smoothing mode for this copper zone
+
+        .. versionadded:: 0.9.0 (KiCad 10.0.7)"""
+        if self.is_rule_area():
+            return None
+        return self._proto.copper_settings.corner_smoothing
+
+    @corner_smoothing.setter
+    def corner_smoothing(self, mode: ZoneCornerSmoothingMode.ValueType):
+        if self.is_rule_area():
+            raise ValueError("corner smoothing does not apply to rule areas")
+        self._proto.copper_settings.corner_smoothing = mode
+
+    @property
+    def corner_radius(self) -> int | None:
+        """Corner radius in nanometers for this copper zone
+
+        .. versionadded:: 0.9.0 (KiCad 10.0.7)"""
+        if self.is_rule_area():
+            return None
+        return self._proto.copper_settings.corner_radius.value_nm
+
+    @corner_radius.setter
+    def corner_radius(self, radius_nm: int):
+        if self.is_rule_area():
+            raise ValueError("corner radius does not apply to rule areas")
+        self._proto.copper_settings.corner_radius.value_nm = radius_nm
+
+    @property
+    def rule_area_settings(self) -> RuleAreaSettings | None:
+        """Settings that apply only to rule area zones; None for copper zones
+
+        .. versionadded:: 0.9.0"""
+        if not self.is_rule_area():
+            return None
+        return RuleAreaSettings(proto_ref=self._proto.rule_area_settings)
+
+    @rule_area_settings.setter
+    def rule_area_settings(self, settings: RuleAreaSettings):
+        if not self.is_rule_area():
+            raise ValueError("rule area settings apply only to rule areas")
+        self._proto.rule_area_settings.CopyFrom(settings.proto)
+
+    @property
+    def layer_properties(self) -> list[ZoneLayerProperties]:
+        """Per-layer properties for this zone
+
+        .. versionadded:: 0.9.0"""
+        return [ZoneLayerProperties(proto_ref=p) for p in self._proto.layer_properties]
+
+    @layer_properties.setter
+    def layer_properties(self, properties: list[ZoneLayerProperties]):
+        del self._proto.layer_properties[:]
+        self._proto.layer_properties.extend(p.proto for p in properties)
 
     @property
     def custom_properties(self) -> list[CustomProperty]:
@@ -3128,6 +4007,30 @@ class Group(BoardItem):
         return f"Group(id={self.id}, items={self.items})"
 
     @property
+    def locked(self) -> bool:
+        """
+        .. versionadded:: 0.9.0 (KiCad 10.0.7)"""
+        return self._proto.locked == LockedState.LS_LOCKED
+
+    @locked.setter
+    def locked(self, locked: bool):
+        self._proto.locked = {
+            True: LockedState.LS_LOCKED,
+            False: LockedState.LS_UNLOCKED,
+        }.get(locked, LockedState.LS_UNLOCKED)
+
+    @property
+    def lib_id(self) -> LibraryIdentifier:
+        """The design block identifier for groups linked to a design block library entry
+
+        .. versionadded:: 0.9.0 (KiCad 10.0.7)"""
+        return LibraryIdentifier(proto_ref=self._proto.lib_id)
+
+    @lib_id.setter
+    def lib_id(self, lib_id: LibraryIdentifier):
+        self._proto.lib_id.CopyFrom(lib_id.proto)
+
+    @property
     def custom_properties(self) -> list[CustomProperty]:
         """
         .. versionadded:: 0.x.0 (KiCad 11)"""
@@ -3427,6 +4330,351 @@ class ReferencePoint(BoardItem):
         self._proto.custom_properties.extend(p.proto for p in properties)
 
 
+class GridItemAffects(Wrapper):
+    """Which actions a grid item affects
+
+    .. versionadded:: 0.x.0 (KiCad 11)"""
+
+    def __init__(
+        self,
+        proto: board_types_pb2.GridItemAffects | None = None,
+        proto_ref: board_types_pb2.GridItemAffects | None = None,
+    ):
+        self._proto = proto_ref if proto_ref is not None else board_types_pb2.GridItemAffects()
+
+        if proto is not None:
+            self._proto.CopyFrom(proto)
+
+    @property
+    def cursor(self) -> bool:
+        return self._proto.cursor
+
+    @cursor.setter
+    def cursor(self, cursor: bool):
+        self._proto.cursor = cursor
+
+    @property
+    def routing(self) -> bool:
+        return self._proto.routing
+
+    @routing.setter
+    def routing(self, routing: bool):
+        self._proto.routing = routing
+
+    @property
+    def placement(self) -> bool:
+        return self._proto.placement
+
+    @placement.setter
+    def placement(self, placement: bool):
+        self._proto.placement = placement
+
+
+class CartesianGridItemAttributes(Wrapper):
+    """.. versionadded:: 0.x.0 (KiCad 11)"""
+
+    def __init__(
+        self,
+        proto: board_types_pb2.CartesianGridItemAttributes | None = None,
+        proto_ref: board_types_pb2.CartesianGridItemAttributes | None = None,
+    ):
+        self._proto = (
+            proto_ref if proto_ref is not None else board_types_pb2.CartesianGridItemAttributes()
+        )
+
+        if proto is not None:
+            self._proto.CopyFrom(proto)
+
+    @property
+    def extent(self) -> Vector2:
+        return Vector2(self._proto.extent)
+
+    @extent.setter
+    def extent(self, extent: Vector2):
+        self._proto.extent.CopyFrom(extent.proto)
+
+    @property
+    def spacing(self) -> Vector2:
+        return Vector2(self._proto.spacing)
+
+    @spacing.setter
+    def spacing(self, spacing: Vector2):
+        self._proto.spacing.CopyFrom(spacing.proto)
+
+
+class PolarGridItemAttributes(Wrapper):
+    """.. versionadded:: 0.x.0 (KiCad 11)"""
+
+    def __init__(
+        self,
+        proto: board_types_pb2.PolarGridItemAttributes | None = None,
+        proto_ref: board_types_pb2.PolarGridItemAttributes | None = None,
+    ):
+        self._proto = (
+            proto_ref if proto_ref is not None else board_types_pb2.PolarGridItemAttributes()
+        )
+
+        if proto is not None:
+            self._proto.CopyFrom(proto)
+
+    @property
+    def radius_extent(self) -> int:
+        return self._proto.radius_extent.value_nm
+
+    @radius_extent.setter
+    def radius_extent(self, extent_nm: int):
+        self._proto.radius_extent.value_nm = extent_nm
+
+    @property
+    def radius_spacing(self) -> int:
+        return self._proto.radius_spacing.value_nm
+
+    @radius_spacing.setter
+    def radius_spacing(self, spacing_nm: int):
+        self._proto.radius_spacing.value_nm = spacing_nm
+
+    @property
+    def phi_extent(self) -> Angle:
+        return Angle(self._proto.phi_extent)
+
+    @phi_extent.setter
+    def phi_extent(self, extent: Angle):
+        self._proto.phi_extent.CopyFrom(extent.proto)
+
+    @property
+    def phi_spacing(self) -> Angle:
+        return Angle(self._proto.phi_spacing)
+
+    @phi_spacing.setter
+    def phi_spacing(self, spacing: Angle):
+        self._proto.phi_spacing.CopyFrom(spacing.proto)
+
+
+class GridItem(BoardItem):
+    """A local grid placed on the board.
+
+    .. versionadded:: 0.x.0 (KiCad 11)"""
+
+    def __init__(
+        self,
+        proto: board_types_pb2.GridItem | None = None,
+        proto_ref: board_types_pb2.GridItem | None = None,
+    ):
+        self._proto = proto_ref if proto_ref is not None else board_types_pb2.GridItem()
+
+        if proto is not None:
+            self._proto.CopyFrom(proto)
+
+    def __repr__(self) -> str:
+        geometry = "cartesian" if self.cartesian is not None else "polar"
+        return f"GridItem(position={self.position}, geometry={geometry})"
+
+    @property
+    def id(self) -> KIID:
+        return self._proto.id
+
+    @property
+    def position(self) -> Vector2:
+        return Vector2(self._proto.position)
+
+    @position.setter
+    def position(self, position: Vector2):
+        self._proto.position.CopyFrom(position.proto)
+
+    @property
+    def orientation(self) -> Angle:
+        return Angle(self._proto.orientation)
+
+    @orientation.setter
+    def orientation(self, orientation: Angle):
+        self._proto.orientation.CopyFrom(orientation.proto)
+
+    @property
+    def cartesian(self) -> CartesianGridItemAttributes | None:
+        """Cartesian grid geometry, or None if the grid is polar"""
+        if self._proto.WhichOneof("geometry") == "cartesian":
+            return CartesianGridItemAttributes(proto_ref=self._proto.cartesian)
+        return None
+
+    @cartesian.setter
+    def cartesian(self, attributes: CartesianGridItemAttributes | None):
+        if attributes is None:
+            if self._proto.WhichOneof("geometry") == "cartesian":
+                self._proto.ClearField("cartesian")
+        else:
+            self._proto.cartesian.CopyFrom(attributes.proto)
+
+    @property
+    def polar(self) -> PolarGridItemAttributes | None:
+        """Polar grid geometry, or None if the grid is cartesian"""
+        if self._proto.WhichOneof("geometry") == "polar":
+            return PolarGridItemAttributes(proto_ref=self._proto.polar)
+        return None
+
+    @polar.setter
+    def polar(self, attributes: PolarGridItemAttributes | None):
+        if attributes is None:
+            if self._proto.WhichOneof("geometry") == "polar":
+                self._proto.ClearField("polar")
+        else:
+            self._proto.polar.CopyFrom(attributes.proto)
+
+    @property
+    def priority(self) -> int:
+        return self._proto.priority
+
+    @priority.setter
+    def priority(self, priority: int):
+        self._proto.priority = priority
+
+    @property
+    def tick_interval(self) -> int:
+        return self._proto.tick_interval
+
+    @tick_interval.setter
+    def tick_interval(self, interval: int):
+        self._proto.tick_interval = interval
+
+    @property
+    def affects(self) -> GridItemAffects:
+        return GridItemAffects(proto_ref=self._proto.affects)
+
+    @affects.setter
+    def affects(self, affects: GridItemAffects):
+        self._proto.affects.CopyFrom(affects.proto)
+
+    @property
+    def locked(self) -> bool:
+        return self._proto.locked == LockedState.LS_LOCKED
+
+    @locked.setter
+    def locked(self, locked: bool):
+        self._proto.locked = {
+            True: LockedState.LS_LOCKED,
+            False: LockedState.LS_UNLOCKED,
+        }.get(locked, LockedState.LS_UNLOCKED)
+
+    @property
+    def custom_properties(self) -> list[CustomProperty]:
+        return [CustomProperty(proto_ref=p) for p in self._proto.custom_properties]
+
+    @custom_properties.setter
+    def custom_properties(self, properties: list[CustomProperty]):
+        del self._proto.custom_properties[:]
+        self._proto.custom_properties.extend(p.proto for p in properties)
+
+
+class ConstraintMember(Wrapper):
+    """.. versionadded:: 0.x.0 (KiCad 11)"""
+
+    def __init__(
+        self,
+        proto: board_types_pb2.ConstraintMember | None = None,
+        proto_ref: board_types_pb2.ConstraintMember | None = None,
+    ):
+        self._proto = proto_ref if proto_ref is not None else board_types_pb2.ConstraintMember()
+
+        if proto is not None:
+            self._proto.CopyFrom(proto)
+
+    def __repr__(self) -> str:
+        return f"ConstraintMember(item={self.item}, anchor={self.anchor})"
+
+    @property
+    def item(self) -> KIID:
+        return self._proto.item
+
+    @item.setter
+    def item(self, item: KIID):
+        self._proto.item.CopyFrom(item)
+
+    @property
+    def anchor(self) -> ConstraintAnchor.ValueType:
+        return self._proto.anchor
+
+    @anchor.setter
+    def anchor(self, anchor: ConstraintAnchor.ValueType):
+        self._proto.anchor = anchor
+
+    @property
+    def index(self) -> int | None:
+        if self._proto.HasField("index"):
+            return self._proto.index
+        return None
+
+    @index.setter
+    def index(self, index: int | None):
+        if index is None:
+            self._proto.ClearField("index")
+        else:
+            self._proto.index = index
+
+
+class Constraint(BoardItem):
+    """A geometric constraint between board items
+
+    .. versionadded:: 0.x.0 (KiCad 11)"""
+
+    def __init__(
+        self,
+        proto: board_types_pb2.Constraint | None = None,
+        proto_ref: board_types_pb2.Constraint | None = None,
+    ):
+        self._proto = proto_ref if proto_ref is not None else board_types_pb2.Constraint()
+
+        if proto is not None:
+            self._proto.CopyFrom(proto)
+
+    def __repr__(self) -> str:
+        return f"Constraint(type={ConstraintType.Name(self.type)}, members={self.members})"
+
+    @property
+    def id(self) -> KIID:
+        return self._proto.id
+
+    @property
+    def type(self) -> ConstraintType.ValueType:
+        return self._proto.type
+
+    @type.setter
+    def type(self, type: ConstraintType.ValueType):
+        self._proto.type = type
+
+    @property
+    def members(self) -> list[ConstraintMember]:
+        return [ConstraintMember(proto_ref=m) for m in self._proto.members]
+
+    @members.setter
+    def members(self, members: list[ConstraintMember]):
+        del self._proto.members[:]
+        self._proto.members.extend(member.proto for member in members)
+
+    @property
+    def value(self) -> float | None:
+        if self._proto.HasField("value"):
+            return self._proto.value
+        return None
+
+    @value.setter
+    def value(self, value: float | None):
+        if value is None:
+            self._proto.ClearField("value")
+        else:
+            self._proto.value = value
+
+    @property
+    def driving(self) -> bool:
+        return self._proto.driving
+
+    @driving.setter
+    def driving(self, driving: bool):
+        self._proto.driving = driving
+
+    @property
+    def custom_properties(self) -> list[CustomProperty]:
+        return [CustomProperty(proto_ref=p) for p in self._proto.custom_properties]
+
+
 _proto_to_object: dict[type[Message], type[Wrapper]] = {
     board_types_pb2.Arc: ArcTrack,
     board_types_pb2.Barcode: Barcode,
@@ -3446,6 +4694,8 @@ _proto_to_object: dict[type[Message], type[Wrapper]] = {
     board_types_pb2.Group: Group,
     board_types_pb2.Table: Table,
     board_types_pb2.ReferencePoint: ReferencePoint,
+    board_types_pb2.GridItem: GridItem,
+    board_types_pb2.Constraint: Constraint,
 }
 
 
