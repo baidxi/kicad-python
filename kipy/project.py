@@ -65,14 +65,26 @@ class Project:
         return [NetClass(p) for p in response.net_classes]
 
     @overload
-    def expand_text_variables(self, text: str) -> str: ...
+    def expand_text_variables(self, text: str, *, expand_env_vars: bool = False) -> str: ...
 
     @overload
-    def expand_text_variables(self, text: List[str]) -> List[str]: ...
+    def expand_text_variables(
+        self, text: List[str], *, expand_env_vars: bool = False
+    ) -> List[str]: ...
 
-    def expand_text_variables(self, text: Union[str, List[str]]) -> Union[str, List[str]]:
+    def expand_text_variables(
+        self, text: Union[str, List[str]], *, expand_env_vars: bool = False
+    ) -> Union[str, List[str]]:
+        """Expands text variables in the given text, optionally expanding environment variables.
+        Any text variables that do not exist will be left as-is in the output.
+
+        .. param:: expand_env_vars will expand environment variables in addition to built-in
+                                           KiCad text variables when True.
+
+        .. versionadded:: 0.9.0"""
         command = project_commands_pb2.ExpandTextVariables()
         command.document.CopyFrom(self._doc)
+        command.expand_env_vars = expand_env_vars
         if isinstance(text, list):
             command.text.extend(text)
         else:
