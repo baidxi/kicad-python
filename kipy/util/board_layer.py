@@ -20,6 +20,123 @@
 
 from kipy.proto.board.board_types_pb2 import BoardLayer
 
+_B = BoardLayer
+
+COPPER_LAYERS: tuple[BoardLayer.ValueType, ...] = (
+    (_B.BL_F_Cu,)
+    + (
+        _B.BL_In1_Cu,
+        _B.BL_In2_Cu,
+        _B.BL_In3_Cu,
+        _B.BL_In4_Cu,
+        _B.BL_In5_Cu,
+        _B.BL_In6_Cu,
+        _B.BL_In7_Cu,
+        _B.BL_In8_Cu,
+        _B.BL_In9_Cu,
+        _B.BL_In10_Cu,
+        _B.BL_In11_Cu,
+        _B.BL_In12_Cu,
+        _B.BL_In13_Cu,
+        _B.BL_In14_Cu,
+        _B.BL_In15_Cu,
+        _B.BL_In16_Cu,
+        _B.BL_In17_Cu,
+        _B.BL_In18_Cu,
+        _B.BL_In19_Cu,
+        _B.BL_In20_Cu,
+        _B.BL_In21_Cu,
+        _B.BL_In22_Cu,
+        _B.BL_In23_Cu,
+        _B.BL_In24_Cu,
+        _B.BL_In25_Cu,
+        _B.BL_In26_Cu,
+        _B.BL_In27_Cu,
+        _B.BL_In28_Cu,
+        _B.BL_In29_Cu,
+        _B.BL_In30_Cu,
+    )
+    + (_B.BL_B_Cu,)
+)
+"""The sequence of copper layers, top to bottom"""
+
+FRONT_TECH_LAYERS: frozenset[BoardLayer.ValueType] = frozenset(
+    (_B.BL_F_Mask, _B.BL_F_Adhes, _B.BL_F_Paste, _B.BL_F_SilkS, _B.BL_F_CrtYd, _B.BL_F_Fab)
+)
+"""Technical layers associated with the front of a board"""
+
+BACK_TECH_LAYERS: frozenset[BoardLayer.ValueType] = frozenset(
+    (_B.BL_B_Mask, _B.BL_B_Adhes, _B.BL_B_Paste, _B.BL_B_SilkS, _B.BL_B_CrtYd, _B.BL_B_Fab)
+)
+"""Technical layers associated with the back of a board"""
+
+TECHNICAL_LAYERS: frozenset[BoardLayer.ValueType] = FRONT_TECH_LAYERS | BACK_TECH_LAYERS
+"""All technical layers on the board (front and back sides)"""
+
+USER_LAYERS: frozenset[BoardLayer.ValueType] = frozenset(
+    (
+        _B.BL_User_1,
+        _B.BL_User_2,
+        _B.BL_User_3,
+        _B.BL_User_4,
+        _B.BL_User_5,
+        _B.BL_User_6,
+        _B.BL_User_7,
+        _B.BL_User_8,
+        _B.BL_User_9,
+        _B.BL_User_10,
+        _B.BL_User_11,
+        _B.BL_User_12,
+        _B.BL_User_13,
+        _B.BL_User_14,
+        _B.BL_User_15,
+        _B.BL_User_16,
+        _B.BL_User_17,
+        _B.BL_User_18,
+        _B.BL_User_19,
+        _B.BL_User_20,
+        _B.BL_User_21,
+        _B.BL_User_22,
+        _B.BL_User_23,
+        _B.BL_User_24,
+        _B.BL_User_25,
+        _B.BL_User_26,
+        _B.BL_User_27,
+        _B.BL_User_28,
+        _B.BL_User_29,
+        _B.BL_User_30,
+        _B.BL_User_31,
+        _B.BL_User_32,
+        _B.BL_User_33,
+        _B.BL_User_34,
+        _B.BL_User_35,
+        _B.BL_User_36,
+        _B.BL_User_37,
+        _B.BL_User_38,
+        _B.BL_User_39,
+        _B.BL_User_40,
+        _B.BL_User_41,
+        _B.BL_User_42,
+        _B.BL_User_43,
+        _B.BL_User_44,
+        _B.BL_User_45,
+    )
+)
+"""The user-assignable drawing layers on a board (not all boards will have all layers)"""
+
+DRAWING_LAYERS: frozenset[BoardLayer.ValueType] = frozenset(
+    (
+        _B.BL_Dwgs_User,
+        _B.BL_Cmts_User,
+        _B.BL_Eco1_User,
+        _B.BL_Eco2_User,
+        _B.BL_Edge_Cuts,
+        _B.BL_Margin,
+    )
+)
+"""The built-in drawing layers on a board"""
+
+
 CANONICAL_LAYER_NAMES = {
     BoardLayer.BL_F_Cu: "F.Cu",
     BoardLayer.BL_In1_Cu: "In1.Cu",
@@ -122,40 +239,7 @@ CANONICAL_LAYER_NAMES = {
 
 def is_copper_layer(layer: BoardLayer.ValueType) -> bool:
     """Checks if the given layer is a copper layer"""
-    return layer in {
-        BoardLayer.BL_F_Cu,
-        BoardLayer.BL_B_Cu,
-        BoardLayer.BL_In1_Cu,
-        BoardLayer.BL_In2_Cu,
-        BoardLayer.BL_In3_Cu,
-        BoardLayer.BL_In4_Cu,
-        BoardLayer.BL_In5_Cu,
-        BoardLayer.BL_In6_Cu,
-        BoardLayer.BL_In7_Cu,
-        BoardLayer.BL_In8_Cu,
-        BoardLayer.BL_In9_Cu,
-        BoardLayer.BL_In10_Cu,
-        BoardLayer.BL_In11_Cu,
-        BoardLayer.BL_In12_Cu,
-        BoardLayer.BL_In13_Cu,
-        BoardLayer.BL_In14_Cu,
-        BoardLayer.BL_In15_Cu,
-        BoardLayer.BL_In16_Cu,
-        BoardLayer.BL_In17_Cu,
-        BoardLayer.BL_In18_Cu,
-        BoardLayer.BL_In19_Cu,
-        BoardLayer.BL_In20_Cu,
-        BoardLayer.BL_In21_Cu,
-        BoardLayer.BL_In22_Cu,
-        BoardLayer.BL_In23_Cu,
-        BoardLayer.BL_In24_Cu,
-        BoardLayer.BL_In25_Cu,
-        BoardLayer.BL_In26_Cu,
-        BoardLayer.BL_In27_Cu,
-        BoardLayer.BL_In28_Cu,
-        BoardLayer.BL_In29_Cu,
-        BoardLayer.BL_In30_Cu,
-    }
+    return layer in COPPER_LAYERS
 
 
 def canonical_name(layer: BoardLayer.ValueType) -> str:
@@ -176,6 +260,4 @@ def layer_from_canonical_name(name: str) -> BoardLayer.ValueType:
 
 def iter_copper_layers():
     """Yields all copper layers."""
-    for layer in CANONICAL_LAYER_NAMES:
-        if is_copper_layer(layer):
-            yield layer
+    yield from COPPER_LAYERS

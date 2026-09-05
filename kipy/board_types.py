@@ -106,7 +106,7 @@ from kipy.proto.board.board_types_pb2 import (  # noqa
 from kipy.proto.common.types import KIID, base_types_pb2
 from kipy.proto.common.types.base_types_pb2 import LockedState
 from kipy.util import unpack_any
-from kipy.util.board_layer import is_copper_layer, iter_copper_layers
+from kipy.util.board_layer import COPPER_LAYERS, is_copper_layer
 from kipy.util.units import from_mm
 from kipy.wrapper import Item, Wrapper
 
@@ -1765,7 +1765,7 @@ class PadStack(BoardItem):
                 BoardLayer.BL_In1_Cu,
                 BoardLayer.BL_B_Cu,
             ],
-            board_types_pb2.PadStackType.PST_CUSTOM: [layer for layer in iter_copper_layers()],
+            board_types_pb2.PadStackType.PST_CUSTOM: [layer for layer in COPPER_LAYERS],
         }.get(type, [])
 
         for layer, value in layer_map.items():
