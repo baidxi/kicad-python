@@ -42,6 +42,7 @@ from kipy.proto.common import types
 from kipy.proto.common.types import base_types_pb2, embedded_files_pb2
 from kipy.proto.common.types.base_types_pb2 import (  # noqa
     KIID,
+    LineEndingStyle,
     PageOrientation,
     PageSize,
 )
@@ -1129,3 +1130,59 @@ class CustomProperty(Wrapper):
 
     def __repr__(self) -> str:
         return f"CustomProperty(key={self.key!r})"
+
+
+class LineEnding(Wrapper):
+    """.. versionadded:: 0.x.0 (KiCad 11)"""
+
+    def __init__(
+        self,
+        proto: base_types_pb2.LineEnding | None = None,
+        proto_ref: base_types_pb2.LineEnding | None = None,
+    ):
+        self._proto = proto_ref if proto_ref is not None else base_types_pb2.LineEnding()
+
+        if proto is not None:
+            self._proto.CopyFrom(proto)
+
+    @property
+    def style(self) -> LineEndingStyle.ValueType:
+        return self._proto.style
+
+    @style.setter
+    def style(self, style: LineEndingStyle.ValueType):
+        self._proto.style = style
+
+    @property
+    def length(self) -> int | None:
+        if self._proto.HasField("length"):
+            return self._proto.length.value_nm
+        return None
+
+    @length.setter
+    def length(self, length: int | None):
+        if length is None:
+            self._proto.ClearField("length")
+        else:
+            self._proto.length.value_nm = length
+
+    @property
+    def width(self) -> int | None:
+        if self._proto.HasField("width"):
+            return self._proto.width.value_nm
+        return None
+
+    @width.setter
+    def width(self, width: int | None):
+        if width is None:
+            self._proto.ClearField("width")
+        else:
+            self._proto.width.value_nm = width
+
+    @property
+    def stroke(self) -> StrokeAttributes:
+        return StrokeAttributes(proto_ref=self._proto.stroke)
+
+    @stroke.setter
+    def stroke(self, stroke: StrokeAttributes):
+        self._proto.stroke.CopyFrom(stroke.proto)
