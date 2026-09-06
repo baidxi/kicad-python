@@ -53,6 +53,7 @@ from kipy.proto.common.types.embedded_files_pb2 import (
 )
 from kipy.proto.common.types.enums_pb2 import (  # noqa
     HorizontalAlignment,
+    PathType,
     VerticalAlignment,
 )
 from kipy.wrapper import Wrapper

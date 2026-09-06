@@ -34,7 +34,7 @@ from typing_extensions import Self
 
 from kipy.board import Board
 from kipy.client import ApiError, KiCadClient
-from kipy.common_types import CompoundShape, Text, TextBox
+from kipy.common_types import CompoundShape, PathType, Text, TextBox
 from kipy.errors import FutureVersionError
 from kipy.geometry import Box2
 from kipy.kicad_api_version import KICAD_API_VERSION
@@ -244,6 +244,19 @@ class KiCad:
         cmd = commands.GetKiCadBinaryPath()
         cmd.binary_name = binary_name
         return self._client.send(cmd, commands.PathResponse).path
+
+    def get_paths(self) -> dict[PathType.ValueType, str]:
+        """Returns a dictionary mapping well-known KiCad filesystem paths to
+        their locations.  Paths are returned in platform-native format.  Not every
+        path is guaranteed to exist and be accessible.  The meaning and contents of
+        this dictionary are not covered by API stability guarantees and may change
+        between KiCad versions.
+
+        .. versionadded:: 0.x.y (KiCad 11)
+        """
+        cmd = base_commands_pb2.GetPaths()
+        response = self._client.send(cmd, base_commands_pb2.GetPathsResponse)
+        return {entry.type: entry.path for entry in response.paths}
 
     def get_plugin_settings_path(self, identifier: str) -> str:
         """Return a writeable path that a plugin can use for storing persistent data such as
