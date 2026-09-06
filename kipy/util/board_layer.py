@@ -58,20 +58,28 @@ COPPER_LAYERS: tuple[BoardLayer.ValueType, ...] = (
     )
     + (_B.BL_B_Cu,)
 )
-"""The sequence of copper layers, top to bottom"""
+"""The sequence of copper layers, top to bottom
+
+.. versionadded:: 0.9.0 (KiCad 10.0.7)"""
 
 FRONT_TECH_LAYERS: frozenset[BoardLayer.ValueType] = frozenset(
     (_B.BL_F_Mask, _B.BL_F_Adhes, _B.BL_F_Paste, _B.BL_F_SilkS, _B.BL_F_CrtYd, _B.BL_F_Fab)
 )
-"""Technical layers associated with the front of a board"""
+"""Technical layers associated with the front of a board
+
+.. versionadded:: 0.9.0 (KiCad 10.0.7)"""
 
 BACK_TECH_LAYERS: frozenset[BoardLayer.ValueType] = frozenset(
     (_B.BL_B_Mask, _B.BL_B_Adhes, _B.BL_B_Paste, _B.BL_B_SilkS, _B.BL_B_CrtYd, _B.BL_B_Fab)
 )
-"""Technical layers associated with the back of a board"""
+"""Technical layers associated with the back of a board
+
+.. versionadded:: 0.9.0 (KiCad 10.0.7)"""
 
 TECHNICAL_LAYERS: frozenset[BoardLayer.ValueType] = FRONT_TECH_LAYERS | BACK_TECH_LAYERS
-"""All technical layers on the board (front and back sides)"""
+"""All technical layers on the board (front and back sides)
+
+.. versionadded:: 0.9.0 (KiCad 10.0.7)"""
 
 USER_LAYERS: frozenset[BoardLayer.ValueType] = frozenset(
     (
@@ -122,7 +130,9 @@ USER_LAYERS: frozenset[BoardLayer.ValueType] = frozenset(
         _B.BL_User_45,
     )
 )
-"""The user-assignable drawing layers on a board (not all boards will have all layers)"""
+"""The user-assignable drawing layers on a board (not all boards will have all layers)
+
+.. versionadded:: 0.9.0 (KiCad 10.0.7)"""
 
 DRAWING_LAYERS: frozenset[BoardLayer.ValueType] = frozenset(
     (
@@ -134,7 +144,9 @@ DRAWING_LAYERS: frozenset[BoardLayer.ValueType] = frozenset(
         _B.BL_Margin,
     )
 )
-"""The built-in drawing layers on a board"""
+"""The built-in drawing layers on a board
+
+.. versionadded:: 0.9.0 (KiCad 10.0.7)"""
 
 
 CANONICAL_LAYER_NAMES = {

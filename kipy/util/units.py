@@ -42,6 +42,8 @@ def from_mils(value_mils: float) -> int:
     as 64-bit nanometers
     :param value_mils: a quantity in mils (thousanths of an inch)
     :return: the quantity in KiCad API units
+
+    .. versionadded:: 0.9.0
     """
     return int(value_mils * 25_400)
 
@@ -49,5 +51,7 @@ def from_mils(value_mils: float) -> int:
 def to_mils(value_mils: int) -> float:
     """
     Converts a KiCad API length/distance value (in nanometers) to mils (thousanths of an inch)
+
+    .. versionadded:: 0.9.0
     """
     return float(value_mils) / 25_400

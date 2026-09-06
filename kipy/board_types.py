@@ -1648,6 +1648,9 @@ class Pad(BoardItem):
 
     @property
     def fab_property(self) -> PadFabricationProperty.ValueType:
+        """PCB fabrication property of this pad
+
+        .. versionadded:: 0.9.0 (KiCad 10.0.7)"""
         return self._proto.fab_property
 
     @fab_property.setter
@@ -1859,6 +1862,9 @@ class FootprintAttributes(Wrapper):
 
     @property
     def exempt_from_courtyard_requirement(self) -> bool:
+        """Whether this footprint is exempt from the courtyard requirement
+
+        .. versionadded:: 0.9.0 (KiCad 10.0.7)"""
         return self._proto.exempt_from_courtyard_requirement
 
     @exempt_from_courtyard_requirement.setter
@@ -1867,6 +1873,9 @@ class FootprintAttributes(Wrapper):
 
     @property
     def allow_soldermask_bridges(self) -> bool:
+        """Whether this footprint allows soldermask bridges between adjacent pads
+
+        .. versionadded:: 0.9.0 (KiCad 10.0.7)"""
         return self._proto.allow_soldermask_bridges
 
     @allow_soldermask_bridges.setter
@@ -1888,6 +1897,9 @@ class FootprintAttributes(Wrapper):
 
     @property
     def description(self) -> str:
+        """The description of this footprint
+
+        .. versionadded:: 0.9.0 (KiCad 10.0.7)"""
         return self._proto.description
 
     @description.setter
@@ -1896,6 +1908,9 @@ class FootprintAttributes(Wrapper):
 
     @property
     def keywords(self) -> str:
+        """The search keywords for this footprint
+
+        .. versionadded:: 0.9.0 (KiCad 10.0.7)"""
         return self._proto.keywords
 
     @keywords.setter

@@ -69,7 +69,7 @@ class Vector2(Wrapper):
     def from_xy_mils(cls, x_mils: float, y_mils: float) -> Self:
         """Initialize Vector2 with x and y values in mils
 
-        .. versionadded:: 0.x.y"""
+        .. versionadded:: 0.9.0"""
         proto = types.Vector2()
         proto.x_nm = from_mils(x_mils)
         proto.y_nm = from_mils(y_mils)

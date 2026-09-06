@@ -1338,6 +1338,8 @@ class Board:
 
         .. param:: expand_env_vars will expand environment variables in addition to built-in
                                    KiCad text variables when True.
+
+        .. versionadded:: 0.9.0 (expand_env_vars parameter)
         """
         command = project_commands_pb2.ExpandTextVariables()
         command.document.CopyFrom(self._doc)
