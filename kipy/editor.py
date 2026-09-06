@@ -298,3 +298,15 @@ class EditorCommandsHandler(Generic[_ItemT_co]):
         command = editor_commands_pb2.ClearSelection()
         command.header.document.CopyFrom(self._doc)
         self._kicad.send(command, Empty)
+
+    def is_document_modified(self) -> bool:
+        """Returns true if this document has been modified (either interactively or by the API)
+        since it was last saved.
+
+        .. versionadded:: 0.x.0 (KiCad 11)"""
+        command = editor_commands_pb2.GetDocumentModifiedState()
+        command.document.CopyFrom(self._doc)
+        return (
+            self._kicad.send(command, editor_commands_pb2.GetDocumentModifiedStateResponse).state
+            == editor_commands_pb2.DocumentModifiedState.DMS_MODIFIED
+        )
