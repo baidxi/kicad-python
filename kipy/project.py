@@ -64,6 +64,23 @@ class Project:
         response = self._kicad.send(command, project_commands_pb2.NetClassesResponse)
         return [NetClass(p) for p in response.net_classes]
 
+    def set_net_classes(
+        self,
+        net_classes: list[NetClass],
+        merge_mode: MapMergeMode.ValueType = MapMergeMode.MMM_MERGE,
+    ):
+        """Sets the project net classes, merging with existing classes by default
+
+        :param net_classes: the net classes to set
+        :param merge_mode: ``MMM_MERGE`` merges the given classes into the existing set,
+                           ``MMM_REPLACE`` replaces the existing set of net classes
+
+        .. versionadded:: 0.9.0"""
+        command = project_commands_pb2.SetNetClasses()
+        command.merge_mode = merge_mode
+        command.net_classes.extend([nc.proto for nc in net_classes])
+        self._kicad.send(command, Empty)
+
     @overload
     def expand_text_variables(self, text: str, *, expand_env_vars: bool = False) -> str: ...
 
