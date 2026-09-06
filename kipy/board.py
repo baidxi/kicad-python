@@ -19,7 +19,6 @@
 # SOFTWARE.
 
 import pathlib
-import reprlib
 from collections.abc import Iterable, Sequence
 from time import sleep
 from typing import Dict, List, Optional, Union, cast, overload

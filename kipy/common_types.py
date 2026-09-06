@@ -18,12 +18,12 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import base64
 import sys
 from collections.abc import Sequence
 from pathlib import Path
 from typing import Optional
 
-import base64
 import zstandard
 
 from kipy.geometry import (
