@@ -20,6 +20,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import sys
+
 from kipy import KiCad
 
 if __name__ == "__main__":
@@ -28,7 +30,7 @@ if __name__ == "__main__":
         print(f"KiCad version: {kicad.get_version().full_version}")
     except BaseException as e:
         print(f"Not connected to KiCad: {e}")
-        exit()
+        sys.exit()
 
     print(f"Api version {kicad.get_api_version()}")
     try:

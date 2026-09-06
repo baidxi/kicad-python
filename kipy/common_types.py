@@ -18,11 +18,12 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from __future__ import annotations
+
 import base64
 import sys
 from collections.abc import Sequence
 from pathlib import Path
-from typing import Optional
 
 import zstandard
 
@@ -73,8 +74,8 @@ class SheetPath(Wrapper):
 
     def __init__(
         self,
-        proto: Optional[types.SheetPath] = None,
-        proto_ref: Optional[types.SheetPath] = None,
+        proto: types.SheetPath | None = None,
+        proto_ref: types.SheetPath | None = None,
     ):
         self._proto = proto_ref if proto_ref is not None else types.SheetPath()
 
@@ -101,8 +102,8 @@ class SheetPath(Wrapper):
 class Color(Wrapper):
     def __init__(
         self,
-        proto: Optional[types.Color] = None,
-        proto_ref: Optional[types.Color] = None,
+        proto: types.Color | None = None,
+        proto_ref: types.Color | None = None,
     ):
         self._proto = proto_ref if proto_ref is not None else types.Color()
 
@@ -145,8 +146,8 @@ class Color(Wrapper):
 class TextAttributes(Wrapper):
     def __init__(
         self,
-        proto: Optional[types.TextAttributes] = None,
-        proto_ref: Optional[types.TextAttributes] = None,
+        proto: types.TextAttributes | None = None,
+        proto_ref: types.TextAttributes | None = None,
     ):
         self._proto = proto_ref if proto_ref is not None else types.TextAttributes()
 
@@ -287,8 +288,8 @@ class LibraryIdentifier(Wrapper):
 
     def __init__(
         self,
-        proto: Optional[types.LibraryIdentifier] = None,
-        proto_ref: Optional[types.LibraryIdentifier] = None,
+        proto: types.LibraryIdentifier | None = None,
+        proto_ref: types.LibraryIdentifier | None = None,
     ):
         self._proto = proto_ref if proto_ref is not None else types.LibraryIdentifier()
 
@@ -318,8 +319,8 @@ class LibraryIdentifier(Wrapper):
 class StrokeAttributes(Wrapper):
     def __init__(
         self,
-        proto: Optional[types.StrokeAttributes] = None,
-        proto_ref: Optional[types.StrokeAttributes] = None,
+        proto: types.StrokeAttributes | None = None,
+        proto_ref: types.StrokeAttributes | None = None,
     ):
         self._proto = proto_ref if proto_ref is not None else types.StrokeAttributes()
 
@@ -356,8 +357,8 @@ class StrokeAttributes(Wrapper):
 class GraphicFillAttributes(Wrapper):
     def __init__(
         self,
-        proto: Optional[types.GraphicFillAttributes] = None,
-        proto_ref: Optional[types.GraphicFillAttributes] = None,
+        proto: types.GraphicFillAttributes | None = None,
+        proto_ref: types.GraphicFillAttributes | None = None,
     ):
         self._proto = proto_ref if proto_ref is not None else types.GraphicFillAttributes()
 
@@ -387,8 +388,8 @@ class GraphicFillAttributes(Wrapper):
 class GraphicAttributes(Wrapper):
     def __init__(
         self,
-        proto: Optional[types.GraphicAttributes] = None,
-        proto_ref: Optional[types.GraphicAttributes] = None,
+        proto: types.GraphicAttributes | None = None,
+        proto_ref: types.GraphicAttributes | None = None,
     ):
         self._proto = proto_ref if proto_ref is not None else types.GraphicAttributes()
 
@@ -410,7 +411,7 @@ class GraphicAttributes(Wrapper):
 class Text(Wrapper):
     """Common text properties (wrapper for KiCad's EDA_TEXT) shared between board and schematic"""
 
-    def __init__(self, proto: Optional[types.Text] = None, proto_ref: Optional[types.Text] = None):
+    def __init__(self, proto: types.Text | None = None, proto_ref: types.Text | None = None):
         self._proto = proto_ref if proto_ref is not None else types.Text()
 
         if proto is not None:
@@ -444,8 +445,8 @@ class Text(Wrapper):
 class TextBox(Wrapper):
     def __init__(
         self,
-        proto: Optional[types.TextBox] = None,
-        proto_ref: Optional[types.TextBox] = None,
+        proto: types.TextBox | None = None,
+        proto_ref: types.TextBox | None = None,
     ):
         self._proto = proto_ref if proto_ref is not None else types.TextBox()
 
@@ -497,7 +498,7 @@ class TextBox(Wrapper):
 class GraphicShape(Wrapper):
     """Represents an abstract graphic shape (not a board or schematic item)"""
 
-    def __init__(self, proto: Optional[base_types_pb2.GraphicShape] = None):
+    def __init__(self, proto: base_types_pb2.GraphicShape | None = None):
         self._graphic_proto = base_types_pb2.GraphicShape()
 
         if proto is not None:
@@ -520,8 +521,8 @@ class Segment(GraphicShape):
 
     def __init__(
         self,
-        proto: Optional[base_types_pb2.GraphicShape] = None,
-        proto_ref: Optional[base_types_pb2.GraphicShape] = None,
+        proto: base_types_pb2.GraphicShape | None = None,
+        proto_ref: base_types_pb2.GraphicShape | None = None,
     ):
         self._graphic_proto = proto_ref if proto_ref is not None else base_types_pb2.GraphicShape()
 
@@ -556,8 +557,8 @@ class Arc(GraphicShape):
 
     def __init__(
         self,
-        proto: Optional[base_types_pb2.GraphicShape] = None,
-        proto_ref: Optional[base_types_pb2.GraphicShape] = None,
+        proto: base_types_pb2.GraphicShape | None = None,
+        proto_ref: base_types_pb2.GraphicShape | None = None,
     ):
         self._graphic_proto = proto_ref if proto_ref is not None else base_types_pb2.GraphicShape()
 
@@ -590,7 +591,7 @@ class Arc(GraphicShape):
     def end(self, point: Vector2):
         self._graphic_proto.arc.end.CopyFrom(point.proto)
 
-    def center(self) -> Optional[Vector2]:
+    def center(self) -> Vector2 | None:
         """
         Calculates the center of the arc.  Uses a different algorithm than KiCad so may have
         slightly different results.  The KiCad API preserves the start, middle, and end points of
@@ -614,13 +615,13 @@ class Arc(GraphicShape):
         # for situations where matching KiCad's behavior exactly is important
         return arc_radius(self.start, self.mid, self.end)
 
-    def start_angle(self) -> Optional[float]:
+    def start_angle(self) -> float | None:
         return arc_start_angle(self.start, self.mid, self.end)
 
-    def end_angle(self) -> Optional[float]:
+    def end_angle(self) -> float | None:
         return arc_end_angle(self.start, self.mid, self.end)
 
-    def angle(self) -> Optional[float]:
+    def angle(self) -> float | None:
         """Calculates the angle between the start and end of the arc in radians
 
         :return: The angle of the arc, or None if the arc is degenerate
@@ -636,8 +637,8 @@ class Circle(GraphicShape):
 
     def __init__(
         self,
-        proto: Optional[base_types_pb2.GraphicShape] = None,
-        proto_ref: Optional[base_types_pb2.GraphicShape] = None,
+        proto: base_types_pb2.GraphicShape | None = None,
+        proto_ref: base_types_pb2.GraphicShape | None = None,
     ):
         self._graphic_proto = proto_ref if proto_ref is not None else base_types_pb2.GraphicShape()
 
@@ -683,8 +684,8 @@ class Rectangle(GraphicShape):
 
     def __init__(
         self,
-        proto: Optional[base_types_pb2.GraphicShape] = None,
-        proto_ref: Optional[base_types_pb2.GraphicShape] = None,
+        proto: base_types_pb2.GraphicShape | None = None,
+        proto_ref: base_types_pb2.GraphicShape | None = None,
     ):
         self._graphic_proto = proto_ref if proto_ref is not None else base_types_pb2.GraphicShape()
 
@@ -719,8 +720,8 @@ class Polygon(GraphicShape):
 
     def __init__(
         self,
-        proto: Optional[base_types_pb2.GraphicShape] = None,
-        proto_ref: Optional[base_types_pb2.GraphicShape] = None,
+        proto: base_types_pb2.GraphicShape | None = None,
+        proto_ref: base_types_pb2.GraphicShape | None = None,
     ):
         self._graphic_proto = proto_ref if proto_ref is not None else base_types_pb2.GraphicShape()
 
@@ -756,8 +757,8 @@ class Bezier(GraphicShape):
 
     def __init__(
         self,
-        proto: Optional[base_types_pb2.GraphicShape] = None,
-        proto_ref: Optional[base_types_pb2.GraphicShape] = None,
+        proto: base_types_pb2.GraphicShape | None = None,
+        proto_ref: base_types_pb2.GraphicShape | None = None,
     ):
         self._graphic_proto = proto_ref if proto_ref is not None else base_types_pb2.GraphicShape()
 
@@ -804,7 +805,7 @@ class Bezier(GraphicShape):
         raise NotImplementedError()
 
 
-def to_concrete_shape(shape: GraphicShape) -> Optional[GraphicShape]:
+def to_concrete_shape(shape: GraphicShape) -> GraphicShape | None:
     cls = {
         "segment": Segment,
         "arc": Arc,
@@ -821,7 +822,7 @@ def to_concrete_shape(shape: GraphicShape) -> Optional[GraphicShape]:
 class CompoundShape(Wrapper):
     """Represents a compound shape (a collection of other shapes)"""
 
-    def __init__(self, proto: Optional[base_types_pb2.CompoundShape] = None):
+    def __init__(self, proto: base_types_pb2.CompoundShape | None = None):
         self._proto = base_types_pb2.CompoundShape()
 
         if proto is not None:
@@ -860,8 +861,8 @@ class CompoundShape(Wrapper):
 class TitleBlockInfo(Wrapper):
     def __init__(
         self,
-        proto: Optional[types.TitleBlockInfo] = None,
-        proto_ref: Optional[types.TitleBlockInfo] = None,
+        proto: types.TitleBlockInfo | None = None,
+        proto_ref: types.TitleBlockInfo | None = None,
     ):
         self._proto = proto_ref if proto_ref is not None else types.TitleBlockInfo()
 
@@ -943,8 +944,8 @@ class EmbeddedFile(Wrapper):
 
     def __init__(
         self,
-        proto: Optional[embedded_files_pb2.EmbeddedFile] = None,
-        proto_ref: Optional[embedded_files_pb2.EmbeddedFile] = None,
+        proto: embedded_files_pb2.EmbeddedFile | None = None,
+        proto_ref: embedded_files_pb2.EmbeddedFile | None = None,
     ):
         self._proto = proto_ref if proto_ref is not None else embedded_files_pb2.EmbeddedFile()
 
@@ -984,9 +985,7 @@ class EmbeddedFile(Wrapper):
         self._proto.data_hash = data_hash
 
     @classmethod
-    def from_path(
-        cls, path: Path, type: Optional[EmbeddedFileType.ValueType] = None
-    ) -> EmbeddedFile:
+    def from_path(cls, path: Path, type: EmbeddedFileType.ValueType | None = None) -> EmbeddedFile:
         """Creates a new embedded file from a file path.
 
         :param path: Path of the file to embed.
@@ -1031,8 +1030,8 @@ class EmbeddedFiles(Wrapper):
 
     def __init__(
         self,
-        proto: Optional[embedded_files_pb2.EmbeddedFiles] = None,
-        proto_ref: Optional[embedded_files_pb2.EmbeddedFiles] = None,
+        proto: embedded_files_pb2.EmbeddedFiles | None = None,
+        proto_ref: embedded_files_pb2.EmbeddedFiles | None = None,
     ):
         self._proto = proto_ref if proto_ref is not None else embedded_files_pb2.EmbeddedFiles()
 

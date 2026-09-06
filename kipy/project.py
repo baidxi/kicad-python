@@ -18,7 +18,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from typing import List, Union, overload
+from __future__ import annotations
+
+from typing import overload
 
 from google.protobuf.empty_pb2 import Empty
 
@@ -59,7 +61,7 @@ class Project:
     def path(self) -> str:
         return self._doc.project.path
 
-    def get_net_classes(self) -> List[NetClass]:
+    def get_net_classes(self) -> list[NetClass]:
         command = project_commands_pb2.GetNetClasses()
         response = self._kicad.send(command, project_commands_pb2.NetClassesResponse)
         return [NetClass(p) for p in response.net_classes]
@@ -86,12 +88,12 @@ class Project:
 
     @overload
     def expand_text_variables(
-        self, text: List[str], *, expand_env_vars: bool = False
-    ) -> List[str]: ...
+        self, text: list[str], *, expand_env_vars: bool = False
+    ) -> list[str]: ...
 
     def expand_text_variables(
-        self, text: Union[str, List[str]], *, expand_env_vars: bool = False
-    ) -> Union[str, List[str]]:
+        self, text: str | list[str], *, expand_env_vars: bool = False
+    ) -> str | list[str]:
         """Expands text variables in the given text, optionally expanding environment variables.
         Any text variables that do not exist will be left as-is in the output.
 

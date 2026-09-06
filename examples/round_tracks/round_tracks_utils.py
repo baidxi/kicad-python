@@ -1,8 +1,9 @@
+from __future__ import annotations
+
 import math
 from collections.abc import Sequence
 from copy import deepcopy
 from math import pi
-from typing import Union
 
 from kipy.board import Board
 from kipy.board_types import Arc, Pad, Track
@@ -11,7 +12,7 @@ from kipy.geometry import Vector2
 tolerance = 10  # in nanometres
 
 
-def reverseTrack(track: Union[Track, Arc]):
+def reverseTrack(track: Track | Arc):
     ep = deepcopy(track.start)
     track.start = track.end
     track.end = ep
