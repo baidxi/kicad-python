@@ -20,40 +20,18 @@
 
 from __future__ import annotations
 
-import pathlib
-from collections.abc import Iterable, Sequence
-from typing import cast
+from collections.abc import Sequence
+from typing import Any, cast
 
 from google.protobuf.empty_pb2 import Empty
 
 from kipy.client import KiCadClient
-from kipy.common_types import Commit, PageSettings, TitleBlockInfo
+from kipy.common_types import PageSettings, TitleBlockInfo
+from kipy.editor import EditorCommandsHandler
 from kipy.project import Project
-from kipy.proto.common.commands import editor_commands_pb2, project_commands_pb2
-from kipy.proto.common.commands.editor_commands_pb2 import (
-    BeginCommit,
-    BeginCommitResponse,
-    CommitAction,
-    CreateItems,
-    CreateItemsResponse,
-    DeleteItems,
-    DeleteItemsResponse,
-    EndCommit,
-    EndCommitResponse,
-    GetItems,
-    GetItemsById,
-    GetItemsResponse,
-    GetPageSettings,
-    SetPageSettings,
-    UpdateItems,
-    UpdateItemsResponse,
-)
-from kipy.proto.common.types import (
-    KIID,
-    DocumentSpecifier,
-    KiCadObjectType,
-    base_types_pb2,
-)
+from kipy.proto.common.commands import editor_commands_pb2
+from kipy.proto.common.commands.editor_commands_pb2 import GetPageSettings, SetPageSettings
+from kipy.proto.common.types import DocumentSpecifier, KiCadObjectType, base_types_pb2
 from kipy.proto.schematic.schematic_commands_pb2 import (
     GetSchematicHierarchy,
     GetSchematicNetlist,
@@ -80,12 +58,10 @@ from kipy.schematic_types import (
     SheetSymbol,
     unwrap,
 )
-from kipy.util import pack_any
 from kipy.variants import VariantsCommandHandler
-from kipy.wrapper import Wrapper
 
 
-class Schematic(VariantsCommandHandler):
+class Schematic(EditorCommandsHandler["SchematicItem"], VariantsCommandHandler):
     """
     .. versionadded:: 0.x.y (KiCad 11)
     """
@@ -112,141 +88,9 @@ class Schematic(VariantsCommandHandler):
     def name(self) -> str:
         return self._doc.project.name + ".kicad_sch"
 
-    def save(self):
-        command = project_commands_pb2.SaveDocument()
-        command.document.CopyFrom(self._doc)
-        self._kicad.send(command, Empty)
-
-    def save_as(self, filename: str, overwrite: bool = False, include_project: bool = True):
-        """
-        Saves the schematic to a new file.  Does not open the newly-saved file.
-
-        :param filename: The path to save the schematic to
-        :param overwrite: If True, the file will be overwritten if it already exists
-        :param include_project: If True, the project will be saved along with the schematic
-        """
-        path = pathlib.Path(filename)
-        command = editor_commands_pb2.SaveCopyOfDocument()
-        command.document.CopyFrom(self._doc)
-        command.path = str(path.resolve())
-        command.options.overwrite = overwrite
-        command.options.include_project = include_project
-        self._kicad.send(command, Empty)
-
-    def revert(self):
-        command = editor_commands_pb2.RevertDocument()
-        command.document.CopyFrom(self._doc)
-        self._kicad.send(command, Empty)
-
-    def begin_commit(self) -> Commit:
-        command = BeginCommit()
-        command.header.document.CopyFrom(self._doc)
-        return Commit(self._kicad.send(command, BeginCommitResponse).id)
-
-    def push_commit(self, commit: Commit, message: str = ""):
-        command = EndCommit()
-        command.id.CopyFrom(commit.id)
-        command.header.document.CopyFrom(self._doc)
-        command.action = CommitAction.CMA_COMMIT
-        command.message = message
-        self._kicad.send(command, EndCommitResponse)
-
-    def drop_commit(self, commit: Commit):
-        command = EndCommit()
-        command.id.CopyFrom(commit.id)
-        command.header.document.CopyFrom(self._doc)
-        command.action = CommitAction.CMA_DROP
-        self._kicad.send(command, EndCommitResponse)
-
-    def create_items(self, items: Wrapper | Iterable[Wrapper]) -> list[SchematicItem]:
-        command = CreateItems()
-        command.header.document.CopyFrom(self._doc)
-
-        if isinstance(items, Wrapper):
-            command.items.append(pack_any(items.proto))
-        else:
-            command.items.extend(pack_any(item.proto) for item in items)
-
-        return [
-            cast(SchematicItem, unwrap(result.item))
-            for result in self._kicad.send(command, CreateItemsResponse).created_items
-        ]
-
-    def get_items(
-        self,
-        types: KiCadObjectType.ValueType | Sequence[KiCadObjectType.ValueType],
-    ) -> Sequence[SchematicItem]:
-        command = GetItems()
-        command.header.document.CopyFrom(self._doc)
-
-        if isinstance(types, int):
-            command.types.append(types)
-        else:
-            command.types.extend(types)
-
-        return [
-            cast(SchematicItem, unwrap(item))
-            for item in self._kicad.send(command, GetItemsResponse).items
-        ]
-
-    def get_items_by_id(self, ids: KIID | Sequence[KIID]) -> Sequence[SchematicItem]:
-        command = GetItemsById()
-        command.header.document.CopyFrom(self._doc)
-
-        if isinstance(ids, KIID):
-            command.items.append(ids)
-        else:
-            command.items.extend(ids)
-
-        return [
-            cast(SchematicItem, unwrap(item))
-            for item in self._kicad.send(command, GetItemsResponse).items
-        ]
-
-    def update_items(self, items: SchematicItem | Sequence[SchematicItem]) -> list[SchematicItem]:
-        command = UpdateItems()
-        command.header.document.CopyFrom(self._doc)
-
-        if isinstance(items, SchematicItem):
-            command.items.append(pack_any(items.proto))
-        else:
-            command.items.extend(pack_any(item.proto) for item in items)
-
-        if len(command.items) == 0:
-            return []
-
-        return [
-            cast(SchematicItem, unwrap(result.item))
-            for result in self._kicad.send(command, UpdateItemsResponse).updated_items
-        ]
-
-    def remove_items(self, items: SchematicItem | Sequence[SchematicItem]):
-        command = DeleteItems()
-        command.header.document.CopyFrom(self._doc)
-
-        if isinstance(items, SchematicItem):
-            command.item_ids.append(items.id)
-        else:
-            command.item_ids.extend(item.id for item in items)
-
-        if len(command.item_ids) == 0:
-            return
-
-        self._kicad.send(command, DeleteItemsResponse)
-
-    def remove_items_by_id(self, items: KIID | Sequence[KIID]):
-        command = DeleteItems()
-        command.header.document.CopyFrom(self._doc)
-
-        if isinstance(items, KIID):
-            command.item_ids.append(items)
-        else:
-            command.item_ids.extend(items)
-
-        if len(command.item_ids) == 0:
-            return
-
-        self._kicad.send(command, DeleteItemsResponse)
+    def _item_from_message(self, message: Any) -> SchematicItem:
+        """Converts an unwrapped protobuf message into a concrete schematic item wrapper"""
+        return cast(SchematicItem, unwrap(message))
 
     def get_lines(self) -> Sequence[SchematicLine]:
         return [
@@ -405,66 +249,3 @@ class Schematic(VariantsCommandHandler):
         command.document.CopyFrom(self._doc)
         command.page_settings.CopyFrom(page_settings.proto)
         return PageSettings(self._kicad.send(command, base_types_pb2.PageSettings))
-
-    def get_as_string(self) -> str:
-        command = editor_commands_pb2.SaveDocumentToString()
-        command.document.CopyFrom(self._doc)
-        return self._kicad.send(command, editor_commands_pb2.SavedDocumentResponse).contents
-
-    def get_selection_as_string(self) -> str:
-        command = editor_commands_pb2.SaveSelectionToString()
-        return self._kicad.send(command, editor_commands_pb2.SavedSelectionResponse).contents
-
-    def get_selection(
-        self,
-        types: KiCadObjectType.ValueType | Sequence[KiCadObjectType.ValueType] | None = None,
-    ) -> Sequence[SchematicItem]:
-        command = editor_commands_pb2.GetSelection()
-        command.header.document.CopyFrom(self._doc)
-
-        if isinstance(types, int):
-            command.types.append(types)
-        else:
-            command.types.extend(types or [])
-
-        return [
-            cast(SchematicItem, unwrap(item))
-            for item in self._kicad.send(command, editor_commands_pb2.SelectionResponse).items
-        ]
-
-    def add_to_selection(
-        self, items: SchematicItem | Sequence[SchematicItem]
-    ) -> Sequence[SchematicItem]:
-        command = editor_commands_pb2.AddToSelection()
-        command.header.document.CopyFrom(self._doc)
-
-        if isinstance(items, SchematicItem):
-            command.items.append(items.id)
-        else:
-            command.items.extend(item.id for item in items)
-
-        return [
-            cast(SchematicItem, unwrap(item))
-            for item in self._kicad.send(command, editor_commands_pb2.SelectionResponse).items
-        ]
-
-    def remove_from_selection(
-        self, items: SchematicItem | Sequence[SchematicItem]
-    ) -> Sequence[SchematicItem]:
-        command = editor_commands_pb2.RemoveFromSelection()
-        command.header.document.CopyFrom(self._doc)
-
-        if isinstance(items, SchematicItem):
-            command.items.append(items.id)
-        else:
-            command.items.extend(item.id for item in items)
-
-        return [
-            cast(SchematicItem, unwrap(item))
-            for item in self._kicad.send(command, editor_commands_pb2.SelectionResponse).items
-        ]
-
-    def clear_selection(self):
-        command = editor_commands_pb2.ClearSelection()
-        command.header.document.CopyFrom(self._doc)
-        self._kicad.send(command, Empty)

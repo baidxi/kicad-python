@@ -21,11 +21,10 @@
 from __future__ import annotations
 
 import os
-import pathlib
 import reprlib
 from collections.abc import Iterable, Sequence
 from time import sleep
-from typing import Union, cast, overload
+from typing import Any, Union, cast, overload
 
 from google.protobuf.empty_pb2 import Empty
 
@@ -71,12 +70,12 @@ from kipy.board_types import (
 from kipy.client import ApiError, KiCadClient
 from kipy.common_types import (
     Color,
-    Commit,
     EmbeddedFile,
     EmbeddedFiles,
     TextAttributes,
     TitleBlockInfo,
 )
+from kipy.editor import EditorCommandsHandler
 from kipy.geometry import Box2, PolygonWithHoles, Vector2
 from kipy.project import NetClass, Project
 from kipy.proto.board import board_commands_pb2, board_jobs_pb2, board_pb2, board_types_pb2
@@ -118,23 +117,10 @@ from kipy.proto.board.board_pb2 import (  # noqa
 from kipy.proto.board.board_types_pb2 import BoardLayer
 from kipy.proto.common.commands import Ping, editor_commands_pb2, project_commands_pb2
 from kipy.proto.common.commands.editor_commands_pb2 import (
-    BeginCommit,
-    BeginCommitResponse,
-    CommitAction,
-    CreateItems,
-    CreateItemsResponse,
-    DeleteItems,
-    DeleteItemsResponse,
-    EndCommit,
-    EndCommitResponse,
-    GetItems,
-    GetItemsById,
     GetItemsResponse,
     HitTest,
     HitTestResponse,
     HitTestResult,
-    UpdateItems,
-    UpdateItemsResponse,
 )
 from kipy.proto.common.envelope_pb2 import ApiStatusCode
 from kipy.proto.common.types import (
@@ -148,7 +134,6 @@ from kipy.proto.common.types import (
 from kipy.proto.common.types.enums_pb2 import (
     Units,
 )
-from kipy.util import pack_any
 from kipy.variants import VariantsCommandHandler
 from kipy.wrapper import Item, Wrapper
 
@@ -684,7 +669,7 @@ class BoardStackup(Wrapper):
         return [BoardStackupLayer(layer) for layer in self._proto.layers]
 
 
-class Board(VariantsCommandHandler):
+class Board(EditorCommandsHandler["BoardItem"], VariantsCommandHandler):
     def __init__(self, kicad: KiCadClient, document: DocumentSpecifier):
         """Represents an open board (.kicad_pcb) document in KiCad"""
         self._kicad = kicad
@@ -711,32 +696,6 @@ class Board(VariantsCommandHandler):
     def name(self) -> str:
         """Returns the file name of the board"""
         return self._doc.board_filename
-
-    def save(self):
-        command = project_commands_pb2.SaveDocument()
-        command.document.CopyFrom(self._doc)
-        self._kicad.send(command, Empty)
-
-    def save_as(self, filename: str, overwrite: bool = False, include_project: bool = True):
-        """Saves the board to a new file.  Does not open the newly-saved file.
-
-        :param filename: The path to save the board to
-        :param overwrite: If True, the file will be overwritten if it already exists
-        :param include_project: If True, the project will be saved along with the board
-        """
-        path = pathlib.Path(filename)
-        command = editor_commands_pb2.SaveCopyOfDocument()
-        command.document.CopyFrom(self._doc)
-        command.path = str(path.resolve())
-        command.options.overwrite = overwrite
-        command.options.include_project = include_project
-        self._kicad.send(command, Empty)
-
-    def revert(self):
-        """Reverts the board to the last saved state"""
-        command = editor_commands_pb2.RevertDocument()
-        command.document.CopyFrom(self._doc)
-        self._kicad.send(command, Empty)
 
     def export_3d(
         self,
@@ -1094,53 +1053,9 @@ class Board(VariantsCommandHandler):
         command.job_settings.output_path = output_path
         return JobResult(self._kicad.send(command, jobs_pb2.RunJobResponse))
 
-    def begin_commit(self) -> Commit:
-        """Begins a commit transaction on the board, returning a Commit object that can be used to
-        push or drop (cancel) the commit.  Each commit represents a set of changes that can be
-        undone or redone as a single operation.
-
-        If you do not call begin_commit, any changes made to the board will be committed
-        immediately, which will result in multiple steps being added to the undo history.
-
-        If you call begin_commit, changes made to the board will not be reflected in the editor
-        until you call push_commit.  This allows you to group multiple changes into a single undo
-        step.
-        """
-        command = BeginCommit()
-        command.header.document.CopyFrom(self._doc)
-        return Commit(self._kicad.send(command, BeginCommitResponse).id)
-
-    def push_commit(self, commit: Commit, message: str = ""):
-        """If a commit is open, pushes the changes to the board and closes the commit.  This will
-        result in a single undo step being added to the undo history."""
-        command = EndCommit()
-        command.id.CopyFrom(commit.id)
-        command.header.document.CopyFrom(self._doc)
-        command.action = CommitAction.CMA_COMMIT
-        command.message = message
-        self._kicad.send(command, EndCommitResponse)
-
-    def drop_commit(self, commit: Commit):
-        """Cancel a commit, discarding any changes made since the commit was opened"""
-        command = EndCommit()
-        command.id.CopyFrom(commit.id)
-        command.header.document.CopyFrom(self._doc)
-        command.action = CommitAction.CMA_DROP
-        self._kicad.send(command, EndCommitResponse)
-
-    def create_items(self, items: Wrapper | Iterable[Wrapper]) -> list[Wrapper]:
-        command = CreateItems()
-        command.header.document.CopyFrom(self._doc)
-
-        if isinstance(items, Wrapper):
-            command.items.append(pack_any(items.proto))
-        else:
-            command.items.extend([pack_any(i.proto) for i in items])
-
-        return [
-            unwrap(result.item)
-            for result in self._kicad.send(command, CreateItemsResponse).created_items
-        ]
+    def _item_from_message(self, message: Any) -> BoardItem:
+        """Converts an unwrapped protobuf message into a concrete board item wrapper"""
+        return self._to_concrete_items([unwrap(message)])[0]
 
     def _to_concrete_items(self, items: Sequence[Wrapper]) -> list[BoardItem]:
         items_converted: list[BoardItem] = []
@@ -1157,35 +1072,16 @@ class Board(VariantsCommandHandler):
 
     def get_items(
         self, types: KiCadObjectType.ValueType | Sequence[KiCadObjectType.ValueType]
-    ) -> Sequence[Item]:
+    ) -> Sequence[BoardItem]:
         """Retrieves items from the board, optionally filtering to a single or set of types"""
-        command = GetItems()
-        command.header.document.CopyFrom(self._doc)
+        return self._to_concrete_items(super().get_items(types))
 
-        if isinstance(types, int):
-            command.types.append(types)
-        else:
-            command.types.extend(types)
-
-        return self._to_concrete_items(
-            [unwrap(item) for item in self._kicad.send(command, GetItemsResponse).items]
-        )
-
-    def get_items_by_id(self, ids: KIID | Sequence[KIID]) -> Sequence[Item]:
+    def get_items_by_id(self, ids: KIID | Sequence[KIID]) -> Sequence[BoardItem]:
         """Retrieves items from the board by their KIID (internal unique identifier)
 
         .. versionadded:: 0.7.0 (KiCad 10.0.0)
         """
-        command = GetItemsById()
-        command.header.document.CopyFrom(self._doc)
-        if isinstance(ids, KIID):
-            command.items.append(ids)
-        else:
-            command.items.extend(ids)
-
-        return self._to_concrete_items(
-            [unwrap(item) for item in self._kicad.send(command, GetItemsResponse).items]
-        )
+        return self._to_concrete_items(super().get_items_by_id(ids))
 
     def get_items_by_net(
         self,
@@ -1390,74 +1286,6 @@ class Board(VariantsCommandHandler):
 
         return groups
 
-    def get_as_string(self) -> str:
-        """Returns the board as a string in KiCad's board file format"""
-        command = editor_commands_pb2.SaveDocumentToString()
-        command.document.CopyFrom(self._doc)
-        return self._kicad.send(command, editor_commands_pb2.SavedDocumentResponse).contents
-
-    def get_selection_as_string(self) -> str:
-        """Returns the current selection as a string in KiCad's board file format"""
-        command = editor_commands_pb2.SaveSelectionToString()
-        return self._kicad.send(command, editor_commands_pb2.SavedSelectionResponse).contents
-
-    def update_items(self, items: BoardItem | Sequence[BoardItem]) -> list[BoardItem]:
-        """Updates the properties of one or more items on the board.  The items must already exist
-        on the board, and are matched by internal UUID.  All other properties of the items are
-        updated from those passed in this call.
-
-        Returns the updated items, which may be different from the input items if any updates
-        failed to apply (for example, if any properties were out of range and were clamped)"""
-        command = UpdateItems()
-        command.header.document.CopyFrom(self._doc)
-
-        if isinstance(items, BoardItem):
-            command.items.append(pack_any(items.proto))
-        else:
-            command.items.extend([pack_any(i.proto) for i in items])
-
-        if len(command.items) == 0:
-            return []
-
-        return self._to_concrete_items(
-            [
-                unwrap(result.item)
-                for result in self._kicad.send(command, UpdateItemsResponse).updated_items
-            ]
-        )
-
-    def remove_items(self, items: BoardItem | Sequence[BoardItem]):
-        """Deletes one or more items from the board"""
-        command = DeleteItems()
-        command.header.document.CopyFrom(self._doc)
-
-        if isinstance(items, BoardItem):
-            command.item_ids.append(items.id)
-        else:
-            command.item_ids.extend([item.id for item in items])
-
-        if len(command.item_ids) == 0:
-            return
-
-        self._kicad.send(command, DeleteItemsResponse)
-
-    def remove_items_by_id(self, items: KIID | Sequence[KIID]):
-        """Deletes one or more items from the board using their unique IDs
-
-        .. versionadded:: 0.4.0"""
-        command = DeleteItems()
-        command.header.document.CopyFrom(self._doc)
-
-        if isinstance(items, KIID):
-            command.item_ids.append(items)
-        else:
-            command.item_ids.extend(items)
-
-        if len(command.item_ids) == 0:
-            return
-
-        self._kicad.send(command, DeleteItemsResponse)
-
     def flip_items(
         self,
         items: BoardItem | Sequence[BoardItem],
@@ -1565,65 +1393,8 @@ class Board(VariantsCommandHandler):
     def get_selection(
         self,
         types: KiCadObjectType.ValueType | Sequence[KiCadObjectType.ValueType] | None = None,
-    ) -> Sequence[Wrapper]:
-        cmd = editor_commands_pb2.GetSelection()
-        cmd.header.document.CopyFrom(self._doc)
-
-        if isinstance(types, int):
-            cmd.types.append(types)
-        else:
-            cmd.types.extend(types or [])
-
-        return self._to_concrete_items(
-            [
-                unwrap(item)
-                for item in self._kicad.send(cmd, editor_commands_pb2.SelectionResponse).items
-            ]
-        )
-
-    def add_to_selection(self, items: BoardItem | Sequence[BoardItem]) -> Sequence[Wrapper]:
-        """Adds one or more items to the current selection on the board
-
-        :param items: The items to add to the selection
-        :return: The updated selection
-        """
-        cmd = editor_commands_pb2.AddToSelection()
-        cmd.header.document.CopyFrom(self._doc)
-
-        if isinstance(items, BoardItem):
-            cmd.items.append(items.id)
-        else:
-            cmd.items.extend([i.id for i in items])
-
-        return [
-            unwrap(item)
-            for item in self._kicad.send(cmd, editor_commands_pb2.SelectionResponse).items
-        ]
-
-    def remove_from_selection(self, items: BoardItem | Sequence[BoardItem]) -> Sequence[Wrapper]:
-        """Removes one or more items from the current selection on the board
-
-        :param items: The items to remove from the selection
-        :return: The updated selection
-        """
-        cmd = editor_commands_pb2.RemoveFromSelection()
-        cmd.header.document.CopyFrom(self._doc)
-
-        if isinstance(items, BoardItem):
-            cmd.items.append(items.id)
-        else:
-            cmd.items.extend([i.id for i in items])
-
-        return [
-            unwrap(item)
-            for item in self._kicad.send(cmd, editor_commands_pb2.SelectionResponse).items
-        ]
-
-    def clear_selection(self):
-        """Clears the current selection on the board"""
-        cmd = editor_commands_pb2.ClearSelection()
-        cmd.header.document.CopyFrom(self._doc)
-        self._kicad.send(cmd, Empty)
+    ) -> Sequence[BoardItem]:
+        return self._to_concrete_items(super().get_selection(types))
 
     def get_stackup(self) -> BoardStackup:
         """Retrieves the stackup for the board"""
