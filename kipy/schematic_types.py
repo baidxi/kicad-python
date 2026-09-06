@@ -32,6 +32,7 @@ from kipy.common_types import (
     GraphicFillAttributes,
     GraphicShape,
     LibraryIdentifier,
+    LineEnding,
     SheetPath,
     StrokeAttributes,
     Text,
@@ -48,11 +49,13 @@ from kipy.proto.schematic.schematic_types_pb2 import (
     SchematicLabelShape,
     SchematicLabelSpinStyle,
     SchematicLineType,
+    SchematicPassthroughMode,
     SchematicPinOrientation,
     SchematicPinShape,
     SchematicSymbolOrientation,
     SchematicSymbolType,
     SheetSide,
+    TableStrokeMode,
 )
 from kipy.util import unpack_any
 from kipy.wrapper import Item, Wrapper
@@ -190,10 +193,34 @@ class SchematicLine(SchematicItem):
         self._proto.stroke.CopyFrom(value.proto)
 
     @property
-    def custom_properties(self) -> Sequence[CustomProperty]:
-        """User-defined properties attached to the line
+    def start_ending(self) -> LineEnding | None:
+        if self._proto.HasField("start_ending"):
+            return LineEnding(proto_ref=self._proto.start_ending)
+        return None
 
-        .. versionadded:: 0.x.0 (KiCad 11)"""
+    @start_ending.setter
+    def start_ending(self, value: LineEnding | None):
+        if value is not None:
+            self._proto.start_ending.CopyFrom(value.proto)
+        else:
+            self._proto.ClearField("start_ending")
+
+    @property
+    def end_ending(self) -> LineEnding | None:
+        if self._proto.HasField("end_ending"):
+            return LineEnding(proto_ref=self._proto.end_ending)
+        return None
+
+    @end_ending.setter
+    def end_ending(self, value: LineEnding | None):
+        if value is not None:
+            self._proto.end_ending.CopyFrom(value.proto)
+        else:
+            self._proto.ClearField("end_ending")
+
+    @property
+    def custom_properties(self) -> Sequence[CustomProperty]:
+        """User-defined properties attached to the line"""
         return [CustomProperty(proto_ref=prop) for prop in self._proto.custom_properties]
 
     @custom_properties.setter
@@ -741,6 +768,14 @@ class BaseLabel(SchematicItem):
         self.proto.fields.extend(field.proto for field in value)
 
     @property
+    def fields_autoplaced(self) -> bool:
+        return self.proto.fields_autoplaced
+
+    @fields_autoplaced.setter
+    def fields_autoplaced(self, value: bool):
+        self.proto.fields_autoplaced = value
+
+    @property
     def custom_properties(self) -> Sequence[CustomProperty]:
         """User-defined properties attached to the label"""
         return [CustomProperty(proto_ref=prop) for prop in self.proto.custom_properties]
@@ -1067,6 +1102,14 @@ class SheetSymbol(SchematicItem):
     @dnp.setter
     def dnp(self, value: bool):
         self._proto.dnp = value
+
+    @property
+    def fields_autoplaced(self) -> bool:
+        return self._proto.fields_autoplaced
+
+    @fields_autoplaced.setter
+    def fields_autoplaced(self, value: bool):
+        self._proto.fields_autoplaced = value
 
     @property
     def custom_properties(self) -> Sequence[CustomProperty]:
@@ -2101,10 +2144,28 @@ class SchematicSymbolInstance(SchematicItem):
         self._proto.user_fields.extend(f.proto for f in value)
 
     @property
-    def custom_properties(self) -> Sequence[CustomProperty]:
-        """User-defined properties attached to the symbol instance
+    def pin_map_override(self) -> PinMapInstanceOverride:
+        return PinMapInstanceOverride(proto_ref=self._proto.pin_map_override)
 
-        .. versionadded:: 0.9.0"""
+    @property
+    def fields_autoplaced(self) -> bool:
+        return self._proto.fields_autoplaced
+
+    @fields_autoplaced.setter
+    def fields_autoplaced(self, value: bool):
+        self._proto.fields_autoplaced = value
+
+    @property
+    def passthrough(self) -> SchematicPassthroughMode.ValueType:
+        return self._proto.passthrough
+
+    @passthrough.setter
+    def passthrough(self, value: SchematicPassthroughMode.ValueType):
+        self._proto.passthrough = value
+
+    @property
+    def custom_properties(self) -> Sequence[CustomProperty]:
+        """User-defined properties attached to the symbol instance"""
         return [CustomProperty(proto_ref=prop) for prop in self._proto.custom_properties]
 
     @custom_properties.setter
@@ -2342,6 +2403,254 @@ class SheetVariants(Wrapper):
         self._proto.variants.extend(variant.proto for variant in value)
 
 
+class SchematicRuleArea(SchematicItem):
+    def __init__(
+        self,
+        proto: schematic_types_pb2.SchematicRuleArea | None = None,
+        proto_ref: schematic_types_pb2.SchematicRuleArea | None = None,
+    ):
+        self._proto = (
+            proto_ref if proto_ref is not None else schematic_types_pb2.SchematicRuleArea()
+        )
+
+        if proto is not None:
+            self._proto.CopyFrom(proto)
+
+    @property
+    def locked(self) -> bool:
+        return self._proto.locked == LockedState.LS_LOCKED
+
+    @locked.setter
+    def locked(self, locked: bool):
+        self._proto.locked = {
+            True: LockedState.LS_LOCKED,
+            False: LockedState.LS_UNLOCKED,
+        }.get(locked, LockedState.LS_UNLOCKED)
+
+    @property
+    def shape(self) -> GraphicShape | None:
+        """The rule area outline (only polygons are supported by KiCad)"""
+        return to_concrete_shape(GraphicShape(self._proto.shape))
+
+    @shape.setter
+    def shape(self, value: GraphicShape):
+        if value._graphic_proto.WhichOneof("geometry") not in (None, "polygon"):
+            raise ValueError("SchematicRuleArea shape must be a polygon")
+        self._proto.shape.CopyFrom(value._graphic_proto)
+
+    @property
+    def exclude_from_sim(self) -> bool:
+        return self._proto.exclude_from_sim
+
+    @exclude_from_sim.setter
+    def exclude_from_sim(self, value: bool):
+        self._proto.exclude_from_sim = value
+
+    @property
+    def exclude_from_bom(self) -> bool:
+        return self._proto.exclude_from_bom
+
+    @exclude_from_bom.setter
+    def exclude_from_bom(self, value: bool):
+        self._proto.exclude_from_bom = value
+
+    @property
+    def exclude_from_board(self) -> bool:
+        return self._proto.exclude_from_board
+
+    @exclude_from_board.setter
+    def exclude_from_board(self, value: bool):
+        self._proto.exclude_from_board = value
+
+    @property
+    def dnp(self) -> bool:
+        return self._proto.dnp
+
+    @dnp.setter
+    def dnp(self, value: bool):
+        self._proto.dnp = value
+
+    @property
+    def custom_properties(self) -> Sequence[CustomProperty]:
+        """User-defined properties attached to the rule area"""
+        return [CustomProperty(proto_ref=prop) for prop in self._proto.custom_properties]
+
+    @custom_properties.setter
+    def custom_properties(self, value: Sequence[CustomProperty]):
+        del self._proto.custom_properties[:]
+        self._proto.custom_properties.extend(prop.proto for prop in value)
+
+
+class SchematicTableCell(Wrapper):
+    """A single cell of a schematic table"""
+
+    def __init__(
+        self,
+        proto: schematic_types_pb2.SchematicTableCell | None = None,
+        proto_ref: schematic_types_pb2.SchematicTableCell | None = None,
+    ):
+        self._proto = (
+            proto_ref if proto_ref is not None else schematic_types_pb2.SchematicTableCell()
+        )
+
+        if proto is not None:
+            self._proto.CopyFrom(proto)
+
+    @property
+    def text_box(self) -> SchematicTextBox:
+        return SchematicTextBox(proto_ref=self._proto.text_box)
+
+    @text_box.setter
+    def text_box(self, value: SchematicTextBox):
+        self._proto.text_box.CopyFrom(value.proto)
+
+    @property
+    def column_span(self) -> int:
+        return self._proto.column_span
+
+    @column_span.setter
+    def column_span(self, value: int):
+        self._proto.column_span = value
+
+    @property
+    def row_span(self) -> int:
+        return self._proto.row_span
+
+    @row_span.setter
+    def row_span(self, value: int):
+        self._proto.row_span = value
+
+    @property
+    def custom_properties(self) -> Sequence[CustomProperty]:
+        """User-defined properties attached to the cell"""
+        return [CustomProperty(proto_ref=prop) for prop in self._proto.custom_properties]
+
+    @custom_properties.setter
+    def custom_properties(self, value: Sequence[CustomProperty]):
+        del self._proto.custom_properties[:]
+        self._proto.custom_properties.extend(prop.proto for prop in value)
+
+
+class SchematicTable(SchematicItem):
+    """A table in a schematic"""
+
+    def __init__(
+        self,
+        proto: schematic_types_pb2.SchematicTable | None = None,
+        proto_ref: schematic_types_pb2.SchematicTable | None = None,
+    ):
+        self._proto = proto_ref if proto_ref is not None else schematic_types_pb2.SchematicTable()
+
+        if proto is not None:
+            self._proto.CopyFrom(proto)
+
+    @property
+    def locked(self) -> bool:
+        return self._proto.locked == LockedState.LS_LOCKED
+
+    @locked.setter
+    def locked(self, locked: bool):
+        self._proto.locked = {
+            True: LockedState.LS_LOCKED,
+            False: LockedState.LS_UNLOCKED,
+        }.get(locked, LockedState.LS_UNLOCKED)
+
+    @property
+    def column_count(self) -> int:
+        return self._proto.column_count
+
+    @column_count.setter
+    def column_count(self, value: int):
+        self._proto.column_count = value
+
+    @property
+    def column_widths(self) -> Sequence[int]:
+        return [width.value_nm for width in self._proto.column_widths]
+
+    @column_widths.setter
+    def column_widths(self, value: Sequence[int]):
+        del self._proto.column_widths[:]
+        for width in value:
+            self._proto.column_widths.add().value_nm = width
+
+    @property
+    def row_heights(self) -> Sequence[int]:
+        return [height.value_nm for height in self._proto.row_heights]
+
+    @row_heights.setter
+    def row_heights(self, value: Sequence[int]):
+        del self._proto.row_heights[:]
+        for height in value:
+            self._proto.row_heights.add().value_nm = height
+
+    @property
+    def cells(self) -> Sequence[SchematicTableCell]:
+        return [SchematicTableCell(proto_ref=cell) for cell in self._proto.cells]
+
+    @cells.setter
+    def cells(self, value: Sequence[SchematicTableCell]):
+        del self._proto.cells[:]
+        self._proto.cells.extend(cell.proto for cell in value)
+
+    @property
+    def external_border(self) -> TableStrokeMode.ValueType:
+        return self._proto.external_border
+
+    @external_border.setter
+    def external_border(self, value: TableStrokeMode.ValueType):
+        self._proto.external_border = value
+
+    @property
+    def header_separator(self) -> TableStrokeMode.ValueType:
+        return self._proto.header_separator
+
+    @header_separator.setter
+    def header_separator(self, value: TableStrokeMode.ValueType):
+        self._proto.header_separator = value
+
+    @property
+    def row_separators(self) -> TableStrokeMode.ValueType:
+        return self._proto.row_separators
+
+    @row_separators.setter
+    def row_separators(self, value: TableStrokeMode.ValueType):
+        self._proto.row_separators = value
+
+    @property
+    def column_separators(self) -> TableStrokeMode.ValueType:
+        return self._proto.column_separators
+
+    @column_separators.setter
+    def column_separators(self, value: TableStrokeMode.ValueType):
+        self._proto.column_separators = value
+
+    @property
+    def border_stroke(self) -> StrokeAttributes:
+        return StrokeAttributes(proto_ref=self._proto.border_stroke)
+
+    @border_stroke.setter
+    def border_stroke(self, value: StrokeAttributes):
+        self._proto.border_stroke.CopyFrom(value.proto)
+
+    @property
+    def separators_stroke(self) -> StrokeAttributes:
+        return StrokeAttributes(proto_ref=self._proto.separators_stroke)
+
+    @separators_stroke.setter
+    def separators_stroke(self, value: StrokeAttributes):
+        self._proto.separators_stroke.CopyFrom(value.proto)
+
+    @property
+    def custom_properties(self) -> Sequence[CustomProperty]:
+        """User-defined properties attached to the table"""
+        return [CustomProperty(proto_ref=prop) for prop in self._proto.custom_properties]
+
+    @custom_properties.setter
+    def custom_properties(self, value: Sequence[CustomProperty]):
+        del self._proto.custom_properties[:]
+        self._proto.custom_properties.extend(prop.proto for prop in value)
+
+
 _proto_to_object: dict[type[Message], type[Wrapper]] = {
     schematic_types_pb2.SchematicField: SchematicField,
     schematic_types_pb2.SchematicLine: SchematicLine,
@@ -2361,6 +2670,8 @@ _proto_to_object: dict[type[Message], type[Wrapper]] = {
     schematic_types_pb2.SheetSymbol: SheetSymbol,
     schematic_types_pb2.SchematicPin: SchematicPin,
     schematic_types_pb2.SchematicSymbolInstance: SchematicSymbolInstance,
+    schematic_types_pb2.SchematicRuleArea: SchematicRuleArea,
+    schematic_types_pb2.SchematicTable: SchematicTable,
 }
 
 

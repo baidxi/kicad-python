@@ -61,14 +61,19 @@ from kipy.proto.schematic.schematic_commands_pb2 import (
     SchematicNetlistResponse,
 )
 from kipy.schematic_types import (
+    BusEntry,
     Group,
+    Junction,
     LocalLabel,
+    NoConnectMarker,
     SchematicGraphicShape,
     SchematicImage,
     SchematicItem,
     SchematicLine,
     SchematicNet,
+    SchematicRuleArea,
     SchematicSymbolInstance,
+    SchematicTable,
     SchematicText,
     SchematicTextBox,
     SheetInstance,
@@ -291,6 +296,56 @@ class Schematic(VariantsCommandHandler):
         return [
             cast(SheetSymbol, item)
             for item in self.get_items(types=[KiCadObjectType.KOT_SCH_SHEET])
+        ]
+
+    def get_junctions(self) -> Sequence[Junction]:
+        """Returns all junctions in the schematic
+
+        .. versionadded:: 0.9.0"""
+        return [
+            cast(Junction, item)
+            for item in self.get_items(types=[KiCadObjectType.KOT_SCH_JUNCTION])
+        ]
+
+    def get_no_connects(self) -> Sequence[NoConnectMarker]:
+        """Returns all no-connect markers in the schematic
+
+        .. versionadded:: 0.9.0"""
+        return [
+            cast(NoConnectMarker, item)
+            for item in self.get_items(types=[KiCadObjectType.KOT_SCH_NO_CONNECT])
+        ]
+
+    def get_bus_entries(self) -> Sequence[BusEntry]:
+        """Returns all wire-to-bus and bus-to-bus entries in the schematic
+
+        .. versionadded:: 0.9.0"""
+        return [
+            cast(BusEntry, item)
+            for item in self.get_items(
+                types=[
+                    KiCadObjectType.KOT_SCH_BUS_WIRE_ENTRY,
+                    KiCadObjectType.KOT_SCH_BUS_BUS_ENTRY,
+                ]
+            )
+        ]
+
+    def get_rule_areas(self) -> Sequence[SchematicRuleArea]:
+        """Returns all rule areas (schematic keepouts) in the schematic
+
+        .. versionadded:: 0.9.0"""
+        return [
+            cast(SchematicRuleArea, item)
+            for item in self.get_items(types=[KiCadObjectType.KOT_SCH_RULE_AREA])
+        ]
+
+    def get_tables(self) -> Sequence[SchematicTable]:
+        """Returns all tables in the schematic
+
+        .. versionadded:: 0.9.0"""
+        return [
+            cast(SchematicTable, item)
+            for item in self.get_items(types=[KiCadObjectType.KOT_SCH_TABLE])
         ]
 
     def get_groups(self) -> Sequence[Group]:

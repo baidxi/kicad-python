@@ -70,6 +70,8 @@ _any_urls = {
     "type.googleapis.com/kiapi.schematic.types.SheetPin": schematic_types_pb2.SheetPin,
     "type.googleapis.com/kiapi.schematic.types.SheetSymbol": schematic_types_pb2.SheetSymbol,
     "type.googleapis.com/kiapi.schematic.types.SchematicSymbolInstance": schematic_types_pb2.SchematicSymbolInstance,
+    "type.googleapis.com/kiapi.schematic.types.SchematicRuleArea": schematic_types_pb2.SchematicRuleArea,
+    "type.googleapis.com/kiapi.schematic.types.SchematicTable": schematic_types_pb2.SchematicTable,
 }
 
 
