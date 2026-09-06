@@ -76,10 +76,11 @@ from kipy.schematic_types import (
     unwrap,
 )
 from kipy.util import pack_any
+from kipy.variants import VariantsCommandHandler
 from kipy.wrapper import Wrapper
 
 
-class Schematic:
+class Schematic(VariantsCommandHandler):
     """
     .. versionadded:: 0.x.y (KiCad 11)
     """

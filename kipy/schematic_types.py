@@ -44,6 +44,7 @@ from kipy.proto.common.types.base_types_pb2 import ElectricalPinType, LockedStat
 from kipy.proto.schematic import schematic_types_pb2
 from kipy.proto.schematic.schematic_types_pb2 import (
     BusEntryType,
+    PinMapOverrideMode,
     SchematicLabelShape,
     SchematicLabelSpinStyle,
     SchematicLineType,
@@ -255,9 +256,7 @@ class Junction(SchematicItem):
 
     @property
     def custom_properties(self) -> Sequence[CustomProperty]:
-        """User-defined properties attached to the junction
-
-        .. versionadded:: 0.x.0 (KiCad 11)"""
+        """User-defined properties attached to the junction"""
         return [CustomProperty(proto_ref=prop) for prop in self._proto.custom_properties]
 
     @custom_properties.setter
@@ -310,9 +309,7 @@ class NoConnectMarker(SchematicItem):
 
     @property
     def custom_properties(self) -> Sequence[CustomProperty]:
-        """User-defined properties attached to the no-connect marker
-
-        .. versionadded:: 0.x.0 (KiCad 11)"""
+        """User-defined properties attached to the no-connect marker"""
         return [CustomProperty(proto_ref=prop) for prop in self._proto.custom_properties]
 
     @custom_properties.setter
@@ -381,9 +378,7 @@ class BusEntry(SchematicItem):
 
     @property
     def custom_properties(self) -> Sequence[CustomProperty]:
-        """User-defined properties attached to the bus entry
-
-        .. versionadded:: 0.x.0 (KiCad 11)"""
+        """User-defined properties attached to the bus entry"""
         return [CustomProperty(proto_ref=prop) for prop in self._proto.custom_properties]
 
     @custom_properties.setter
@@ -452,9 +447,7 @@ class SchematicText(SchematicItem):
 
     @property
     def custom_properties(self) -> Sequence[CustomProperty]:
-        """User-defined properties attached to the text
-
-        .. versionadded:: 0.x.0 (KiCad 11)"""
+        """User-defined properties attached to the text"""
         return [CustomProperty(proto_ref=prop) for prop in self._proto.custom_properties]
 
     @custom_properties.setter
@@ -569,9 +562,7 @@ class SchematicTextBox(SchematicItem):
 
     @property
     def custom_properties(self) -> Sequence[CustomProperty]:
-        """User-defined properties attached to the text box
-
-        .. versionadded:: 0.x.0 (KiCad 11)"""
+        """User-defined properties attached to the text box"""
         return [CustomProperty(proto_ref=prop) for prop in self._proto.custom_properties]
 
     @custom_properties.setter
@@ -622,9 +613,7 @@ class SchematicGraphicShape(SchematicItem):
 
     @property
     def custom_properties(self) -> Sequence[CustomProperty]:
-        """User-defined properties attached to the shape
-
-        .. versionadded:: 0.x.0 (KiCad 11)"""
+        """User-defined properties attached to the shape"""
         return [CustomProperty(proto_ref=prop) for prop in self._proto.custom_properties]
 
     @custom_properties.setter
@@ -693,9 +682,7 @@ class SchematicImage(SchematicItem):
 
     @property
     def custom_properties(self) -> Sequence[CustomProperty]:
-        """User-defined properties attached to the image
-
-        .. versionadded:: 0.x.0 (KiCad 11)"""
+        """User-defined properties attached to the image"""
         return [CustomProperty(proto_ref=prop) for prop in self._proto.custom_properties]
 
     @custom_properties.setter
@@ -755,9 +742,7 @@ class BaseLabel(SchematicItem):
 
     @property
     def custom_properties(self) -> Sequence[CustomProperty]:
-        """User-defined properties attached to the label
-
-        .. versionadded:: 0.9.0"""
+        """User-defined properties attached to the label"""
         return [CustomProperty(proto_ref=prop) for prop in self.proto.custom_properties]
 
     @custom_properties.setter
@@ -904,9 +889,7 @@ class Group(SchematicItem):
 
     @property
     def custom_properties(self) -> Sequence[CustomProperty]:
-        """User-defined properties attached to the group
-
-        .. versionadded:: 0.9.0"""
+        """User-defined properties attached to the group"""
         return [CustomProperty(proto_ref=prop) for prop in self._proto.custom_properties]
 
     @custom_properties.setter
@@ -1087,15 +1070,22 @@ class SheetSymbol(SchematicItem):
 
     @property
     def custom_properties(self) -> Sequence[CustomProperty]:
-        """User-defined properties attached to the sheet
-
-        .. versionadded:: 0.9.0"""
+        """User-defined properties attached to the sheet"""
         return [CustomProperty(proto_ref=prop) for prop in self._proto.custom_properties]
 
     @custom_properties.setter
     def custom_properties(self, value: Sequence[CustomProperty]):
         del self._proto.custom_properties[:]
         self._proto.custom_properties.extend(prop.proto for prop in value)
+
+    @property
+    def variants(self) -> Sequence[SheetVariant]:
+        return [SheetVariant(proto_ref=v) for v in self._proto.variants.variants]
+
+    @variants.setter
+    def variants(self, value: Sequence[SheetVariant]):
+        del self._proto.variants.variants[:]
+        self._proto.variants.variants.extend(v.proto for v in value)
 
 
 class SchematicPinAlternate(Wrapper):
@@ -1420,6 +1410,311 @@ class SchematicSymbolVariant(Wrapper):
         self._proto.fields.clear()
         self._proto.fields.update(value)
 
+    @property
+    def symbol_override(self) -> LibraryIdentifier | None:
+        """Alternate library symbol used in this variant, if any"""
+        if self._proto.HasField("symbol_override"):
+            return LibraryIdentifier(proto_ref=self._proto.symbol_override)
+        return None
+
+    @symbol_override.setter
+    def symbol_override(self, value: LibraryIdentifier | None):
+        if value is not None:
+            self._proto.symbol_override.CopyFrom(value.proto)
+        else:
+            self._proto.ClearField("symbol_override")
+
+    @property
+    def pin_map_override(self) -> PinMapInstanceOverride | None:
+        """Per-variant pin-to-pad map override, if any"""
+        if self._proto.HasField("pin_map_override"):
+            return PinMapInstanceOverride(proto_ref=self._proto.pin_map_override)
+        return None
+
+    @pin_map_override.setter
+    def pin_map_override(self, value: PinMapInstanceOverride | None):
+        if value is not None:
+            self._proto.pin_map_override.CopyFrom(value.proto)
+        else:
+            self._proto.ClearField("pin_map_override")
+
+
+class PinMapEntry(Wrapper):
+    """Maps a symbol pin to a footprint pad"""
+
+    def __init__(
+        self,
+        proto: schematic_types_pb2.PinMapEntry | None = None,
+        proto_ref: schematic_types_pb2.PinMapEntry | None = None,
+    ):
+        self._proto = proto_ref if proto_ref is not None else schematic_types_pb2.PinMapEntry()
+
+        if proto is not None:
+            self._proto.CopyFrom(proto)
+
+    @property
+    def pin_number(self) -> str:
+        return self._proto.pin_number
+
+    @pin_number.setter
+    def pin_number(self, value: str):
+        self._proto.pin_number = value
+
+    @property
+    def pad_number(self) -> str:
+        return self._proto.pad_number
+
+    @pad_number.setter
+    def pad_number(self, value: str):
+        self._proto.pad_number = value
+
+
+class PinMap(Wrapper):
+    """A named mapping of symbol pins to footprint pads"""
+
+    def __init__(
+        self,
+        proto: schematic_types_pb2.PinMap | None = None,
+        proto_ref: schematic_types_pb2.PinMap | None = None,
+    ):
+        self._proto = proto_ref if proto_ref is not None else schematic_types_pb2.PinMap()
+
+        if proto is not None:
+            self._proto.CopyFrom(proto)
+
+    @property
+    def name(self) -> str:
+        return self._proto.name
+
+    @name.setter
+    def name(self, value: str):
+        self._proto.name = value
+
+    @property
+    def entries(self) -> Sequence[PinMapEntry]:
+        return [PinMapEntry(proto_ref=entry) for entry in self._proto.entries]
+
+    @entries.setter
+    def entries(self, value: Sequence[PinMapEntry]):
+        del self._proto.entries[:]
+        self._proto.entries.extend(entry.proto for entry in value)
+
+
+class AssociatedFootprint(Wrapper):
+    """A footprint the symbol is associated with, and the name of the pin map to use for it"""
+
+    def __init__(
+        self,
+        proto: schematic_types_pb2.AssociatedFootprint | None = None,
+        proto_ref: schematic_types_pb2.AssociatedFootprint | None = None,
+    ):
+        self._proto = (
+            proto_ref if proto_ref is not None else schematic_types_pb2.AssociatedFootprint()
+        )
+
+        if proto is not None:
+            self._proto.CopyFrom(proto)
+
+    @property
+    def footprint(self) -> LibraryIdentifier:
+        return LibraryIdentifier(proto_ref=self._proto.footprint)
+
+    @footprint.setter
+    def footprint(self, value: LibraryIdentifier):
+        self._proto.footprint.CopyFrom(value.proto)
+
+    @property
+    def map_name(self) -> str:
+        return self._proto.map_name
+
+    @map_name.setter
+    def map_name(self, value: str):
+        self._proto.map_name = value
+
+
+class SymbolPinMaps(Wrapper):
+    """Pin maps defined in a symbol and the footprints they are associated with"""
+
+    def __init__(
+        self,
+        proto: schematic_types_pb2.SymbolPinMaps | None = None,
+        proto_ref: schematic_types_pb2.SymbolPinMaps | None = None,
+    ):
+        self._proto = proto_ref if proto_ref is not None else schematic_types_pb2.SymbolPinMaps()
+
+        if proto is not None:
+            self._proto.CopyFrom(proto)
+
+    @property
+    def associated_footprints(self) -> Sequence[AssociatedFootprint]:
+        return [AssociatedFootprint(proto_ref=fp) for fp in self._proto.associated_footprints]
+
+    @associated_footprints.setter
+    def associated_footprints(self, value: Sequence[AssociatedFootprint]):
+        del self._proto.associated_footprints[:]
+        self._proto.associated_footprints.extend(fp.proto for fp in value)
+
+    @property
+    def pin_maps(self) -> Sequence[PinMap]:
+        return [PinMap(proto_ref=pin_map) for pin_map in self._proto.pin_maps]
+
+    @pin_maps.setter
+    def pin_maps(self, value: Sequence[PinMap]):
+        del self._proto.pin_maps[:]
+        self._proto.pin_maps.extend(pin_map.proto for pin_map in value)
+
+
+class PinMapInstanceOverride(Wrapper):
+    """A per-symbol-instance override of the library pin maps"""
+
+    def __init__(
+        self,
+        proto: schematic_types_pb2.PinMapInstanceOverride | None = None,
+        proto_ref: schematic_types_pb2.PinMapInstanceOverride | None = None,
+    ):
+        self._proto = (
+            proto_ref if proto_ref is not None else schematic_types_pb2.PinMapInstanceOverride()
+        )
+
+        if proto is not None:
+            self._proto.CopyFrom(proto)
+
+    @property
+    def mode(self) -> PinMapOverrideMode.ValueType:
+        return self._proto.mode
+
+    @mode.setter
+    def mode(self, value: PinMapOverrideMode.ValueType):
+        self._proto.mode = value
+
+    @property
+    def active_map_name(self) -> str:
+        return self._proto.active_map_name
+
+    @active_map_name.setter
+    def active_map_name(self, value: str):
+        self._proto.active_map_name = value
+
+    @property
+    def edits(self) -> Sequence[PinMapEntry]:
+        return [PinMapEntry(proto_ref=edit) for edit in self._proto.edits]
+
+    @edits.setter
+    def edits(self, value: Sequence[PinMapEntry]):
+        del self._proto.edits[:]
+        self._proto.edits.extend(edit.proto for edit in value)
+
+
+class JumperGroup(Wrapper):
+    """A group of pins internally connected by a jumper"""
+
+    def __init__(
+        self,
+        proto: schematic_types_pb2.JumperGroup | None = None,
+        proto_ref: schematic_types_pb2.JumperGroup | None = None,
+    ):
+        self._proto = proto_ref if proto_ref is not None else schematic_types_pb2.JumperGroup()
+
+        if proto is not None:
+            self._proto.CopyFrom(proto)
+
+    @property
+    def pin_numbers(self) -> Sequence[str]:
+        return list(self._proto.pin_numbers)
+
+    @pin_numbers.setter
+    def pin_numbers(self, value: Sequence[str]):
+        del self._proto.pin_numbers[:]
+        self._proto.pin_numbers.extend(value)
+
+
+class JumperSettings(Wrapper):
+    """Jumper definitions for a symbol"""
+
+    def __init__(
+        self,
+        proto: schematic_types_pb2.JumperSettings | None = None,
+        proto_ref: schematic_types_pb2.JumperSettings | None = None,
+    ):
+        self._proto = proto_ref if proto_ref is not None else schematic_types_pb2.JumperSettings()
+
+        if proto is not None:
+            self._proto.CopyFrom(proto)
+
+    @property
+    def duplicate_names_are_jumpered(self) -> bool:
+        """True if pins with duplicate names are considered connected by a jumper"""
+        return self._proto.duplicate_names_are_jumpered
+
+    @duplicate_names_are_jumpered.setter
+    def duplicate_names_are_jumpered(self, value: bool):
+        self._proto.duplicate_names_are_jumpered = value
+
+    @property
+    def groups(self) -> Sequence[JumperGroup]:
+        return [JumperGroup(proto_ref=group) for group in self._proto.groups]
+
+    @groups.setter
+    def groups(self, value: Sequence[JumperGroup]):
+        del self._proto.groups[:]
+        self._proto.groups.extend(group.proto for group in value)
+
+
+class SchematicUnitDisplayName(Wrapper):
+    """A custom display name for one unit of a multi-unit symbol"""
+
+    def __init__(
+        self,
+        proto: schematic_types_pb2.SchematicUnitDisplayName | None = None,
+        proto_ref: schematic_types_pb2.SchematicUnitDisplayName | None = None,
+    ):
+        self._proto = (
+            proto_ref if proto_ref is not None else schematic_types_pb2.SchematicUnitDisplayName()
+        )
+
+        if proto is not None:
+            self._proto.CopyFrom(proto)
+
+    @property
+    def unit(self) -> int:
+        return self._proto.unit
+
+    @unit.setter
+    def unit(self, value: int):
+        self._proto.unit = value
+
+    @property
+    def name(self) -> str:
+        return self._proto.name
+
+    @name.setter
+    def name(self, value: str):
+        self._proto.name = value
+
+
+class SchematicBodyStyle(Wrapper):
+    """A named body style a symbol can be displayed with"""
+
+    def __init__(
+        self,
+        proto: schematic_types_pb2.SchematicBodyStyle | None = None,
+        proto_ref: schematic_types_pb2.SchematicBodyStyle | None = None,
+    ):
+        self._proto = (
+            proto_ref if proto_ref is not None else schematic_types_pb2.SchematicBodyStyle()
+        )
+
+        if proto is not None:
+            self._proto.CopyFrom(proto)
+
+    @property
+    def name(self) -> str:
+        return self._proto.name
+
+    @name.setter
+    def name(self, value: str):
+        self._proto.name = value
+
 
 class SchematicSymbol(Wrapper):
     """
@@ -1537,6 +1832,61 @@ class SchematicSymbol(Wrapper):
     def footprint_filters(self, value: Sequence[str]):
         del self._proto.footprint_filters[:]
         self._proto.footprint_filters.extend(value)
+
+    @property
+    def body_style(self) -> Sequence[SchematicBodyStyle]:
+        """Body styles the symbol can be displayed with"""
+        return [SchematicBodyStyle(proto_ref=style) for style in self._proto.body_style]
+
+    @body_style.setter
+    def body_style(self, value: Sequence[SchematicBodyStyle]):
+        del self._proto.body_style[:]
+        self._proto.body_style.extend(style.proto for style in value)
+
+    @property
+    def pin_maps(self) -> SymbolPinMaps:
+        """Pin maps and their associated footprints"""
+        return SymbolPinMaps(proto_ref=self._proto.pin_maps)
+
+    @pin_maps.setter
+    def pin_maps(self, value: SymbolPinMaps):
+        self._proto.pin_maps.CopyFrom(value.proto)
+
+    @property
+    def jumpers(self) -> JumperSettings:
+        """Jumper settings for the symbol"""
+        return JumperSettings(proto_ref=self._proto.jumpers)
+
+    @jumpers.setter
+    def jumpers(self, value: JumperSettings):
+        self._proto.jumpers.CopyFrom(value.proto)
+
+    @property
+    def units_locked(self) -> bool:
+        return self._proto.units_locked
+
+    @units_locked.setter
+    def units_locked(self, value: bool):
+        self._proto.units_locked = value
+
+    @property
+    def unit_display_names(self) -> Sequence[SchematicUnitDisplayName]:
+        return [
+            SchematicUnitDisplayName(proto_ref=name) for name in self._proto.unit_display_names
+        ]
+
+    @unit_display_names.setter
+    def unit_display_names(self, value: Sequence[SchematicUnitDisplayName]):
+        del self._proto.unit_display_names[:]
+        self._proto.unit_display_names.extend(name.proto for name in value)
+
+    @property
+    def embedded_fonts(self) -> bool:
+        return self._proto.embedded_fonts
+
+    @embedded_fonts.setter
+    def embedded_fonts(self, value: bool):
+        self._proto.embedded_fonts = value
 
 
 class SchematicSymbolTransform(Wrapper):
@@ -1885,6 +2235,111 @@ class SchematicNet(Wrapper):
     @property
     def sheets(self) -> Sequence[SchematicNetSheetContents]:
         return [SchematicNetSheetContents(proto_ref=s) for s in self._proto.sheets]
+
+
+class SheetVariant(Wrapper):
+    """One sheet variant and its per-variant field values"""
+
+    def __init__(
+        self,
+        proto: schematic_types_pb2.SheetVariant | None = None,
+        proto_ref: schematic_types_pb2.SheetVariant | None = None,
+    ):
+        self._proto = proto_ref if proto_ref is not None else schematic_types_pb2.SheetVariant()
+
+        if proto is not None:
+            self._proto.CopyFrom(proto)
+
+    @property
+    def name(self) -> str:
+        return self._proto.name
+
+    @name.setter
+    def name(self, value: str):
+        self._proto.name = value
+
+    @property
+    def description(self) -> str | None:
+        if self._proto.HasField("description"):
+            return self._proto.description
+        return None
+
+    @description.setter
+    def description(self, value: str | None):
+        if value is not None:
+            self._proto.description = value
+        else:
+            self._proto.ClearField("description")
+
+    @property
+    def exclude_from_sim(self) -> bool | None:
+        if self._proto.HasField("exclude_from_sim"):
+            return self._proto.exclude_from_sim
+        return None
+
+    @exclude_from_sim.setter
+    def exclude_from_sim(self, value: bool | None):
+        if value is not None:
+            self._proto.exclude_from_sim = value
+        else:
+            self._proto.ClearField("exclude_from_sim")
+
+    @property
+    def exclude_from_bom(self) -> bool | None:
+        if self._proto.HasField("exclude_from_bom"):
+            return self._proto.exclude_from_bom
+        return None
+
+    @exclude_from_bom.setter
+    def exclude_from_bom(self, value: bool | None):
+        if value is not None:
+            self._proto.exclude_from_bom = value
+        else:
+            self._proto.ClearField("exclude_from_bom")
+
+    @property
+    def dnp(self) -> bool | None:
+        if self._proto.HasField("dnp"):
+            return self._proto.dnp
+        return None
+
+    @dnp.setter
+    def dnp(self, value: bool | None):
+        if value is not None:
+            self._proto.dnp = value
+        else:
+            self._proto.ClearField("dnp")
+
+    @property
+    def fields(self) -> dict[str, str]:
+        """Per-variant overrides of field values, keyed by field name"""
+        return dict(self._proto.fields)
+
+    @fields.setter
+    def fields(self, value: dict[str, str]):
+        self._proto.fields.clear()
+        self._proto.fields.update(value)
+
+
+class SheetVariants(Wrapper):
+    def __init__(
+        self,
+        proto: schematic_types_pb2.SheetVariants | None = None,
+        proto_ref: schematic_types_pb2.SheetVariants | None = None,
+    ):
+        self._proto = proto_ref if proto_ref is not None else schematic_types_pb2.SheetVariants()
+
+        if proto is not None:
+            self._proto.CopyFrom(proto)
+
+    @property
+    def variants(self) -> Sequence[SheetVariant]:
+        return [SheetVariant(proto_ref=variant) for variant in self._proto.variants]
+
+    @variants.setter
+    def variants(self, value: Sequence[SheetVariant]):
+        del self._proto.variants[:]
+        self._proto.variants.extend(variant.proto for variant in value)
 
 
 _proto_to_object: dict[type[Message], type[Wrapper]] = {

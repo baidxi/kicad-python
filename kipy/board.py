@@ -149,6 +149,7 @@ from kipy.proto.common.types.enums_pb2 import (
     Units,
 )
 from kipy.util import pack_any
+from kipy.variants import VariantsCommandHandler
 from kipy.wrapper import Item, Wrapper
 
 BoardJobCommand = Union[
@@ -683,7 +684,7 @@ class BoardStackup(Wrapper):
         return [BoardStackupLayer(layer) for layer in self._proto.layers]
 
 
-class Board:
+class Board(VariantsCommandHandler):
     def __init__(self, kicad: KiCadClient, document: DocumentSpecifier):
         """Represents an open board (.kicad_pcb) document in KiCad"""
         self._kicad = kicad

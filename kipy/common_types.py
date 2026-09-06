@@ -39,7 +39,7 @@ from kipy.geometry import (
     arc_start_angle,
 )
 from kipy.proto.common import types
-from kipy.proto.common.types import base_types_pb2, embedded_files_pb2
+from kipy.proto.common.types import base_types_pb2, embedded_files_pb2, variants_pb2
 from kipy.proto.common.types.base_types_pb2 import (  # noqa
     KIID,
     LineEndingStyle,
@@ -1186,3 +1186,32 @@ class LineEnding(Wrapper):
     @stroke.setter
     def stroke(self, stroke: StrokeAttributes):
         self._proto.stroke.CopyFrom(stroke.proto)
+
+
+class DesignVariant(Wrapper):
+    def __init__(
+        self,
+        proto: variants_pb2.DesignVariant | None = None,
+        proto_ref: variants_pb2.DesignVariant | None = None,
+    ):
+        self._proto = proto_ref if proto_ref is not None else variants_pb2.DesignVariant()
+
+        if proto is not None:
+            self._proto.CopyFrom(proto)
+
+    @property
+    def name(self) -> str:
+        """Variant name (must be case-insensitively unique in a project)"""
+        return self._proto.name
+
+    @name.setter
+    def name(self, value: str):
+        self._proto.name = value
+
+    @property
+    def description(self) -> str:
+        return self._proto.description
+
+    @description.setter
+    def description(self, value: str):
+        self._proto.description = value
