@@ -1107,6 +1107,7 @@ class Board(VariantsCommandHandler):
         step.
         """
         command = BeginCommit()
+        command.header.document.CopyFrom(self._doc)
         return Commit(self._kicad.send(command, BeginCommitResponse).id)
 
     def push_commit(self, commit: Commit, message: str = ""):
@@ -1114,6 +1115,7 @@ class Board(VariantsCommandHandler):
         result in a single undo step being added to the undo history."""
         command = EndCommit()
         command.id.CopyFrom(commit.id)
+        command.header.document.CopyFrom(self._doc)
         command.action = CommitAction.CMA_COMMIT
         command.message = message
         self._kicad.send(command, EndCommitResponse)
@@ -1122,6 +1124,7 @@ class Board(VariantsCommandHandler):
         """Cancel a commit, discarding any changes made since the commit was opened"""
         command = EndCommit()
         command.id.CopyFrom(commit.id)
+        command.header.document.CopyFrom(self._doc)
         command.action = CommitAction.CMA_DROP
         self._kicad.send(command, EndCommitResponse)
 

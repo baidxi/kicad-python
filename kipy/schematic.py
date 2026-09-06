@@ -140,11 +140,13 @@ class Schematic(VariantsCommandHandler):
 
     def begin_commit(self) -> Commit:
         command = BeginCommit()
+        command.header.document.CopyFrom(self._doc)
         return Commit(self._kicad.send(command, BeginCommitResponse).id)
 
     def push_commit(self, commit: Commit, message: str = ""):
         command = EndCommit()
         command.id.CopyFrom(commit.id)
+        command.header.document.CopyFrom(self._doc)
         command.action = CommitAction.CMA_COMMIT
         command.message = message
         self._kicad.send(command, EndCommitResponse)
@@ -152,6 +154,7 @@ class Schematic(VariantsCommandHandler):
     def drop_commit(self, commit: Commit):
         command = EndCommit()
         command.id.CopyFrom(commit.id)
+        command.header.document.CopyFrom(self._doc)
         command.action = CommitAction.CMA_DROP
         self._kicad.send(command, EndCommitResponse)
 
