@@ -3112,8 +3112,8 @@ class TableCell(Wrapper):
 
     def __init__(
         self,
-        proto: board_types_pb2.TableCell | None = None,
-        proto_ref: board_types_pb2.TableCell | None = None,
+        proto: Optional[board_types_pb2.TableCell] = None,
+        proto_ref: Optional[board_types_pb2.TableCell] = None,
     ):
         self._proto = proto_ref if proto_ref is not None else board_types_pb2.TableCell()
 
@@ -3155,8 +3155,8 @@ class Table(BoardItem):
 
     def __init__(
         self,
-        proto: board_types_pb2.Table | None = None,
-        proto_ref: board_types_pb2.Table | None = None,
+        proto: Optional[board_types_pb2.Table] = None,
+        proto_ref: Optional[board_types_pb2.Table] = None,
     ):
         self._proto = proto_ref if proto_ref is not None else board_types_pb2.Table()
 
@@ -3276,7 +3276,7 @@ class Table(BoardItem):
         self._proto.separators_stroke.CopyFrom(stroke.proto)
 
     @property
-    def parent(self) -> KIID | None:
+    def parent(self) -> Optional[KIID]:
         """The ID of the parent container for this item (such as a Board or Footprint), if any.
         Read-only; item parents can only be changed by add/remove calls on the parent container.
         """
@@ -3290,8 +3290,8 @@ class ReferencePoint(BoardItem):
 
     def __init__(
         self,
-        proto: board_types_pb2.ReferencePoint | None = None,
-        proto_ref: board_types_pb2.ReferencePoint | None = None,
+        proto: Optional[board_types_pb2.ReferencePoint] = None,
+        proto_ref: Optional[board_types_pb2.ReferencePoint] = None,
     ):
         self._proto = proto_ref if proto_ref is not None else board_types_pb2.ReferencePoint()
 
@@ -3345,7 +3345,7 @@ class ReferencePoint(BoardItem):
         }.get(locked, LockedState.LS_UNLOCKED)
 
     @property
-    def parent(self) -> KIID | None:
+    def parent(self) -> Optional[KIID]:
         """The ID of the parent container for this item (such as a Board or Footprint), if any.
         Read-only; item parents can only be changed by add/remove calls on the parent container.
         """

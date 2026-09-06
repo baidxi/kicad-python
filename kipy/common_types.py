@@ -943,8 +943,8 @@ class EmbeddedFile(Wrapper):
 
     def __init__(
         self,
-        proto: embedded_files_pb2.EmbeddedFile | None = None,
-        proto_ref: embedded_files_pb2.EmbeddedFile | None = None,
+        proto: Optional[embedded_files_pb2.EmbeddedFile] = None,
+        proto_ref: Optional[embedded_files_pb2.EmbeddedFile] = None,
     ):
         self._proto = proto_ref if proto_ref is not None else embedded_files_pb2.EmbeddedFile()
 
@@ -985,7 +985,7 @@ class EmbeddedFile(Wrapper):
 
     @classmethod
     def from_path(
-        cls, path: Path, type: EmbeddedFileType.ValueType | None = None
+        cls, path: Path, type: Optional[EmbeddedFileType.ValueType] = None
     ) -> EmbeddedFile:
         """Creates a new embedded file from a file path.
 
@@ -1031,8 +1031,8 @@ class EmbeddedFiles(Wrapper):
 
     def __init__(
         self,
-        proto: embedded_files_pb2.EmbeddedFiles | None = None,
-        proto_ref: embedded_files_pb2.EmbeddedFiles | None = None,
+        proto: Optional[embedded_files_pb2.EmbeddedFiles] = None,
+        proto_ref: Optional[embedded_files_pb2.EmbeddedFiles] = None,
     ):
         self._proto = proto_ref if proto_ref is not None else embedded_files_pb2.EmbeddedFiles()
 

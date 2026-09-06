@@ -887,15 +887,6 @@ class Board:
             cast(Table, item) for item in self.get_items(types=[KiCadObjectType.KOT_PCB_TABLE])
         ]
 
-    def get_reference_points(self) -> Sequence[ReferencePoint]:
-        """Retrieves all reference point objects on the board
-
-        .. versionadded:: 0.9.0 (KiCad 10.0.7)"""
-        return [
-            cast(ReferencePoint, item)
-            for item in self.get_items(types=[KiCadObjectType.KOT_PCB_POINT])
-        ]
-
     def get_zones(self) -> Sequence[Zone]:
         """Retrieves all zones (including rule areas and graphic zones) on the board"""
         return [cast(Zone, item) for item in self.get_items(types=[KiCadObjectType.KOT_PCB_ZONE])]
@@ -915,6 +906,15 @@ class Board:
                 group._unwrapped_items = items
 
         return groups
+
+    def get_reference_points(self) -> Sequence[ReferencePoint]:
+        """Retrieves all reference point objects on the board
+
+        .. versionadded:: 0.9.0 (KiCad 10.0.7)"""
+        return [
+            cast(ReferencePoint, item)
+            for item in self.get_items(types=[KiCadObjectType.KOT_PCB_POINT])
+        ]
 
     def get_as_string(self) -> str:
         """Returns the board as a string in KiCad's board file format"""
@@ -1247,7 +1247,7 @@ class Board:
         response = self._kicad.send(cmd, embedded_files_pb2.EmbeddedFiles)
         return EmbeddedFiles(response)
 
-    def add_embedded_files(self, files: EmbeddedFile | Sequence[EmbeddedFile]):
+    def add_embedded_files(self, files: Union[EmbeddedFile, Sequence[EmbeddedFile]]):
         """Appends the given file(s) to the board's embedded files
 
         .. versionadded:: 0.9.0 (KiCad 10.0.7)"""
@@ -1257,7 +1257,7 @@ class Board:
         cmd.files.files.extend([file.proto for file in files_list])
         self._kicad.send(cmd, Empty)
 
-    def set_embedded_files(self, files: EmbeddedFile | Sequence[EmbeddedFile]):
+    def set_embedded_files(self, files: Union[EmbeddedFile, Sequence[EmbeddedFile]]):
         """Replaces all files embedded in the board with the given file(s)
 
         .. versionadded:: 0.9.0 (KiCad 10.0.7)"""
@@ -1328,7 +1328,9 @@ class Board:
     def expand_text_variables(self, text: str, *, expand_env_vars: bool = False) -> str: ...
 
     @overload
-    def expand_text_variables(self, text: List[str], *, expand_env_vars: bool = False) -> List[str]: ...
+    def expand_text_variables(
+        self, text: List[str], *, expand_env_vars: bool = False
+    ) -> List[str]: ...
 
     def expand_text_variables(
         self, text: Union[str, List[str]], *, expand_env_vars: bool = False
