@@ -81,6 +81,24 @@ plugins, copy or symlink them into the appropriate plugins path in order for KiC
 
 ## Release History
 
+### 0.9.0 (TBD)
+
+- Add support for `Table`, `TableCell`, and `ReferencePoint` board objects
+- Add support for embedded files (`EmbeddedFile`, `Board.get_embedded_files` and friends)
+- Add `Project.set_net_classes`
+- Add `expand_env_vars` argument to `expand_text_variables`; environment variables can now be
+  expanded in addition to project text variables (opt-in to preserve existing behavior)
+- Add `from_mils` and `to_mils` helpers in `util.units`
+- Add `FootprintAttributes.exempt_from_courtyard_requirement`, `FootprintAttributes.allow_soldermask_bridges` (Salvador E. Tropea)
+- Add `Pad.fab_property`
+- Add more board layer helper constants in `board_layer`
+- Fix missing document specifiers from `begin_commit` / `end_commit`
+- Support relative paths in `Board.save_as`
+- Breaking change: `TeardropType` protobuf enum renamed to `ZoneTeardropType` to match KiCad.
+  The values and meaning of the enum have not changed; existing clients using the old name
+  will continue to work on earlier versions of `kicad-python`.
+- Clean up various type-checking and other linter issues
+
 ### 0.8.0 (August 30, 2026)
 
 - Add `Item.clone` method to simplify creation of new items based on existing ones
