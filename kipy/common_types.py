@@ -63,6 +63,11 @@ if sys.version_info >= (3, 13):
 else:
     from typing_extensions import deprecated
 
+if sys.version_info >= (3, 11):
+    from typing import Self
+else:
+    from typing_extensions import Self
+
 
 class Commit:
     def __init__(self, id: KIID):
@@ -538,6 +543,16 @@ class Segment(GraphicShape):
 
         assert self._graphic_proto.WhichOneof("geometry") == "segment"
 
+    @classmethod
+    def from_coords(cls, start: Vector2, end: Vector2) -> Self:
+        """Create a segment from its endpoints.
+
+        .. versionadded:: 0.9.0"""
+        proto = base_types_pb2.GraphicShape()
+        proto.segment.start.CopyFrom(start.proto)
+        proto.segment.end.CopyFrom(end.proto)
+        return cls(proto)
+
     @property
     def start(self) -> Vector2:
         return Vector2(self._graphic_proto.segment.start)
@@ -573,6 +588,17 @@ class Arc(GraphicShape):
             self._graphic_proto.CopyFrom(proto)
 
         assert self._graphic_proto.WhichOneof("geometry") == "arc"
+
+    @classmethod
+    def from_coords(cls, start: Vector2, mid: Vector2, end: Vector2) -> Self:
+        """Create an arc from its start, midpoint, and end coordinates.
+
+        .. versionadded:: 0.9.0"""
+        proto = base_types_pb2.GraphicShape()
+        proto.arc.start.CopyFrom(start.proto)
+        proto.arc.mid.CopyFrom(mid.proto)
+        proto.arc.end.CopyFrom(end.proto)
+        return cls(proto)
 
     @property
     def start(self) -> Vector2:
@@ -654,6 +680,16 @@ class Circle(GraphicShape):
 
         assert self._graphic_proto.WhichOneof("geometry") == "circle"
 
+    @classmethod
+    def from_center_radius(cls, center: Vector2, radius: int) -> Self:
+        """Create a circle from its center and radius.
+
+        .. versionadded:: 0.9.0"""
+        proto = base_types_pb2.GraphicShape()
+        proto.circle.center.CopyFrom(center.proto)
+        proto.circle.radius_point.CopyFrom(Vector2.from_xy(center.x + radius, center.y).proto)
+        return cls(proto)
+
     @property
     def center(self) -> Vector2:
         return Vector2(self._graphic_proto.circle.center)
@@ -700,6 +736,16 @@ class Rectangle(GraphicShape):
             self._graphic_proto.CopyFrom(proto)
 
         assert self._graphic_proto.WhichOneof("geometry") == "rectangle"
+
+    @classmethod
+    def from_coords(cls, top_left: Vector2, bottom_right: Vector2) -> Self:
+        """Create a rectangle from its top-left and bottom-right corners.
+
+        .. versionadded:: 0.9.0"""
+        proto = base_types_pb2.GraphicShape()
+        proto.rectangle.top_left.CopyFrom(top_left.proto)
+        proto.rectangle.bottom_right.CopyFrom(bottom_right.proto)
+        return cls(proto)
 
     @property
     def top_left(self) -> Vector2:
@@ -773,6 +819,20 @@ class Bezier(GraphicShape):
             self._graphic_proto.CopyFrom(proto)
 
         assert self._graphic_proto.WhichOneof("geometry") == "bezier"
+
+    @classmethod
+    def from_coords(
+        cls, start: Vector2, control1: Vector2, control2: Vector2, end: Vector2
+    ) -> Self:
+        """Create a bezier curve from its endpoints and control points.
+
+        .. versionadded:: 0.9.0"""
+        proto = base_types_pb2.GraphicShape()
+        proto.bezier.start.CopyFrom(start.proto)
+        proto.bezier.control1.CopyFrom(control1.proto)
+        proto.bezier.control2.CopyFrom(control2.proto)
+        proto.bezier.end.CopyFrom(end.proto)
+        return cls(proto)
 
     @property
     def start(self) -> Vector2:
