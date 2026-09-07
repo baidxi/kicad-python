@@ -28,6 +28,7 @@ from pathlib import Path
 import zstandard
 
 from kipy.geometry import (
+    Angle,
     Box2,
     PolygonWithHoles,
     Vector2,
@@ -872,6 +873,72 @@ class Bezier(GraphicShape):
         raise NotImplementedError()
 
 
+class Ellipse(GraphicShape):
+    """Represents a graphic ellipse (not a board or schematic item).
+
+    .. versionadded:: 0.9.0"""
+
+    def __init__(
+        self,
+        proto: base_types_pb2.GraphicShape | None = None,
+        proto_ref: base_types_pb2.GraphicShape | None = None,
+    ):
+        self._graphic_proto = proto_ref if proto_ref is not None else base_types_pb2.GraphicShape()
+        if proto is not None:
+            self._graphic_proto.CopyFrom(proto)
+        assert self._graphic_proto.WhichOneof("geometry") == "ellipse"
+
+    @classmethod
+    def from_center_radii(
+        cls, center: Vector2, major_radius: int, minor_radius: int, rotation: Angle | None = None
+    ) -> Self:
+        """Create an ellipse from its center, radii, and optional rotation."""
+        proto = base_types_pb2.GraphicShape()
+        proto.ellipse.center.CopyFrom(center.proto)
+        proto.ellipse.major_radius.value_nm = major_radius
+        proto.ellipse.minor_radius.value_nm = minor_radius
+        if rotation is not None:
+            proto.ellipse.rotation.CopyFrom(rotation.proto)
+        return cls(proto)
+
+
+class EllipseArc(GraphicShape):
+    """Represents a graphic elliptical arc (not a board or schematic item).
+
+    .. versionadded:: 0.x.0"""
+
+    def __init__(
+        self,
+        proto: base_types_pb2.GraphicShape | None = None,
+        proto_ref: base_types_pb2.GraphicShape | None = None,
+    ):
+        self._graphic_proto = proto_ref if proto_ref is not None else base_types_pb2.GraphicShape()
+        if proto is not None:
+            self._graphic_proto.CopyFrom(proto)
+        assert self._graphic_proto.WhichOneof("geometry") == "ellipse_arc"
+
+    @classmethod
+    def from_center_radii_angles(
+        cls,
+        center: Vector2,
+        major_radius: int,
+        minor_radius: int,
+        start_angle: Angle,
+        end_angle: Angle,
+        rotation: Angle | None = None,
+    ) -> Self:
+        """Create an ellipse arc from its center, radii, and angles."""
+        proto = base_types_pb2.GraphicShape()
+        proto.ellipse_arc.center.CopyFrom(center.proto)
+        proto.ellipse_arc.major_radius.value_nm = major_radius
+        proto.ellipse_arc.minor_radius.value_nm = minor_radius
+        proto.ellipse_arc.start_angle.CopyFrom(start_angle.proto)
+        proto.ellipse_arc.end_angle.CopyFrom(end_angle.proto)
+        if rotation is not None:
+            proto.ellipse_arc.rotation.CopyFrom(rotation.proto)
+        return cls(proto)
+
+
 def to_concrete_shape(shape: GraphicShape) -> GraphicShape | None:
     cls = {
         "segment": Segment,
@@ -880,6 +947,8 @@ def to_concrete_shape(shape: GraphicShape) -> GraphicShape | None:
         "rectangle": Rectangle,
         "polygon": Polygon,
         "bezier": Bezier,
+        "ellipse": Ellipse,
+        "ellipse_arc": EllipseArc,
         None: None,
     }.get(shape._graphic_proto.WhichOneof("geometry"), None)
 
