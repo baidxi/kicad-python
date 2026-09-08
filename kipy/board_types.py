@@ -108,7 +108,7 @@ from kipy.proto.common.types.base_types_pb2 import LockedState
 from kipy.util import unpack_any
 from kipy.util.board_layer import COPPER_LAYERS, is_copper_layer
 from kipy.util.units import from_mm
-from kipy.wrapper import Item, Wrapper
+from kipy.wrapper import Item, MutableWrapperSequence, Wrapper
 
 if sys.version_info >= (3, 13):
     from warnings import deprecated
@@ -1798,8 +1798,8 @@ class PadStack(BoardItem):
         self._proto.unconnected_layer_removal = removal
 
     @property
-    def copper_layers(self) -> list[PadStackLayer]:
-        return [PadStackLayer(proto_ref=p) for p in self._proto.copper_layers]
+    def copper_layers(self) -> MutableWrapperSequence[PadStackLayer]:
+        return MutableWrapperSequence(self._proto.copper_layers, PadStackLayer)
 
     def copper_layer(self, layer: BoardLayer.ValueType) -> PadStackLayer | None:
         for copper_layer in self.copper_layers:
@@ -2087,10 +2087,10 @@ class Pad(BoardItem):
         self._proto.symbol_pin.CopyFrom(pin.proto)
 
     @property
-    def custom_properties(self) -> list[CustomProperty]:
+    def custom_properties(self) -> MutableWrapperSequence[CustomProperty]:
         """
         .. versionadded:: 0.x.0 (KiCad 11)"""
-        return [CustomProperty(proto_ref=p) for p in self._proto.custom_properties]
+        return MutableWrapperSequence(self._proto.custom_properties, CustomProperty)
 
     @custom_properties.setter
     def custom_properties(self, properties: list[CustomProperty]):
@@ -2230,10 +2230,10 @@ class Via(BoardItem):
         self._proto.teardrop.CopyFrom(settings.proto)
 
     @property
-    def custom_properties(self) -> list[CustomProperty]:
+    def custom_properties(self) -> MutableWrapperSequence[CustomProperty]:
         """
         .. versionadded:: 0.x.0 (KiCad 11)"""
-        return [CustomProperty(proto_ref=p) for p in self._proto.custom_properties]
+        return MutableWrapperSequence(self._proto.custom_properties, CustomProperty)
 
     @custom_properties.setter
     def custom_properties(self, properties: list[CustomProperty]):
@@ -2561,8 +2561,8 @@ class JumperSettings(Wrapper):
         self._proto.duplicate_names_are_jumpered = value
 
     @property
-    def groups(self) -> list[JumperGroup]:
-        return [JumperGroup(proto_ref=g) for g in self._proto.groups]
+    def groups(self) -> MutableWrapperSequence[JumperGroup]:
+        return MutableWrapperSequence(self._proto.groups, JumperGroup)
 
     @groups.setter
     def groups(self, groups: list[JumperGroup]):
@@ -2658,11 +2658,11 @@ class Footprint(Wrapper):
         self._proto.anchor.CopyFrom(anchor.proto)
 
     @property
-    def net_ties(self) -> list[NetTieDefinition]:
+    def net_ties(self) -> MutableWrapperSequence[NetTieDefinition]:
         """The net-tie groups defined in this footprint
 
         .. versionadded:: 0.9.0 (KiCad 10.0.7)"""
-        return [NetTieDefinition(proto_ref=t) for t in self._proto.net_ties]
+        return MutableWrapperSequence(self._proto.net_ties, NetTieDefinition)
 
     @net_ties.setter
     def net_ties(self, net_ties: list[NetTieDefinition]):
@@ -2906,10 +2906,10 @@ class FootprintInstance(BoardItem):
             self._proto.ClearField("embedded_files")
 
     @property
-    def custom_properties(self) -> list[CustomProperty]:
+    def custom_properties(self) -> MutableWrapperSequence[CustomProperty]:
         """
         .. versionadded:: 0.x.0 (KiCad 11)"""
-        return [CustomProperty(proto_ref=p) for p in self._proto.custom_properties]
+        return MutableWrapperSequence(self._proto.custom_properties, CustomProperty)
 
     @custom_properties.setter
     def custom_properties(self, properties: list[CustomProperty]):
@@ -2948,7 +2948,7 @@ class ZoneFilledPolygons(Wrapper):
 
     @property
     def shapes(self) -> Sequence[PolygonWithHoles]:
-        return [PolygonWithHoles(proto_ref=p) for p in self._proto.shapes.polygons]
+        return MutableWrapperSequence(self._proto.shapes.polygons, PolygonWithHoles)
 
 
 class HatchFillSettings(Wrapper):
@@ -3457,11 +3457,11 @@ class Zone(BoardItem):
         self._proto.rule_area_settings.CopyFrom(settings.proto)
 
     @property
-    def layer_properties(self) -> list[ZoneLayerProperties]:
+    def layer_properties(self) -> MutableWrapperSequence[ZoneLayerProperties]:
         """Per-layer properties for this zone
 
         .. versionadded:: 0.9.0"""
-        return [ZoneLayerProperties(proto_ref=p) for p in self._proto.layer_properties]
+        return MutableWrapperSequence(self._proto.layer_properties, ZoneLayerProperties)
 
     @layer_properties.setter
     def layer_properties(self, properties: list[ZoneLayerProperties]):
@@ -3469,10 +3469,10 @@ class Zone(BoardItem):
         self._proto.layer_properties.extend(p.proto for p in properties)
 
     @property
-    def custom_properties(self) -> list[CustomProperty]:
+    def custom_properties(self) -> MutableWrapperSequence[CustomProperty]:
         """
         .. versionadded:: 0.x.0 (KiCad 11)"""
-        return [CustomProperty(proto_ref=p) for p in self._proto.custom_properties]
+        return MutableWrapperSequence(self._proto.custom_properties, CustomProperty)
 
     @custom_properties.setter
     def custom_properties(self, properties: list[CustomProperty]):
@@ -4031,10 +4031,10 @@ class Group(BoardItem):
         self._proto.lib_id.CopyFrom(lib_id.proto)
 
     @property
-    def custom_properties(self) -> list[CustomProperty]:
+    def custom_properties(self) -> MutableWrapperSequence[CustomProperty]:
         """
         .. versionadded:: 0.x.0 (KiCad 11)"""
-        return [CustomProperty(proto_ref=p) for p in self._proto.custom_properties]
+        return MutableWrapperSequence(self._proto.custom_properties, CustomProperty)
 
     @custom_properties.setter
     def custom_properties(self, properties: list[CustomProperty]):
@@ -4093,10 +4093,10 @@ class TableCell(Wrapper):
         self._proto.row_span = span
 
     @property
-    def custom_properties(self) -> list[CustomProperty]:
+    def custom_properties(self) -> MutableWrapperSequence[CustomProperty]:
         """
         .. versionadded:: 0.x.0 (KiCad 11)"""
-        return [CustomProperty(proto_ref=p) for p in self._proto.custom_properties]
+        return MutableWrapperSequence(self._proto.custom_properties, CustomProperty)
 
     @custom_properties.setter
     def custom_properties(self, properties: list[CustomProperty]):
@@ -4175,8 +4175,8 @@ class Table(BoardItem):
         }.get(locked, LockedState.LS_UNLOCKED)
 
     @property
-    def cells(self) -> list[TableCell]:
-        return [TableCell(proto_ref=cell) for cell in self._proto.cells]
+    def cells(self) -> MutableWrapperSequence[TableCell]:
+        return MutableWrapperSequence(self._proto.cells, TableCell)
 
     @cells.setter
     def cells(self, cells: list[TableCell]):
@@ -4239,10 +4239,10 @@ class Table(BoardItem):
         return self._proto.parent if self._proto.HasField("parent") else None
 
     @property
-    def custom_properties(self) -> list[CustomProperty]:
+    def custom_properties(self) -> MutableWrapperSequence[CustomProperty]:
         """
         .. versionadded:: 0.x.0 (KiCad 11)"""
-        return [CustomProperty(proto_ref=p) for p in self._proto.custom_properties]
+        return MutableWrapperSequence(self._proto.custom_properties, CustomProperty)
 
     @custom_properties.setter
     def custom_properties(self, properties: list[CustomProperty]):
@@ -4319,10 +4319,10 @@ class ReferencePoint(BoardItem):
         return self._proto.parent if self._proto.HasField("parent") else None
 
     @property
-    def custom_properties(self) -> list[CustomProperty]:
+    def custom_properties(self) -> MutableWrapperSequence[CustomProperty]:
         """
         .. versionadded:: 0.x.0 (KiCad 11)"""
-        return [CustomProperty(proto_ref=p) for p in self._proto.custom_properties]
+        return MutableWrapperSequence(self._proto.custom_properties, CustomProperty)
 
     @custom_properties.setter
     def custom_properties(self, properties: list[CustomProperty]):
@@ -4555,8 +4555,8 @@ class GridItem(BoardItem):
         }.get(locked, LockedState.LS_UNLOCKED)
 
     @property
-    def custom_properties(self) -> list[CustomProperty]:
-        return [CustomProperty(proto_ref=p) for p in self._proto.custom_properties]
+    def custom_properties(self) -> MutableWrapperSequence[CustomProperty]:
+        return MutableWrapperSequence(self._proto.custom_properties, CustomProperty)
 
     @custom_properties.setter
     def custom_properties(self, properties: list[CustomProperty]):
@@ -4641,8 +4641,8 @@ class Constraint(BoardItem):
         self._proto.type = type
 
     @property
-    def members(self) -> list[ConstraintMember]:
-        return [ConstraintMember(proto_ref=m) for m in self._proto.members]
+    def members(self) -> MutableWrapperSequence[ConstraintMember]:
+        return MutableWrapperSequence(self._proto.members, ConstraintMember)
 
     @members.setter
     def members(self, members: list[ConstraintMember]):
@@ -4671,8 +4671,8 @@ class Constraint(BoardItem):
         self._proto.driving = driving
 
     @property
-    def custom_properties(self) -> list[CustomProperty]:
-        return [CustomProperty(proto_ref=p) for p in self._proto.custom_properties]
+    def custom_properties(self) -> MutableWrapperSequence[CustomProperty]:
+        return MutableWrapperSequence(self._proto.custom_properties, CustomProperty)
 
 
 _proto_to_object: dict[type[Message], type[Wrapper]] = {

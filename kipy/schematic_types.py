@@ -58,7 +58,7 @@ from kipy.proto.schematic.schematic_types_pb2 import (
     TableStrokeMode,
 )
 from kipy.util import unpack_any
-from kipy.wrapper import Item, Wrapper
+from kipy.wrapper import Item, MutableWrapperSequence, Wrapper
 
 
 class SchematicItem(Item):
@@ -221,7 +221,7 @@ class SchematicLine(SchematicItem):
     @property
     def custom_properties(self) -> Sequence[CustomProperty]:
         """User-defined properties attached to the line"""
-        return [CustomProperty(proto_ref=prop) for prop in self._proto.custom_properties]
+        return MutableWrapperSequence(self._proto.custom_properties, CustomProperty)
 
     @custom_properties.setter
     def custom_properties(self, value: Sequence[CustomProperty]):
@@ -284,7 +284,7 @@ class Junction(SchematicItem):
     @property
     def custom_properties(self) -> Sequence[CustomProperty]:
         """User-defined properties attached to the junction"""
-        return [CustomProperty(proto_ref=prop) for prop in self._proto.custom_properties]
+        return MutableWrapperSequence(self._proto.custom_properties, CustomProperty)
 
     @custom_properties.setter
     def custom_properties(self, value: Sequence[CustomProperty]):
@@ -337,7 +337,7 @@ class NoConnectMarker(SchematicItem):
     @property
     def custom_properties(self) -> Sequence[CustomProperty]:
         """User-defined properties attached to the no-connect marker"""
-        return [CustomProperty(proto_ref=prop) for prop in self._proto.custom_properties]
+        return MutableWrapperSequence(self._proto.custom_properties, CustomProperty)
 
     @custom_properties.setter
     def custom_properties(self, value: Sequence[CustomProperty]):
@@ -406,7 +406,7 @@ class BusEntry(SchematicItem):
     @property
     def custom_properties(self) -> Sequence[CustomProperty]:
         """User-defined properties attached to the bus entry"""
-        return [CustomProperty(proto_ref=prop) for prop in self._proto.custom_properties]
+        return MutableWrapperSequence(self._proto.custom_properties, CustomProperty)
 
     @custom_properties.setter
     def custom_properties(self, value: Sequence[CustomProperty]):
@@ -475,7 +475,7 @@ class SchematicText(SchematicItem):
     @property
     def custom_properties(self) -> Sequence[CustomProperty]:
         """User-defined properties attached to the text"""
-        return [CustomProperty(proto_ref=prop) for prop in self._proto.custom_properties]
+        return MutableWrapperSequence(self._proto.custom_properties, CustomProperty)
 
     @custom_properties.setter
     def custom_properties(self, value: Sequence[CustomProperty]):
@@ -590,7 +590,7 @@ class SchematicTextBox(SchematicItem):
     @property
     def custom_properties(self) -> Sequence[CustomProperty]:
         """User-defined properties attached to the text box"""
-        return [CustomProperty(proto_ref=prop) for prop in self._proto.custom_properties]
+        return MutableWrapperSequence(self._proto.custom_properties, CustomProperty)
 
     @custom_properties.setter
     def custom_properties(self, value: Sequence[CustomProperty]):
@@ -641,7 +641,7 @@ class SchematicGraphicShape(SchematicItem):
     @property
     def custom_properties(self) -> Sequence[CustomProperty]:
         """User-defined properties attached to the shape"""
-        return [CustomProperty(proto_ref=prop) for prop in self._proto.custom_properties]
+        return MutableWrapperSequence(self._proto.custom_properties, CustomProperty)
 
     @custom_properties.setter
     def custom_properties(self, value: Sequence[CustomProperty]):
@@ -710,7 +710,7 @@ class SchematicImage(SchematicItem):
     @property
     def custom_properties(self) -> Sequence[CustomProperty]:
         """User-defined properties attached to the image"""
-        return [CustomProperty(proto_ref=prop) for prop in self._proto.custom_properties]
+        return MutableWrapperSequence(self._proto.custom_properties, CustomProperty)
 
     @custom_properties.setter
     def custom_properties(self, value: Sequence[CustomProperty]):
@@ -760,7 +760,7 @@ class BaseLabel(SchematicItem):
 
     @property
     def fields(self) -> Sequence[SchematicField]:
-        return [SchematicField(proto_ref=field) for field in self.proto.fields]
+        return MutableWrapperSequence(self.proto.fields, SchematicField)
 
     @fields.setter
     def fields(self, value: Sequence[SchematicField]):
@@ -778,7 +778,7 @@ class BaseLabel(SchematicItem):
     @property
     def custom_properties(self) -> Sequence[CustomProperty]:
         """User-defined properties attached to the label"""
-        return [CustomProperty(proto_ref=prop) for prop in self.proto.custom_properties]
+        return MutableWrapperSequence(self.proto.custom_properties, CustomProperty)
 
     @custom_properties.setter
     def custom_properties(self, value: Sequence[CustomProperty]):
@@ -925,7 +925,7 @@ class Group(SchematicItem):
     @property
     def custom_properties(self) -> Sequence[CustomProperty]:
         """User-defined properties attached to the group"""
-        return [CustomProperty(proto_ref=prop) for prop in self._proto.custom_properties]
+        return MutableWrapperSequence(self._proto.custom_properties, CustomProperty)
 
     @custom_properties.setter
     def custom_properties(self, value: Sequence[CustomProperty]):
@@ -1055,7 +1055,7 @@ class SheetSymbol(SchematicItem):
 
     @property
     def user_fields(self) -> Sequence[SchematicField]:
-        return [SchematicField(proto_ref=field) for field in self._proto.user_fields]
+        return MutableWrapperSequence(self._proto.user_fields, SchematicField)
 
     @user_fields.setter
     def user_fields(self, value: Sequence[SchematicField]):
@@ -1063,8 +1063,8 @@ class SheetSymbol(SchematicItem):
         self._proto.user_fields.extend(field.proto for field in value)
 
     @property
-    def pins(self) -> Sequence[SheetPin]:
-        return [SheetPin(proto_ref=pin) for pin in self._proto.pins]
+    def pins(self) -> MutableWrapperSequence[SheetPin]:
+        return MutableWrapperSequence(self._proto.pins, SheetPin)
 
     @pins.setter
     def pins(self, value: Sequence[SheetPin]):
@@ -1114,7 +1114,7 @@ class SheetSymbol(SchematicItem):
     @property
     def custom_properties(self) -> Sequence[CustomProperty]:
         """User-defined properties attached to the sheet"""
-        return [CustomProperty(proto_ref=prop) for prop in self._proto.custom_properties]
+        return MutableWrapperSequence(self._proto.custom_properties, CustomProperty)
 
     @custom_properties.setter
     def custom_properties(self, value: Sequence[CustomProperty]):
@@ -1123,7 +1123,7 @@ class SheetSymbol(SchematicItem):
 
     @property
     def variants(self) -> Sequence[SheetVariant]:
-        return [SheetVariant(proto_ref=v) for v in self._proto.variants.variants]
+        return MutableWrapperSequence(self._proto.variants.variants, SheetVariant)
 
     @variants.setter
     def variants(self, value: Sequence[SheetVariant]):
@@ -1270,7 +1270,7 @@ class SchematicPin(SchematicItem):
 
     @property
     def alternates(self) -> Sequence[SchematicPinAlternate]:
-        return [SchematicPinAlternate(proto_ref=alt) for alt in self._proto.alternates]
+        return MutableWrapperSequence(self._proto.alternates, SchematicPinAlternate)
 
     @alternates.setter
     def alternates(self, value: Sequence[SchematicPinAlternate]):
@@ -1535,7 +1535,7 @@ class PinMap(Wrapper):
 
     @property
     def entries(self) -> Sequence[PinMapEntry]:
-        return [PinMapEntry(proto_ref=entry) for entry in self._proto.entries]
+        return MutableWrapperSequence(self._proto.entries, PinMapEntry)
 
     @entries.setter
     def entries(self, value: Sequence[PinMapEntry]):
@@ -1590,7 +1590,7 @@ class SymbolPinMaps(Wrapper):
 
     @property
     def associated_footprints(self) -> Sequence[AssociatedFootprint]:
-        return [AssociatedFootprint(proto_ref=fp) for fp in self._proto.associated_footprints]
+        return MutableWrapperSequence(self._proto.associated_footprints, AssociatedFootprint)
 
     @associated_footprints.setter
     def associated_footprints(self, value: Sequence[AssociatedFootprint]):
@@ -1599,7 +1599,7 @@ class SymbolPinMaps(Wrapper):
 
     @property
     def pin_maps(self) -> Sequence[PinMap]:
-        return [PinMap(proto_ref=pin_map) for pin_map in self._proto.pin_maps]
+        return MutableWrapperSequence(self._proto.pin_maps, PinMap)
 
     @pin_maps.setter
     def pin_maps(self, value: Sequence[PinMap]):
@@ -1640,7 +1640,7 @@ class PinMapInstanceOverride(Wrapper):
 
     @property
     def edits(self) -> Sequence[PinMapEntry]:
-        return [PinMapEntry(proto_ref=edit) for edit in self._proto.edits]
+        return MutableWrapperSequence(self._proto.edits, PinMapEntry)
 
     @edits.setter
     def edits(self, value: Sequence[PinMapEntry]):
@@ -1695,7 +1695,7 @@ class JumperSettings(Wrapper):
 
     @property
     def groups(self) -> Sequence[JumperGroup]:
-        return [JumperGroup(proto_ref=group) for group in self._proto.groups]
+        return MutableWrapperSequence(self._proto.groups, JumperGroup)
 
     @groups.setter
     def groups(self, value: Sequence[JumperGroup]):
@@ -1840,7 +1840,7 @@ class SchematicSymbol(Wrapper):
 
     @property
     def items(self) -> Sequence[SchematicSymbolChild]:
-        return [SchematicSymbolChild(proto_ref=item) for item in self._proto.items]
+        return MutableWrapperSequence(self._proto.items, SchematicSymbolChild)
 
     @items.setter
     def items(self, value: Sequence[SchematicSymbolChild]):
@@ -1879,7 +1879,7 @@ class SchematicSymbol(Wrapper):
     @property
     def body_style(self) -> Sequence[SchematicBodyStyle]:
         """Body styles the symbol can be displayed with"""
-        return [SchematicBodyStyle(proto_ref=style) for style in self._proto.body_style]
+        return MutableWrapperSequence(self._proto.body_style, SchematicBodyStyle)
 
     @body_style.setter
     def body_style(self, value: Sequence[SchematicBodyStyle]):
@@ -1914,9 +1914,7 @@ class SchematicSymbol(Wrapper):
 
     @property
     def unit_display_names(self) -> Sequence[SchematicUnitDisplayName]:
-        return [
-            SchematicUnitDisplayName(proto_ref=name) for name in self._proto.unit_display_names
-        ]
+        return MutableWrapperSequence(self._proto.unit_display_names, SchematicUnitDisplayName)
 
     @unit_display_names.setter
     def unit_display_names(self, value: Sequence[SchematicUnitDisplayName]):
@@ -2151,7 +2149,7 @@ class SchematicSymbolInstance(SchematicItem):
 
     @property
     def variants(self) -> Sequence[SchematicSymbolVariant]:
-        return [SchematicSymbolVariant(proto_ref=v) for v in self._proto.variants.variants]
+        return MutableWrapperSequence(self._proto.variants.variants, SchematicSymbolVariant)
 
     @variants.setter
     def variants(self, value: Sequence[SchematicSymbolVariant]):
@@ -2160,7 +2158,7 @@ class SchematicSymbolInstance(SchematicItem):
 
     @property
     def user_fields(self) -> Sequence[SchematicField]:
-        return [SchematicField(proto_ref=f) for f in self._proto.user_fields]
+        return MutableWrapperSequence(self._proto.user_fields, SchematicField)
 
     @user_fields.setter
     def user_fields(self, value: Sequence[SchematicField]):
@@ -2190,7 +2188,7 @@ class SchematicSymbolInstance(SchematicItem):
     @property
     def custom_properties(self) -> Sequence[CustomProperty]:
         """User-defined properties attached to the symbol instance"""
-        return [CustomProperty(proto_ref=prop) for prop in self._proto.custom_properties]
+        return MutableWrapperSequence(self._proto.custom_properties, CustomProperty)
 
     @custom_properties.setter
     def custom_properties(self, value: Sequence[CustomProperty]):
@@ -2249,7 +2247,7 @@ class SheetInstance(Wrapper):
 
     @property
     def children(self) -> Sequence[SheetInstance]:
-        return [SheetInstance(proto_ref=child) for child in self._proto.children]
+        return MutableWrapperSequence(self._proto.children, SheetInstance)
 
 
 class SchematicNetSheetContents(Wrapper):
@@ -2319,7 +2317,7 @@ class SchematicNet(Wrapper):
 
     @property
     def sheets(self) -> Sequence[SchematicNetSheetContents]:
-        return [SchematicNetSheetContents(proto_ref=s) for s in self._proto.sheets]
+        return MutableWrapperSequence(self._proto.sheets, SchematicNetSheetContents)
 
 
 class SheetVariant(Wrapper):
@@ -2419,7 +2417,7 @@ class SheetVariants(Wrapper):
 
     @property
     def variants(self) -> Sequence[SheetVariant]:
-        return [SheetVariant(proto_ref=variant) for variant in self._proto.variants]
+        return MutableWrapperSequence(self._proto.variants, SheetVariant)
 
     @variants.setter
     def variants(self, value: Sequence[SheetVariant]):
@@ -2497,7 +2495,7 @@ class SchematicRuleArea(SchematicItem):
     @property
     def custom_properties(self) -> Sequence[CustomProperty]:
         """User-defined properties attached to the rule area"""
-        return [CustomProperty(proto_ref=prop) for prop in self._proto.custom_properties]
+        return MutableWrapperSequence(self._proto.custom_properties, CustomProperty)
 
     @custom_properties.setter
     def custom_properties(self, value: Sequence[CustomProperty]):
@@ -2547,7 +2545,7 @@ class SchematicTableCell(Wrapper):
     @property
     def custom_properties(self) -> Sequence[CustomProperty]:
         """User-defined properties attached to the cell"""
-        return [CustomProperty(proto_ref=prop) for prop in self._proto.custom_properties]
+        return MutableWrapperSequence(self._proto.custom_properties, CustomProperty)
 
     @custom_properties.setter
     def custom_properties(self, value: Sequence[CustomProperty]):
@@ -2609,7 +2607,7 @@ class SchematicTable(SchematicItem):
 
     @property
     def cells(self) -> Sequence[SchematicTableCell]:
-        return [SchematicTableCell(proto_ref=cell) for cell in self._proto.cells]
+        return MutableWrapperSequence(self._proto.cells, SchematicTableCell)
 
     @cells.setter
     def cells(self, value: Sequence[SchematicTableCell]):
@@ -2667,7 +2665,7 @@ class SchematicTable(SchematicItem):
     @property
     def custom_properties(self) -> Sequence[CustomProperty]:
         """User-defined properties attached to the table"""
-        return [CustomProperty(proto_ref=prop) for prop in self._proto.custom_properties]
+        return MutableWrapperSequence(self._proto.custom_properties, CustomProperty)
 
     @custom_properties.setter
     def custom_properties(self, value: Sequence[CustomProperty]):

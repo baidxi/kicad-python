@@ -26,7 +26,7 @@ import sys
 from kipy.proto.common import types
 from kipy.util import from_mm
 from kipy.util.units import from_mils
-from kipy.wrapper import Wrapper
+from kipy.wrapper import MutableWrapperSequence, Wrapper
 
 if sys.version_info >= (3, 11):
     from typing import Self
@@ -546,8 +546,8 @@ class PolyLine(Wrapper):
         return f"PolyLine(nodes={self.nodes}, closed={self.closed})"
 
     @property
-    def nodes(self) -> list[PolyLineNode]:
-        return [PolyLineNode(proto_ref=node) for node in self._proto.nodes]
+    def nodes(self) -> MutableWrapperSequence[PolyLineNode]:
+        return MutableWrapperSequence(self._proto.nodes, PolyLineNode)
 
     @property
     def closed(self) -> bool:
@@ -616,8 +616,8 @@ class PolygonWithHoles(Wrapper):
         self._proto.outline.closed = True
 
     @property
-    def holes(self) -> list[PolyLine]:
-        return [PolyLine(proto_ref=hole) for hole in self._proto.holes]
+    def holes(self) -> MutableWrapperSequence[PolyLine]:
+        return MutableWrapperSequence(self._proto.holes, PolyLine)
 
     def add_hole(self, hole: PolyLine):
         # Holes must be a closed shape

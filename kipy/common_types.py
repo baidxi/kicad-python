@@ -57,7 +57,7 @@ from kipy.proto.common.types.enums_pb2 import (  # noqa
     PathType,
     VerticalAlignment,
 )
-from kipy.wrapper import Wrapper
+from kipy.wrapper import MutableWrapperSequence, Wrapper
 
 if sys.version_info >= (3, 13):
     from warnings import deprecated
@@ -1219,7 +1219,7 @@ class EmbeddedFiles(Wrapper):
 
     @property
     def files(self) -> Sequence[EmbeddedFile]:
-        return [EmbeddedFile(proto_ref=f) for f in self._proto.files]
+        return MutableWrapperSequence(self._proto.files, EmbeddedFile)
 
     @files.setter
     def files(self, files: Sequence[EmbeddedFile]):
