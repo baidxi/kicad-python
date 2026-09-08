@@ -26,12 +26,17 @@ from typing import Any, cast
 from google.protobuf.empty_pb2 import Empty
 
 from kipy.client import KiCadClient
-from kipy.common_types import PageSettings, TitleBlockInfo
+from kipy.common_types import PageSettings, SheetPath, TitleBlockInfo
 from kipy.editor import EditorCommandsHandler
 from kipy.project import Project
 from kipy.proto.common.commands import editor_commands_pb2
 from kipy.proto.common.commands.editor_commands_pb2 import GetPageSettings, SetPageSettings
-from kipy.proto.common.types import DocumentSpecifier, KiCadObjectType, base_types_pb2
+from kipy.proto.common.types import (
+    DocumentSpecifier,
+    DocumentType,
+    KiCadObjectType,
+    base_types_pb2,
+)
 from kipy.proto.schematic.schematic_commands_pb2 import (
     GetSchematicHierarchy,
     GetSchematicNetlist,
@@ -211,6 +216,20 @@ class Schematic(EditorCommandsHandler["SchematicItem"], VariantsCommandHandler):
         command.document.CopyFrom(self._doc)
         response = self._kicad.send(command, SchematicHierarchyResponse)
         return [SheetInstance(proto=sheet) for sheet in response.top_level_sheets]
+
+    def for_sheet(self, sheet: SheetInstance | SheetPath) -> Schematic:
+        """Returns a Schematic bound to the given sheet, e.g. one from :meth:`get_hierarchy` or
+        one of its children.
+
+        The returned object can be used to make calls (`get_items`, etc) on a subsheet.
+        """
+        spec = DocumentSpecifier()
+        spec.type = DocumentType.DOCTYPE_SCHEMATIC
+        spec.project.CopyFrom(self._doc.project)
+        spec.sheet_path.CopyFrom(
+            sheet.path.proto if isinstance(sheet, SheetInstance) else sheet.proto
+        )
+        return Schematic(self._kicad, spec)
 
     def get_netlist(
         self,
