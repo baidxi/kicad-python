@@ -1931,6 +1931,30 @@ class SchematicSymbol(Wrapper):
     def embedded_fonts(self, value: bool):
         self._proto.embedded_fonts = value
 
+    @property
+    def show_pin_numbers(self) -> bool:
+        return self._proto.show_pin_numbers
+
+    @show_pin_numbers.setter
+    def show_pin_numbers(self, value: bool):
+        self._proto.show_pin_numbers = value
+
+    @property
+    def show_pin_names(self) -> bool:
+        return self._proto.show_pin_names
+
+    @show_pin_names.setter
+    def show_pin_names(self, value: bool):
+        self._proto.show_pin_names = value
+
+    @property
+    def pin_name_offset(self) -> int:
+        return self._proto.pin_name_offset.value_nm
+
+    @pin_name_offset.setter
+    def pin_name_offset(self, value: int):
+        self._proto.pin_name_offset.value_nm = value
+
 
 class SchematicSymbolTransform(Wrapper):
     """
