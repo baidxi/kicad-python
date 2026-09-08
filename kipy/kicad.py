@@ -49,6 +49,8 @@ from kipy.proto.common.types import DocumentSpecifier, DocumentType, base_types_
 from kipy.schematic import Schematic
 from kipy.server import KiCadServer, find_kicad_cli
 
+_UNKNOWN_API_VERSION = "unknown"
+
 
 def _default_socket_path() -> str:
     path = os.environ.get("KICAD_API_SOCKET")
@@ -91,6 +93,9 @@ class KiCadVersion:
 
     @staticmethod
     def from_git_describe(describe: str) -> KiCadVersion:
+        if not describe:
+            return KiCadVersion(0, 0, 0, _UNKNOWN_API_VERSION)
+
         parts = describe.split("-")
         version_part = parts[0]
 
@@ -222,6 +227,9 @@ class KiCad:
         """Checks if the connected KiCad version matches the version this library was built against"""
         kicad_version = self.get_version()
         api_version = self.get_api_version()
+
+        if api_version.full_version == _UNKNOWN_API_VERSION:
+            return True
 
         if kicad_version > api_version:
             raise FutureVersionError(
