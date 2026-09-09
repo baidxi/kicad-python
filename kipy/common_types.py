@@ -57,6 +57,7 @@ from kipy.proto.common.types.enums_pb2 import (  # noqa
     PathType,
     VerticalAlignment,
 )
+from kipy.util.units import to_mm
 from kipy.wrapper import MutableWrapperSequence, Wrapper
 
 if sys.version_info >= (3, 13):
@@ -570,6 +571,9 @@ class Segment(GraphicShape):
     def end(self, point: Vector2):
         self._graphic_proto.segment.end.CopyFrom(point.proto)
 
+    def __repr__(self) -> str:
+        return f"Segment(start={self.start}, end={self.end})"
+
     def bounding_box(self) -> Box2:
         """Calculates the bounding box of the segment"""
         return Box2.from_points([self.start, self.end])
@@ -662,6 +666,9 @@ class Arc(GraphicShape):
         .. versionadded:: 0.4.0"""
         return arc_angle(self.start, self.mid, self.end)
 
+    def __repr__(self) -> str:
+        return f"Arc(start={self.start}, mid={self.mid}, end={self.end})"
+
     def bounding_box(self) -> Box2:
         return arc_bounding_box(self.start, self.mid, self.end)
 
@@ -722,6 +729,9 @@ class Circle(GraphicShape):
             diameter,
         )
 
+    def __repr__(self) -> str:
+        return f"Circle(center={self.center}, radius={self.radius()})"
+
 
 class Rectangle(GraphicShape):
     """Represents a graphic rectangle (not a board or schematic item)"""
@@ -764,6 +774,9 @@ class Rectangle(GraphicShape):
     def bottom_right(self, point: Vector2):
         self._graphic_proto.rectangle.bottom_right.CopyFrom(point.proto)
 
+    def __repr__(self) -> str:
+        return f"Rectangle(top_left={self.top_left}, bottom_right={self.bottom_right})"
+
     def bounding_box(self) -> Box2:
         """Calculates the bounding box of the rectangle"""
         return Box2.from_pos_size(self.top_left, self.bottom_right - self.top_left)
@@ -794,6 +807,9 @@ class Polygon(GraphicShape):
     @property
     def polygons(self) -> list[PolygonWithHoles]:
         return self._polygons
+
+    def __repr__(self) -> str:
+        return f"Polygon(polygons={self.polygons})"
 
     def bounding_box(self) -> Box2:
         """Calculates the bounding box of the polygon"""
@@ -867,6 +883,12 @@ class Bezier(GraphicShape):
     def end(self, point: Vector2):
         self._graphic_proto.bezier.end.CopyFrom(point.proto)
 
+    def __repr__(self) -> str:
+        return (
+            f"Bezier(start={self.start}, control1={self.control1}, "
+            f"control2={self.control2}, end={self.end})"
+        )
+
     def bounding_box(self) -> Box2:
         # TODO: maybe bring in a library for Bezier curve math so we can generate an
         # bounding box from the curve approximation like KiCad does?
@@ -887,6 +909,15 @@ class Ellipse(GraphicShape):
         if proto is not None:
             self._graphic_proto.CopyFrom(proto)
         assert self._graphic_proto.WhichOneof("geometry") == "ellipse"
+
+    def __repr__(self) -> str:
+        rotation = self._graphic_proto.ellipse.rotation.value_degrees
+        return (
+            f"Ellipse(center={Vector2(self._graphic_proto.ellipse.center)}, "
+            f"major_radius={to_mm(self._graphic_proto.ellipse.major_radius.value_nm)}, "
+            f"minor_radius={to_mm(self._graphic_proto.ellipse.minor_radius.value_nm)}, "
+            f"rotation={rotation})"
+        )
 
     @classmethod
     def from_center_radii(
@@ -916,6 +947,17 @@ class EllipseArc(GraphicShape):
         if proto is not None:
             self._graphic_proto.CopyFrom(proto)
         assert self._graphic_proto.WhichOneof("geometry") == "ellipse_arc"
+
+    def __repr__(self) -> str:
+        rotation = self._graphic_proto.ellipse.rotation.value_degrees
+        return (
+            f"EllipseArc(center={Vector2(self._graphic_proto.ellipse_arc.center)}, "
+            f"major_radius={to_mm(self._graphic_proto.ellipse_arc.major_radius.value_nm)}, "
+            f"minor_radius={to_mm(self._graphic_proto.ellipse_arc.minor_radius.value_nm)}, "
+            f"start_angle={self._graphic_proto.ellipse_arc.start_angle.value_degrees}, "
+            f"end_angle={self._graphic_proto.ellipse_arc.end_angle.value_degrees}, "
+            f"rotation={rotation})"
+        )
 
     @classmethod
     def from_center_radii_angles(
