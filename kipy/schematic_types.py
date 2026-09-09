@@ -149,6 +149,12 @@ class SchematicLine(SchematicItem):
         if proto is not None:
             self._proto.CopyFrom(proto)
 
+    def __repr__(self) -> str:
+        return (
+            f"SchematicLine(start={self.start}, end={self.end}, "
+            f"type={SchematicLineType.Name(self.type)})"
+        )
+
     @property
     def locked(self) -> bool:
         return self._proto.locked == LockedState.LS_LOCKED
@@ -246,6 +252,9 @@ class Junction(SchematicItem):
         if proto is not None:
             self._proto.CopyFrom(proto)
 
+    def __repr__(self) -> str:
+        return f"Junction(position={self.position})"
+
     @property
     def locked(self) -> bool:
         return self._proto.locked == LockedState.LS_LOCKED
@@ -307,6 +316,9 @@ class NoConnectMarker(SchematicItem):
         if proto is not None:
             self._proto.CopyFrom(proto)
 
+    def __repr__(self) -> str:
+        return f"NoConnectMarker(position={self.position})"
+
     @property
     def locked(self) -> bool:
         return self._proto.locked == LockedState.LS_LOCKED
@@ -359,6 +371,9 @@ class BusEntry(SchematicItem):
 
         if proto is not None:
             self._proto.CopyFrom(proto)
+
+    def __repr__(self) -> str:
+        return f"BusEntry(position={self.position}, type={BusEntryType.Name(self.type)})"
 
     @property
     def locked(self) -> bool:
@@ -429,6 +444,9 @@ class SchematicText(SchematicItem):
         if proto is not None:
             self._proto.CopyFrom(proto)
 
+    def __repr__(self) -> str:
+        return f"SchematicText(value={self.value!r}, position={self.position})"
+
     @property
     def locked(self) -> bool:
         return self._proto.locked == LockedState.LS_LOCKED
@@ -495,6 +513,12 @@ class SchematicTextBox(SchematicItem):
 
         if proto is not None:
             self._proto.CopyFrom(proto)
+
+    def __repr__(self) -> str:
+        return (
+            f"SchematicTextBox(value={self.value!r}, top_left={self.top_left}, "
+            f"bottom_right={self.bottom_right})"
+        )
 
     @property
     def locked(self) -> bool:
@@ -615,6 +639,12 @@ class SchematicGraphicShape(SchematicItem):
         if proto is not None:
             self._proto.CopyFrom(proto)
 
+    def __repr__(self) -> str:
+        shape = self.shape
+        if shape is None:
+            return "SchematicGraphicShape(shape=None)"
+        return f"SchematicGraphicShape(shape={shape})"
+
     @property
     def locked(self) -> bool:
         return self._proto.locked == LockedState.LS_LOCKED
@@ -663,6 +693,9 @@ class SchematicImage(SchematicItem):
 
         if proto is not None:
             self._proto.CopyFrom(proto)
+
+    def __repr__(self) -> str:
+        return f"SchematicImage(position={self.position}, bytes={len(self.image_data)})"
 
     @property
     def locked(self) -> bool:
@@ -815,6 +848,9 @@ class LocalLabel(BaseLabel):
         if proto is not None:
             self._proto.CopyFrom(proto)
 
+    def __repr__(self) -> str:
+        return f"LocalLabel(text={self.text.value!r}, position={self.position})"
+
 
 class GlobalLabel(ShapeLabel):
     """
@@ -830,6 +866,9 @@ class GlobalLabel(ShapeLabel):
 
         if proto is not None:
             self._proto.CopyFrom(proto)
+
+    def __repr__(self) -> str:
+        return f"GlobalLabel(text={self.text.value!r}, position={self.position})"
 
     @property
     def intersheet_refs_field(self) -> SchematicField:
@@ -857,6 +896,9 @@ class HierarchicalLabel(ShapeLabel):
         if proto is not None:
             self._proto.CopyFrom(proto)
 
+    def __repr__(self) -> str:
+        return f"HierarchicalLabel(text={self.text.value!r}, position={self.position})"
+
 
 class DirectiveLabel(ShapeLabel):
     """
@@ -872,6 +914,9 @@ class DirectiveLabel(ShapeLabel):
 
         if proto is not None:
             self._proto.CopyFrom(proto)
+
+    def __repr__(self) -> str:
+        return f"DirectiveLabel(text={self.text.value!r}, position={self.position})"
 
 
 class Group(SchematicItem):
@@ -891,6 +936,9 @@ class Group(SchematicItem):
 
         self._item_ids = self._proto.items
         self._unwrapped_items: Sequence[SchematicItem] | None = None
+
+    def __repr__(self) -> str:
+        return f"Group(name={self.name}, items={len(self.items)})"
 
     @property
     def locked(self) -> bool:
@@ -1187,6 +1235,9 @@ class SchematicPin(SchematicItem):
 
         if proto is not None:
             self._proto.CopyFrom(proto)
+
+    def __repr__(self) -> str:
+        return f"SchematicPin(name={self.name}, number={self.number}, position={self.position})"
 
     @property
     def name(self) -> str:
@@ -1774,6 +1825,12 @@ class SchematicSymbol(Wrapper):
         if proto is not None:
             self._proto.CopyFrom(proto)
 
+    def __repr__(self) -> str:
+        return (
+            f"SchematicSymbol(id={self.id}, reference={self.reference_field.text.value}, "
+            f"value={self.value_field.text.value})"
+        )
+
     @property
     def id(self) -> LibraryIdentifier:
         return LibraryIdentifier(proto_ref=self._proto.id)
@@ -2012,6 +2069,13 @@ class SchematicSymbolInstance(SchematicItem):
 
         if proto is not None:
             self._proto.CopyFrom(proto)
+
+    def __repr__(self) -> str:
+        return (
+            f"SchematicSymbolInstance(reference={self.reference_field.text.value}, "
+            f"value={self.value_field.text.value}, unit={self.unit}, position={self.position}, "
+            f"path={self.path})"
+        )
 
     @property
     def path(self) -> SheetPath:
@@ -2438,6 +2502,9 @@ class SchematicRuleArea(SchematicItem):
         if proto is not None:
             self._proto.CopyFrom(proto)
 
+    def __repr__(self) -> str:
+        return f"SchematicRuleArea(shape={self.shape}, dnp={self.dnp})"
+
     @property
     def locked(self) -> bool:
         return self._proto.locked == LockedState.LS_LOCKED
@@ -2518,6 +2585,12 @@ class SchematicTableCell(Wrapper):
         if proto is not None:
             self._proto.CopyFrom(proto)
 
+    def __repr__(self) -> str:
+        return (
+            f"SchematicTableCell(text={self.text_box.value!r}, "
+            f"spans=({self.row_span}, {self.column_span}))"
+        )
+
     @property
     def text_box(self) -> SchematicTextBox:
         return SchematicTextBox(proto_ref=self._proto.text_box)
@@ -2565,6 +2638,9 @@ class SchematicTable(SchematicItem):
 
         if proto is not None:
             self._proto.CopyFrom(proto)
+
+    def __repr__(self) -> str:
+        return f"SchematicTable(cells={len(self.cells)}, columns={self.column_count})"
 
     @property
     def locked(self) -> bool:
