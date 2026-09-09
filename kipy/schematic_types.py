@@ -662,11 +662,11 @@ class SchematicGraphicShape(SchematicItem):
 
     @shape.setter
     def shape(self, value: GraphicShape):
-        if value._graphic_proto.WhichOneof("geometry") == "segment":
+        if value.proto.WhichOneof("geometry") == "segment":
             raise ValueError(
                 "SchematicGraphicShape cannot be a segment; use SchematicLine instead"
             )
-        self._proto.shape.CopyFrom(value._graphic_proto)
+        self._proto.shape.CopyFrom(value.proto)
 
     @property
     def custom_properties(self) -> Sequence[CustomProperty]:
@@ -2553,9 +2553,9 @@ class SchematicRuleArea(SchematicItem):
 
     @shape.setter
     def shape(self, value: GraphicShape):
-        if value._graphic_proto.WhichOneof("geometry") not in (None, "polygon"):
+        if value.proto.WhichOneof("geometry") != "polygon":
             raise ValueError("SchematicRuleArea shape must be a polygon")
-        self._proto.shape.CopyFrom(value._graphic_proto)
+        self._proto.shape.CopyFrom(value.proto)
 
     @property
     def exclude_from_sim(self) -> bool:
