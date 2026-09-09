@@ -45,7 +45,10 @@ from kipy.proto.schematic.schematic_commands_pb2 import (
 )
 from kipy.schematic_types import (
     BusEntry,
+    DirectiveLabel,
+    GlobalLabel,
     Group,
+    HierarchicalLabel,
     Junction,
     LocalLabel,
     NoConnectMarker,
@@ -128,9 +131,11 @@ class Schematic(EditorCommandsHandler["SchematicItem"], VariantsCommandHandler):
             for item in self.get_items(types=[KiCadObjectType.KOT_SCH_BITMAP])
         ]
 
-    def get_labels(self) -> Sequence[LocalLabel]:
+    def get_labels(
+        self,
+    ) -> Sequence[LocalLabel | GlobalLabel | HierarchicalLabel | DirectiveLabel]:
         return [
-            cast(LocalLabel, item)
+            cast("LocalLabel | GlobalLabel | HierarchicalLabel | DirectiveLabel", item)
             for item in self.get_items(
                 types=[
                     KiCadObjectType.KOT_SCH_LABEL,
