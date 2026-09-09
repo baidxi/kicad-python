@@ -129,6 +129,9 @@ class BoardItem(Item):
     def id(self) -> KIID:
         return self.proto.id
 
+    def move(self, delta: Vector2):
+        raise NotImplementedError(f"move() not implemented for {self.__class__.__name__}")
+
 
 class Net(Wrapper):
     def __init__(self, proto: board_types_pb2.Net | None = None, name: str | None = None):
@@ -258,6 +261,11 @@ class Track(BoardItem):
 
         .. versionadded:: 0.9.0 (KiCad 10.0.7)"""
         return SolderMaskOverrides(proto_ref=self._proto.solder_mask)
+
+    def move(self, delta: Vector2):
+        """Moves the track by the given delta vector"""
+        self.start += delta
+        self.end += delta
 
 
 class ArcTrack(BoardItem):
@@ -410,6 +418,12 @@ class ArcTrack(BoardItem):
     def bounding_box(self) -> Box2:
         return arc_bounding_box(self.start, self.mid, self.end)
 
+    def move(self, delta: Vector2):
+        """Moves the track arc by the given delta vector"""
+        self.start += delta
+        self.mid += delta
+        self.end += delta
+
 
 class BoardShape(BoardItem):
     """Represents a graphic shape on a board or footprint"""
@@ -484,9 +498,6 @@ class BoardShape(BoardItem):
 
         .. versionadded:: 0.8.0 (KiCad 10.0.6)"""
         return self._proto.parent if self._proto.HasField("parent") else None
-
-    def move(self, delta: Vector2):
-        raise NotImplementedError(f"move() not implemented for {self.__class__.__name__}")
 
     def rotate(self, angle: Angle, center: Vector2):
         raise NotImplementedError(f"rotate() not implemented for {self.__class__.__name__}")
@@ -862,6 +873,10 @@ class BoardText(BoardItem):
         .. versionadded:: 0.8.0 (KiCad 10.0.6)"""
         return self._proto.parent if self._proto.HasField("parent") else None
 
+    def move(self, delta: Vector2):
+        """Moves the text by the given delta vector"""
+        self.position += delta
+
 
 class BoardTextBox(BoardItem):
     """Represents a text box on a board"""
@@ -944,6 +959,11 @@ class BoardTextBox(BoardItem):
 
         .. versionadded:: 0.8.0 (KiCad 10.0.6)"""
         return self._proto.parent if self._proto.HasField("parent") else None
+
+    def move(self, delta: Vector2):
+        """Moves the text box by the given delta vector"""
+        self.top_left += delta
+        self.bottom_right += delta
 
 
 class Barcode(BoardItem):
@@ -1079,6 +1099,10 @@ class Barcode(BoardItem):
         .. versionadded:: 0.8.0 (KiCad 10.0.6)"""
         return self._proto.parent if self._proto.HasField("parent") else None
 
+    def move(self, delta: Vector2):
+        """Moves the barcode by the given delta vector"""
+        self.position += delta
+
 
 class ReferenceImage(BoardItem):
     """Represents a reference image on a board (a non-plotting bitmap)
@@ -1157,6 +1181,10 @@ class ReferenceImage(BoardItem):
         .. versionadded:: 0.8.0 (KiCad 10.0.6)"""
         return self._proto.parent if self._proto.HasField("parent") else None
 
+    def move(self, delta: Vector2):
+        """Moves the reference image by the given delta vector"""
+        self.position += delta
+
 
 class Field(BoardItem):
     """Represents a footprint field"""
@@ -1215,6 +1243,10 @@ class Field(BoardItem):
     @visible.setter
     def visible(self, visible: bool):
         self._proto.visible = visible
+
+    def move(self, delta: Vector2):
+        """Moves the field text by the given delta vector"""
+        self.text.move(delta)
 
 
 class ThermalSpokeSettings(Wrapper):
@@ -2156,6 +2188,10 @@ class Pad(BoardItem):
         .. versionadded:: 0.8.0 (KiCad 10.0.6)"""
         return self._proto.parent if self._proto.HasField("parent") else None
 
+    def move(self, delta: Vector2):
+        """Moves the pad by the given delta vector"""
+        self.position += delta
+
 
 class Via(BoardItem):
     def __init__(
@@ -2301,6 +2337,10 @@ class Via(BoardItem):
 
         .. versionadded:: 0.8.0 (KiCad 10.0.6)"""
         return self._proto.parent if self._proto.HasField("parent") else None
+
+    def move(self, delta: Vector2):
+        """Moves the via by the given delta vector"""
+        self.position += delta
 
 
 class FootprintAttributes(Wrapper):
@@ -3071,6 +3111,10 @@ class FootprintInstance(BoardItem):
         .. versionadded:: 0.8.0 (KiCad 10.0.6)"""
         return self._proto.parent if self._proto.HasField("parent") else None
 
+    def move(self, delta: Vector2):
+        """Moves the footprint by the given delta vector"""
+        self.position += delta
+
 
 class ZoneFilledPolygons(Wrapper):
     """Represents the set of filled polygons of a zone on a single board layer"""
@@ -3838,6 +3882,11 @@ class Dimension(BoardItem):
         .. versionadded:: 0.8.0 (KiCad 10.0.6)"""
         return self._proto.parent if self._proto.HasField("parent") else None
 
+    def move(self, delta: Vector2):
+        """Moves the dimension by the given delta vector"""
+        self.start += delta
+        self.end += delta
+
 
 class AlignedDimension(Dimension):
     def __init__(
@@ -3996,6 +4045,11 @@ class RadialDimension(Dimension):
     def leader_length(self, leader_length: int):
         self._proto.radial.leader_length.value_nm = leader_length
 
+    def move(self, delta: Vector2):
+        """Moves the dimension by the given delta vector"""
+        self.center += delta
+        self.radius_point += delta
+
 
 class LeaderDimension(Dimension):
     def __init__(
@@ -4074,6 +4128,11 @@ class CenterDimension(Dimension):
     @end.setter
     def end(self, end: Vector2):
         self._proto.center.end.CopyFrom(end.proto)
+
+    def move(self, delta: Vector2):
+        """Moves the dimension by the given delta vector"""
+        self.center += delta
+        self.end += delta
 
 
 def to_concrete_dimension(dimension: Dimension) -> Dimension:
@@ -4249,6 +4308,11 @@ class Group(BoardItem):
         .. versionadded:: 0.8.0 (KiCad 10.0.6)"""
         return self._proto.parent if self._proto.HasField("parent") else None
 
+    def move(self, delta: Vector2):
+        """Moves the group by the given delta vector"""
+        for item in self.items:
+            item.move(delta)
+
 
 class TableCell(Wrapper):
     """A single cell of a table
@@ -4302,6 +4366,10 @@ class TableCell(Wrapper):
     def custom_properties(self, properties: list[CustomProperty]):
         del self._proto.custom_properties[:]
         self._proto.custom_properties.extend(p.proto for p in properties)
+
+    def move(self, delta: Vector2):
+        """Moves the table cell by the given delta vector"""
+        self.text.move(delta)
 
 
 class Table(BoardItem):
@@ -4449,6 +4517,11 @@ class Table(BoardItem):
         del self._proto.custom_properties[:]
         self._proto.custom_properties.extend(p.proto for p in properties)
 
+    def move(self, delta: Vector2):
+        """Moves the table by the given delta vector"""
+        for cell in self.cells:
+            cell.move(delta)
+
 
 class ReferencePoint(BoardItem):
     """Represents a reference point marker on a board
@@ -4528,6 +4601,10 @@ class ReferencePoint(BoardItem):
     def custom_properties(self, properties: list[CustomProperty]):
         del self._proto.custom_properties[:]
         self._proto.custom_properties.extend(p.proto for p in properties)
+
+    def move(self, delta: Vector2):
+        """Moves the reference point by the given delta vector"""
+        self.position += delta
 
 
 class GridItemAffects(Wrapper):
@@ -4770,6 +4847,10 @@ class GridItem(BoardItem):
     def custom_properties(self, properties: list[CustomProperty]):
         del self._proto.custom_properties[:]
         self._proto.custom_properties.extend(p.proto for p in properties)
+
+    def move(self, delta: Vector2):
+        """Moves the grid by the given delta vector"""
+        self.position += delta
 
 
 class ConstraintMember(Wrapper):
