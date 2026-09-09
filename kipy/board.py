@@ -1071,9 +1071,13 @@ class Board(EditorCommandsHandler["BoardItem"], VariantsCommandHandler):
         return items_converted
 
     def get_items(
-        self, types: KiCadObjectType.ValueType | Sequence[KiCadObjectType.ValueType]
+        self,
+        types: KiCadObjectType.ValueType | Sequence[KiCadObjectType.ValueType] | None = None,
     ) -> Sequence[BoardItem]:
-        """Retrieves items from the board, optionally filtering to a single or set of types"""
+        """Retrieves items from the board, optionally filtering to a single or set of types
+
+        Providing no `types` filter will result in all valid types for the given document
+        being retrieved on KiCad 10.0.7 and newer, and is an error on older versions."""
         return self._to_concrete_items(super().get_items(types))
 
     def get_items_by_id(self, ids: KIID | Sequence[KIID]) -> Sequence[BoardItem]:

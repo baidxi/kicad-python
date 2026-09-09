@@ -133,15 +133,18 @@ class EditorCommandsHandler(Generic[_ItemT_co]):
 
     def get_items(
         self,
-        types: KiCadObjectType.ValueType | Sequence[KiCadObjectType.ValueType],
+        types: KiCadObjectType.ValueType | Sequence[KiCadObjectType.ValueType] | None = None,
     ) -> Sequence[_ItemT_co]:
-        """Retrieves items from the document, optionally filtering to a single or set of types"""
+        """Retrieves items from the document, optionally filtering to a single or set of types.
+
+        Providing no `types` filter will result in all valid types for the given document
+        being retrieved on KiCad 10.0.7 and newer, and is an error on older versions."""
         command = editor_commands_pb2.GetItems()
         command.header.document.CopyFrom(self._doc)
 
         if isinstance(types, int):
             command.types.append(types)
-        else:
+        elif types is not None:
             command.types.extend(types)
 
         return [
