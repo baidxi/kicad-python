@@ -31,6 +31,7 @@ from kipy.geometry import (
     Angle,
     Box2,
     PolygonWithHoles,
+    PolyLine,
     Vector2,
     arc_angle,
     arc_bounding_box,
@@ -512,11 +513,30 @@ class TextBox(Wrapper):
 class GraphicShape(Wrapper):
     """Represents an abstract graphic shape (not a board or schematic item)"""
 
-    def __init__(self, proto: base_types_pb2.GraphicShape | None = None):
-        self._graphic_proto = base_types_pb2.GraphicShape()
+    def __init__(
+        self,
+        proto: base_types_pb2.GraphicShape | None = None,
+        proto_ref: base_types_pb2.GraphicShape | None = None,
+    ):
+        self._graphic_proto = proto_ref if proto_ref is not None else base_types_pb2.GraphicShape()
 
         if proto is not None:
             self._graphic_proto.CopyFrom(proto)
+
+    @property
+    def proto(self):
+        self._pack()
+        return self._graphic_proto
+
+    @classmethod
+    def from_concrete(cls, value: GraphicShape) -> GraphicShape:
+        """Packs a concrete shape subclass into a GraphicShape of the static base type"""
+        assert isinstance(value, cls)
+        if type(value) is cls:
+            return value
+        proto = base_types_pb2.GraphicShape()
+        proto.CopyFrom(value.proto)
+        return cls(proto=proto)
 
     @property
     def attributes(self) -> GraphicAttributes:
@@ -542,8 +562,8 @@ class Segment(GraphicShape):
 
         if proto is not None:
             self._graphic_proto.CopyFrom(proto)
-
-        assert self._graphic_proto.WhichOneof("geometry") == "segment"
+        elif proto_ref is None:
+            self._graphic_proto.segment.SetInParent()
 
     @classmethod
     def from_coords(cls, start: Vector2, end: Vector2) -> Self:
@@ -591,8 +611,8 @@ class Arc(GraphicShape):
 
         if proto is not None:
             self._graphic_proto.CopyFrom(proto)
-
-        assert self._graphic_proto.WhichOneof("geometry") == "arc"
+        elif proto_ref is None:
+            self._graphic_proto.arc.SetInParent()
 
     @classmethod
     def from_coords(cls, start: Vector2, mid: Vector2, end: Vector2) -> Self:
@@ -685,8 +705,8 @@ class Circle(GraphicShape):
 
         if proto is not None:
             self._graphic_proto.CopyFrom(proto)
-
-        assert self._graphic_proto.WhichOneof("geometry") == "circle"
+        elif proto_ref is None:
+            self._graphic_proto.circle.SetInParent()
 
     @classmethod
     def from_center_radius(cls, center: Vector2, radius: int) -> Self:
@@ -745,8 +765,8 @@ class Rectangle(GraphicShape):
 
         if proto is not None:
             self._graphic_proto.CopyFrom(proto)
-
-        assert self._graphic_proto.WhichOneof("geometry") == "rectangle"
+        elif proto_ref is None:
+            self._graphic_proto.rectangle.SetInParent()
 
     @classmethod
     def from_coords(cls, top_left: Vector2, bottom_right: Vector2) -> Self:
@@ -794,6 +814,8 @@ class Polygon(GraphicShape):
 
         if proto is not None:
             self._graphic_proto.CopyFrom(proto)
+        elif proto_ref is None:
+            self._graphic_proto.polygon.SetInParent()
 
         assert self._graphic_proto.WhichOneof("geometry") == "polygon"
         self._polygons = [
@@ -821,6 +843,18 @@ class Polygon(GraphicShape):
                 box.merge(polygon.bounding_box())
         return box if box is not None else Box2()
 
+    @classmethod
+    def from_outline(cls, outline: PolyLine, *holes: PolyLine) -> Self:
+        """Create a polygon from an outer outline and optional holes.
+
+        .. versionadded:: 0.9.0"""
+        result = cls()
+        result.polygons.append(PolygonWithHoles())
+        result.polygons[0].outline = outline
+        for hole in holes:
+            result.polygons[0].add_hole(hole)
+        return result
+
 
 class Bezier(GraphicShape):
     """Represents a graphic bezier curve (not a board or schematic item)"""
@@ -834,8 +868,8 @@ class Bezier(GraphicShape):
 
         if proto is not None:
             self._graphic_proto.CopyFrom(proto)
-
-        assert self._graphic_proto.WhichOneof("geometry") == "bezier"
+        elif proto_ref is None:
+            self._graphic_proto.bezier.SetInParent()
 
     @classmethod
     def from_coords(
@@ -908,6 +942,8 @@ class Ellipse(GraphicShape):
         self._graphic_proto = proto_ref if proto_ref is not None else base_types_pb2.GraphicShape()
         if proto is not None:
             self._graphic_proto.CopyFrom(proto)
+        elif proto_ref is None:
+            self._graphic_proto.ellipse.SetInParent()
         assert self._graphic_proto.WhichOneof("geometry") == "ellipse"
 
     def __repr__(self) -> str:
@@ -946,6 +982,8 @@ class EllipseArc(GraphicShape):
         self._graphic_proto = proto_ref if proto_ref is not None else base_types_pb2.GraphicShape()
         if proto is not None:
             self._graphic_proto.CopyFrom(proto)
+        elif proto_ref is None:
+            self._graphic_proto.ellipse_arc.SetInParent()
         assert self._graphic_proto.WhichOneof("geometry") == "ellipse_arc"
 
     def __repr__(self) -> str:
