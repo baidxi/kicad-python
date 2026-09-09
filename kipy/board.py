@@ -1062,12 +1062,14 @@ class Board(EditorCommandsHandler["BoardItem"], VariantsCommandHandler):
         for it in items:
             assert isinstance(it, BoardItem)
 
-            if isinstance(it, BoardShape):
-                items_converted.append(to_concrete_board_shape(cast(BoardShape, it)))
+            if isinstance(it, Group):
+                it._item_resolver = self.get_items_by_id
+            elif isinstance(it, BoardShape):
+                it = to_concrete_board_shape(cast(BoardShape, it))
             elif isinstance(it, Dimension):
-                items_converted.append(to_concrete_dimension(cast(Dimension, it)))
-            else:
-                items_converted.append(it)
+                it = to_concrete_dimension(cast(Dimension, it))
+
+            items_converted.append(it)
         return items_converted
 
     def get_items(
@@ -1278,17 +1280,9 @@ class Board(EditorCommandsHandler["BoardItem"], VariantsCommandHandler):
         """Retrieves all groups on the board
 
         .. versionadded:: 0.7.0 (KiCad 10.0.0)"""
-        groups = [
+        return [
             cast(Group, item) for item in self.get_items(types=[KiCadObjectType.KOT_PCB_GROUP])
         ]
-
-        # Unwrap items in groups
-        if len(groups) > 0:
-            for group in groups:
-                items = self.get_items_by_id(group._item_ids)
-                group._unwrapped_items = items
-
-        return groups
 
     def flip_items(
         self,

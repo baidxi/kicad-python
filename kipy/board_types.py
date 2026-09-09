@@ -21,7 +21,7 @@
 from __future__ import annotations
 
 import sys
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 
 from google.protobuf.any_pb2 import Any
 from google.protobuf.message import Message
@@ -3969,6 +3969,9 @@ class BoardEditorAppearanceSettings(Wrapper):
 class Group(BoardItem):
     """Represents a group of items on a board
 
+    Groups store item membership by ID only.  See the documentation for `items` and `item_ids`
+    for details.
+
     .. versionadded:: 0.7.0 (KiCad 10.0.0)"""
 
     def __init__(
@@ -3981,7 +3984,8 @@ class Group(BoardItem):
             self._proto.CopyFrom(proto)
 
         self._item_ids = self._proto.items
-        self._unwrapped_items: Sequence[Item] | None = None
+        self._unwrapped_items: Sequence[BoardItem] | None = None
+        self._item_resolver: Callable[[Sequence[KIID]], Sequence[BoardItem]] | None = None
 
     @property
     def id(self) -> KIID:
@@ -3992,19 +3996,40 @@ class Group(BoardItem):
         return self._proto.name
 
     @property
-    def items(self) -> Sequence[Item]:
-        return self._unwrapped_items if self._unwrapped_items else []
+    def item_ids(self) -> Sequence[KIID]:
+        """The IDs of the group members"""
+        return self._item_ids
+
+    @item_ids.setter
+    def item_ids(self, ids: Sequence[KIID]):
+        """Setting this property will invalidate the cache of concrete items
+        returned by the `items` property."""
+        del self._proto.items[:]
+        self._proto.items.extend(ids)
+        self._unwrapped_items = None
+
+    @property
+    def items(self) -> Sequence[BoardItem]:
+        """The members of the group, lazily resolved into actual item wrappers.
+
+        Accessing this property will cause API traffic to resolve the items
+        by their KIID from the document.
+
+        Note that the group does not own these items; `item_ids` is the actual
+        way that group membership is tracked.  This means that you cannot just
+        add items to a group and then to a document by setting this `items`
+        property, you also need to add the items to the document separately."""
+        if self._unwrapped_items is None and self._item_resolver is not None and self._item_ids:
+            self._unwrapped_items = self._item_resolver(self._item_ids)
+        return self._unwrapped_items if self._unwrapped_items is not None else []
 
     @items.setter
-    def items(self, items: Sequence[Item]):
+    def items(self, items: Sequence[BoardItem]):
         """Sets the items in the group, replacing any existing items"""
         del self._proto.items[:]
         self._unwrapped_items = items
         for item in items:
             self._proto.items.append(item.id)
-
-    def __repr__(self) -> str:
-        return f"Group(id={self.id}, items={self.items})"
 
     @property
     def locked(self) -> bool:

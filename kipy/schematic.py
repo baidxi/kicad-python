@@ -95,7 +95,10 @@ class Schematic(EditorCommandsHandler["SchematicItem"], VariantsCommandHandler):
 
     def _item_from_message(self, message: Any) -> SchematicItem:
         """Converts an unwrapped protobuf message into a concrete schematic item wrapper"""
-        return cast(SchematicItem, unwrap(message))
+        item = cast(SchematicItem, unwrap(message))
+        if isinstance(item, Group):
+            item._item_resolver = self.get_items_by_id
+        return item
 
     def get_lines(self) -> Sequence[SchematicLine]:
         return [
@@ -201,15 +204,9 @@ class Schematic(EditorCommandsHandler["SchematicItem"], VariantsCommandHandler):
         ]
 
     def get_groups(self) -> Sequence[Group]:
-        groups = [
+        return [
             cast(Group, item) for item in self.get_items(types=[KiCadObjectType.KOT_SCH_GROUP])
         ]
-
-        if len(groups) > 0:
-            for group in groups:
-                group._unwrapped_items = self.get_items_by_id(group._item_ids)
-
-        return groups
 
     def get_hierarchy(self) -> list[SheetInstance]:
         command = GetSchematicHierarchy()
