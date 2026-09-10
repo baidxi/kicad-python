@@ -67,6 +67,7 @@ _any_urls = {
     "type.googleapis.com/kiapi.schematic.types.HierarchicalLabel": schematic_types_pb2.HierarchicalLabel,
     "type.googleapis.com/kiapi.schematic.types.DirectiveLabel": schematic_types_pb2.DirectiveLabel,
     "type.googleapis.com/kiapi.schematic.types.Group": schematic_types_pb2.Group,
+    "type.googleapis.com/kiapi.schematic.types.SchematicPin": schematic_types_pb2.SchematicPin,
     "type.googleapis.com/kiapi.schematic.types.SheetPin": schematic_types_pb2.SheetPin,
     "type.googleapis.com/kiapi.schematic.types.SheetSymbol": schematic_types_pb2.SheetSymbol,
     "type.googleapis.com/kiapi.schematic.types.SchematicSymbolInstance": schematic_types_pb2.SchematicSymbolInstance,

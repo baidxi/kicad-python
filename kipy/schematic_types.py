@@ -21,6 +21,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable, Sequence
+from typing import cast
 
 from google.protobuf.any_pb2 import Any
 from google.protobuf.message import Message
@@ -40,7 +41,7 @@ from kipy.common_types import (
     to_concrete_shape,
 )
 from kipy.geometry import Vector2
-from kipy.proto.common.types import KIID
+from kipy.proto.common.types import KIID, base_types_pb2
 from kipy.proto.common.types.base_types_pb2 import ElectricalPinType, LockedState
 from kipy.proto.schematic import schematic_types_pb2
 from kipy.proto.schematic.schematic_types_pb2 import (
@@ -623,7 +624,19 @@ class SchematicTextBox(SchematicItem):
 
 
 class SchematicGraphicShape(SchematicItem):
-    """
+    """Represents a graphic shape on a schematic.
+
+    Although the underlying GraphicShape classes are shared between board and schematic in this API,
+    there are some important differences:
+
+    1. `segment` shapes are not supported in the schematic editor.  To draw a two-point line
+       segment, either create a SchematicLine object, or create a `polygon` shape with only two
+       points.
+
+    2. `polygon` shapes are more limited than in the board editor.  The schematic editor supports
+       a single polyline, and it does not use the explicit `closed` flag in `PolygonWithHoles.outline`.
+       To create a closed polygon, duplicate the starting point as the last point.
+
     .. versionadded:: 0.x.y (KiCad 11)
     """
 
@@ -664,7 +677,8 @@ class SchematicGraphicShape(SchematicItem):
     def shape(self, value: GraphicShape):
         if value.proto.WhichOneof("geometry") == "segment":
             raise ValueError(
-                "SchematicGraphicShape cannot be a segment; use SchematicLine instead"
+                "SchematicGraphicShape cannot be a segment; use SchematicLine instead,"
+                "or a polyline with 2 points."
             )
         self._proto.shape.CopyFrom(value.proto)
 
@@ -1370,6 +1384,25 @@ class SchematicPin(SchematicItem):
             self._proto.ClearField("active_alternate")
 
 
+def _unpack_child_item(
+    child: SchematicSymbolChild,
+) -> SchematicPin | SchematicField | GraphicShape | Any:
+    kind = child.kind
+    if kind == "SchematicPin":
+        pin_proto = schematic_types_pb2.SchematicPin()
+        child._proto.item.Unpack(pin_proto)
+        return SchematicPin(proto=pin_proto)
+    if kind == "SchematicField":
+        field_proto = schematic_types_pb2.SchematicField()
+        child._proto.item.Unpack(field_proto)
+        return SchematicField(proto=field_proto)
+    if kind == "GraphicShape":
+        shape_proto = base_types_pb2.GraphicShape()
+        child._proto.item.Unpack(shape_proto)
+        return cast(GraphicShape, to_concrete_shape(GraphicShape(shape_proto)))
+    return child._proto.item
+
+
 class SchematicSymbolChild(Wrapper):
     """
     .. versionadded:: 0.x.y (KiCad 11)
@@ -1383,17 +1416,26 @@ class SchematicSymbolChild(Wrapper):
         self._proto = (
             proto_ref if proto_ref is not None else schematic_types_pb2.SchematicSymbolChild()
         )
-
         if proto is not None:
             self._proto.CopyFrom(proto)
 
+        self._unwrapped_item: Wrapper | Any | None = None
+
+    def _pack(self):
+        if self._unwrapped_item is not None and self._unwrapped_item is not self._proto.item:
+            self._proto.item.Pack(self._unwrapped_item.proto)
+
     @property
-    def item(self) -> Any:
-        return self._proto.item
+    def item(self) -> SchematicPin | SchematicField | GraphicShape | Any:
+        """The child's item, unpacked into a concrete wrapper when possible"""
+        if self._unwrapped_item is None:
+            self._unwrapped_item = _unpack_child_item(self)
+        return cast("SchematicPin | SchematicField | GraphicShape | Any", self._unwrapped_item)
 
     @item.setter
-    def item(self, value: Any):
-        self._proto.item.CopyFrom(value)
+    def item(self, value: Wrapper):
+        self._proto.item.Pack(value.proto)
+        self._unwrapped_item = value
 
     @property
     def unit(self) -> int | None:
@@ -1407,15 +1449,11 @@ class SchematicSymbolChild(Wrapper):
             self._proto.ClearField("unit")
 
     @property
-    def body_style(self) -> int | None:
-        return self._proto.body_style.style if self._proto.HasField("body_style") else None
-
-    @body_style.setter
-    def body_style(self, value: int | None):
-        if value is not None:
-            self._proto.body_style.style = value
-        else:
-            self._proto.ClearField("body_style")
+    def kind(self) -> str | None:
+        """The type of the packed item, if valid"""
+        if not self._proto.HasField("item") or len(self._proto.item.type_url) == 0:
+            return None
+        return self._proto.item.type_url.rsplit(".", 1)[-1]
 
     @property
     def is_private(self) -> bool:
@@ -1855,6 +1893,20 @@ class SchematicSymbol(Wrapper):
         if proto is not None:
             self._proto.CopyFrom(proto)
 
+        self._unwrapped_items = [
+            SchematicSymbolChild(proto_ref=item) for item in self._proto.items
+        ]
+
+    def _pack(self):
+        """Packs all child items back into the proto"""
+        del self._proto.items[:]
+        self._proto.items.extend(child.proto for child in self._unwrapped_items)
+
+    @property
+    def proto(self):
+        self._pack()
+        return self.__dict__["_proto"]
+
     def __repr__(self) -> str:
         return (
             f"SchematicSymbol(id={self.id}, reference={self.reference_field.text.value}, "
@@ -1927,12 +1979,14 @@ class SchematicSymbol(Wrapper):
 
     @property
     def items(self) -> Sequence[SchematicSymbolChild]:
-        return MutableWrapperSequence(self._proto.items, SchematicSymbolChild)
+        return self._unwrapped_items
 
     @items.setter
     def items(self, value: Sequence[SchematicSymbolChild]):
-        del self._proto.items[:]
-        self._proto.items.extend(item.proto for item in value)
+        self._unwrapped_items = list(value)
+
+    def add_item(self, item: SchematicSymbolChild):
+        self._unwrapped_items.append(item)
 
     @property
     def unit_count(self) -> int:
@@ -1953,6 +2007,22 @@ class SchematicSymbol(Wrapper):
     @keywords.setter
     def keywords(self, value: str):
         self._proto.keywords = value
+
+    @property
+    def pins(self) -> Sequence[SchematicPin]:
+        """The symbol's pins"""
+        return [
+            cast(SchematicPin, child.item) for child in self.items if child.kind == "SchematicPin"
+        ]
+
+    @property
+    def fields(self) -> Sequence[SchematicField]:
+        """The definition's fields"""
+        return [
+            cast(SchematicField, child.item)
+            for child in self.items
+            if child.kind == "SchematicField"
+        ]
 
     @property
     def footprint_filters(self) -> Sequence[str]:
@@ -2100,7 +2170,15 @@ class SchematicSymbolInstance(SchematicItem):
         if proto is not None:
             self._proto.CopyFrom(proto)
 
+        self._definition = SchematicSymbol(proto_ref=self._proto.definition)
+
+    @property
+    def proto(self):
+        self._definition._pack()
+        return self.__dict__["_proto"]
+
     def __repr__(self) -> str:
+
         return (
             f"SchematicSymbolInstance(reference={self.reference_field.text.value}, "
             f"value={self.value_field.text.value}, unit={self.unit}, position={self.position}, "
@@ -2144,11 +2222,12 @@ class SchematicSymbolInstance(SchematicItem):
 
     @property
     def definition(self) -> SchematicSymbol:
-        return SchematicSymbol(proto_ref=self._proto.definition)
+        return self._definition
 
     @definition.setter
     def definition(self, value: SchematicSymbol):
         self._proto.definition.CopyFrom(value.proto)
+        self._definition = SchematicSymbol(proto_ref=self._proto.definition)
 
     @property
     def reference_field(self) -> SchematicField:
