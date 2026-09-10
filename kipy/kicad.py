@@ -26,11 +26,16 @@ import os
 import platform
 import random
 import string
+import sys
 from collections.abc import Sequence
 from tempfile import gettempdir
 
 from google.protobuf.empty_pb2 import Empty
-from typing_extensions import Self
+
+if sys.version_info >= (3, 11):
+    from typing import Self
+else:
+    from typing_extensions import Self
 
 from kipy.board import Board
 from kipy.client import ApiError, KiCadClient
