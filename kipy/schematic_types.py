@@ -2238,6 +2238,24 @@ class SchematicSymbolInstance(SchematicItem):
         self._proto.reference_field.CopyFrom(value.proto)
 
     @property
+    def reference(self) -> str:
+        """The symbol's reference designator (a shortcut for self.reference_field.text.value)"""
+        return self.reference_field.text.value
+
+    @reference.setter
+    def reference(self, value: str):
+        self.reference_field.text.value = value
+
+    @property
+    def value(self) -> str:
+        """The symbol's value (a shortcut for self.value_field.text.value)"""
+        return self.value_field.text.value
+
+    @value.setter
+    def value(self, value: str):
+        self.value_field.text.value = value
+
+    @property
     def value_field(self) -> SchematicField:
         return SchematicField(proto_ref=self._proto.value_field)
 
@@ -2421,6 +2439,42 @@ class SheetInstance(Wrapper):
     @property
     def children(self) -> Sequence[SheetInstance]:
         return MutableWrapperSequence(self._proto.children, SheetInstance)
+
+
+class SchematicHierarchy:
+    """The sheet hierarchy of a schematic, returned from
+    :meth:`kipy.schematic.Schematic.get_hierarchy`.
+
+    ``root`` provides the first top-level sheet of the schematic, and
+    iterating the hierarchy yields every sheet depth-first, beginning with the root.
+
+    .. versionadded:: 0.x.y (KiCad 11)"""
+
+    def __init__(self, top_level_sheets: Sequence[SheetInstance]):
+        self._top_level_sheets = list(top_level_sheets)
+
+    @property
+    def root(self) -> SheetInstance:
+        """The root sheet of the schematic"""
+        return self._top_level_sheets[0]
+
+    @property
+    def top_level_sheets(self) -> Sequence[SheetInstance]:
+        """All top-level sheets of the schematic.  This is the root sheet, plus any
+        additional sheets in multi-root hierarchies."""
+        return self._top_level_sheets
+
+    def __iter__(self):
+        def walk(sheet: SheetInstance):
+            yield sheet
+            for child in sheet.children:
+                yield from walk(child)
+
+        for sheet in self._top_level_sheets:
+            yield from walk(sheet)
+
+    def __repr__(self) -> str:
+        return f"SchematicHierarchy({self._top_level_sheets})"
 
 
 class SchematicNetSheetContents(Wrapper):

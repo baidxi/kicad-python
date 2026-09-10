@@ -53,6 +53,7 @@ from kipy.schematic_types import (
     LocalLabel,
     NoConnectMarker,
     SchematicGraphicShape,
+    SchematicHierarchy,
     SchematicImage,
     SchematicItem,
     SchematicLine,
@@ -103,36 +104,83 @@ class Schematic(EditorCommandsHandler["SchematicItem"], VariantsCommandHandler):
             item._item_resolver = self.get_items_by_id
         return item
 
-    def get_lines(self) -> Sequence[SchematicLine]:
+    def _spec(self, sheet_path: SheetPath | SheetInstance | None) -> DocumentSpecifier:
+        """Builds the document specifier for an item query.  When no sheet path is
+        given, the specifier has no sheet path set, which requests items from all
+        sheets in the document."""
+        spec = DocumentSpecifier()
+        spec.type = DocumentType.DOCTYPE_SCHEMATIC
+        spec.project.CopyFrom(self._doc.project)
+        if isinstance(sheet_path, SheetInstance):
+            spec.sheet_path.CopyFrom(sheet_path.path.proto)
+        elif isinstance(sheet_path, SheetPath):
+            spec.sheet_path.CopyFrom(sheet_path.proto)
+        elif sheet_path is not None:
+            spec.sheet_path.CopyFrom(sheet_path)
+        return spec
+
+    def get_items(
+        self,
+        types: KiCadObjectType.ValueType | Sequence[KiCadObjectType.ValueType] | None = None,
+        sheet_path: SheetPath | SheetInstance | None = None,
+    ) -> Sequence[SchematicItem]:
+        """Retrieves items from the schematic, optionally filtered to a single or set of
+        types and/or to a single sheet.
+
+        :param types: Optional type or types of items to retrieve.
+        :param sheet_path: Optional sheet to scope the query to.  If not provided, items
+            from all sheets in the schematic are returned.
+        """
+        return self._get_items(types, self._spec(sheet_path))
+
+    def iter_sheets(self):
+        """Iterates over all sheets in the schematic's hierarchy, depth-first, beginning
+        with the root sheet."""
+        yield from self.get_hierarchy()
+
+    def get_lines(
+        self, sheet_path: SheetPath | SheetInstance | None = None
+    ) -> Sequence[SchematicLine]:
         return [
             cast(SchematicLine, item)
-            for item in self.get_items(types=[KiCadObjectType.KOT_SCH_LINE])
+            for item in self.get_items(types=[KiCadObjectType.KOT_SCH_LINE], sheet_path=sheet_path)
         ]
 
-    def get_text(self) -> Sequence[SchematicText | SchematicTextBox]:
+    def get_text(
+        self, sheet_path: SheetPath | SheetInstance | None = None
+    ) -> Sequence[SchematicText | SchematicTextBox]:
         return [
             cast(SchematicText, item)
             if isinstance(item, SchematicText)
             else cast(SchematicTextBox, item)
             for item in self.get_items(
-                types=[KiCadObjectType.KOT_SCH_TEXT, KiCadObjectType.KOT_SCH_TEXTBOX]
+                types=[KiCadObjectType.KOT_SCH_TEXT, KiCadObjectType.KOT_SCH_TEXTBOX],
+                sheet_path=sheet_path,
             )
         ]
 
-    def get_shapes(self) -> Sequence[SchematicGraphicShape]:
+    def get_shapes(
+        self, sheet_path: SheetPath | SheetInstance | None = None
+    ) -> Sequence[SchematicGraphicShape]:
         return [
             cast(SchematicGraphicShape, item)
-            for item in self.get_items(types=[KiCadObjectType.KOT_SCH_SHAPE])
+            for item in self.get_items(
+                types=[KiCadObjectType.KOT_SCH_SHAPE], sheet_path=sheet_path
+            )
         ]
 
-    def get_images(self) -> Sequence[SchematicImage]:
+    def get_images(
+        self, sheet_path: SheetPath | SheetInstance | None = None
+    ) -> Sequence[SchematicImage]:
         return [
             cast(SchematicImage, item)
-            for item in self.get_items(types=[KiCadObjectType.KOT_SCH_BITMAP])
+            for item in self.get_items(
+                types=[KiCadObjectType.KOT_SCH_BITMAP], sheet_path=sheet_path
+            )
         ]
 
     def get_labels(
-        self,
+        self, sheet_path: SheetPath | SheetInstance | None = None
     ) -> Sequence[LocalLabel | GlobalLabel | HierarchicalLabel | DirectiveLabel]:
         return [
             cast("LocalLabel | GlobalLabel | HierarchicalLabel | DirectiveLabel", item)
@@ -142,82 +190,109 @@ class Schematic(EditorCommandsHandler["SchematicItem"], VariantsCommandHandler):
                     KiCadObjectType.KOT_SCH_GLOBAL_LABEL,
                     KiCadObjectType.KOT_SCH_HIER_LABEL,
                     KiCadObjectType.KOT_SCH_DIRECTIVE_LABEL,
-                ]
+                ],
+                sheet_path=sheet_path,
             )
         ]
 
-    def get_symbols(self) -> Sequence[SchematicSymbolInstance]:
+    def get_symbols(
+        self, sheet_path: SheetPath | SheetInstance | None = None
+    ) -> Sequence[SchematicSymbolInstance]:
         return [
             cast(SchematicSymbolInstance, item)
-            for item in self.get_items(types=[KiCadObjectType.KOT_SCH_SYMBOL])
+            for item in self.get_items(
+                types=[KiCadObjectType.KOT_SCH_SYMBOL], sheet_path=sheet_path
+            )
         ]
 
-    def get_sheet_symbols(self) -> Sequence[SheetSymbol]:
+    def get_sheet_symbols(
+        self, sheet_path: SheetPath | SheetInstance | None = None
+    ) -> Sequence[SheetSymbol]:
         return [
             cast(SheetSymbol, item)
-            for item in self.get_items(types=[KiCadObjectType.KOT_SCH_SHEET])
+            for item in self.get_items(
+                types=[KiCadObjectType.KOT_SCH_SHEET], sheet_path=sheet_path
+            )
         ]
 
-    def get_junctions(self) -> Sequence[Junction]:
-        """Returns all junctions in the schematic
-
-        .. versionadded:: 0.9.0"""
+    def get_junctions(
+        self, sheet_path: SheetPath | SheetInstance | None = None
+    ) -> Sequence[Junction]:
+        """Returns all junctions in the schematic"""
         return [
             cast(Junction, item)
-            for item in self.get_items(types=[KiCadObjectType.KOT_SCH_JUNCTION])
+            for item in self.get_items(
+                types=[KiCadObjectType.KOT_SCH_JUNCTION], sheet_path=sheet_path
+            )
         ]
 
-    def get_no_connects(self) -> Sequence[NoConnectMarker]:
-        """Returns all no-connect markers in the schematic
-
-        .. versionadded:: 0.9.0"""
+    def get_no_connects(
+        self, sheet_path: SheetPath | SheetInstance | None = None
+    ) -> Sequence[NoConnectMarker]:
+        """Returns all no-connect markers in the schematic"""
         return [
             cast(NoConnectMarker, item)
-            for item in self.get_items(types=[KiCadObjectType.KOT_SCH_NO_CONNECT])
+            for item in self.get_items(
+                types=[KiCadObjectType.KOT_SCH_NO_CONNECT], sheet_path=sheet_path
+            )
         ]
 
-    def get_bus_entries(self) -> Sequence[BusEntry]:
-        """Returns all wire-to-bus and bus-to-bus entries in the schematic
-
-        .. versionadded:: 0.9.0"""
+    def get_bus_entries(
+        self, sheet_path: SheetPath | SheetInstance | None = None
+    ) -> Sequence[BusEntry]:
+        """Returns all wire-to-bus and bus-to-bus entries in the schematic"""
         return [
             cast(BusEntry, item)
             for item in self.get_items(
                 types=[
                     KiCadObjectType.KOT_SCH_BUS_WIRE_ENTRY,
                     KiCadObjectType.KOT_SCH_BUS_BUS_ENTRY,
-                ]
+                ],
+                sheet_path=sheet_path,
             )
         ]
 
-    def get_rule_areas(self) -> Sequence[SchematicRuleArea]:
-        """Returns all rule areas (schematic keepouts) in the schematic
-
-        .. versionadded:: 0.9.0"""
+    def get_rule_areas(
+        self, sheet_path: SheetPath | SheetInstance | None = None
+    ) -> Sequence[SchematicRuleArea]:
+        """Returns all rule areas (schematic keepouts) in the schematic"""
         return [
             cast(SchematicRuleArea, item)
-            for item in self.get_items(types=[KiCadObjectType.KOT_SCH_RULE_AREA])
+            for item in self.get_items(
+                types=[KiCadObjectType.KOT_SCH_RULE_AREA], sheet_path=sheet_path
+            )
         ]
 
-    def get_tables(self) -> Sequence[SchematicTable]:
-        """Returns all tables in the schematic
-
-        .. versionadded:: 0.9.0"""
+    def get_tables(
+        self, sheet_path: SheetPath | SheetInstance | None = None
+    ) -> Sequence[SchematicTable]:
         return [
             cast(SchematicTable, item)
-            for item in self.get_items(types=[KiCadObjectType.KOT_SCH_TABLE])
+            for item in self.get_items(
+                types=[KiCadObjectType.KOT_SCH_TABLE], sheet_path=sheet_path
+            )
         ]
 
-    def get_groups(self) -> Sequence[Group]:
+    def get_groups(self, sheet_path: SheetPath | SheetInstance | None = None) -> Sequence[Group]:
         return [
-            cast(Group, item) for item in self.get_items(types=[KiCadObjectType.KOT_SCH_GROUP])
+            cast(Group, item)
+            for item in self.get_items(
+                types=[KiCadObjectType.KOT_SCH_GROUP], sheet_path=sheet_path
+            )
         ]
 
-    def get_hierarchy(self) -> list[SheetInstance]:
+    def get_hierarchy(self) -> SchematicHierarchy:
+        """Retrieves the sheet hierarchy of the schematic.
+
+        The returned object provides access to the root sheet (``root``), and can
+        be iterated directly to walk every sheet in the hierarchy depth-first.
+        """
         command = GetSchematicHierarchy()
         command.document.CopyFrom(self._doc)
         response = self._kicad.send(command, SchematicHierarchyResponse)
-        return [SheetInstance(proto=sheet) for sheet in response.top_level_sheets]
+        return SchematicHierarchy(
+            [SheetInstance(proto=sheet) for sheet in response.top_level_sheets]
+        )
 
     def for_sheet(self, sheet: SheetInstance | SheetPath) -> Schematic:
         """Returns a Schematic bound to the given sheet, e.g. one from :meth:`get_hierarchy` or

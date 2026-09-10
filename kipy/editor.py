@@ -139,8 +139,15 @@ class EditorCommandsHandler(Generic[_ItemT_co]):
 
         Providing no `types` filter will result in all valid types for the given document
         being retrieved on KiCad 10.0.7 and newer, and is an error on older versions."""
+        return self._get_items(types, self._doc)
+
+    def _get_items(
+        self,
+        types: KiCadObjectType.ValueType | Sequence[KiCadObjectType.ValueType] | None,
+        document: DocumentSpecifier,
+    ) -> Sequence[_ItemT_co]:
         command = editor_commands_pb2.GetItems()
-        command.header.document.CopyFrom(self._doc)
+        command.header.document.CopyFrom(document)
 
         if isinstance(types, int):
             command.types.append(types)
