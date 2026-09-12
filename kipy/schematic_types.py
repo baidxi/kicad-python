@@ -134,6 +134,16 @@ class SchematicField(SchematicItem):
     def is_private(self, value: bool):
         self._proto.is_private = value
 
+    @property
+    def custom_properties(self) -> Sequence[CustomProperty]:
+        """User-defined properties attached to the field"""
+        return MutableWrapperSequence(self._proto.custom_properties, CustomProperty)
+
+    @custom_properties.setter
+    def custom_properties(self, value: Sequence[CustomProperty]):
+        del self._proto.custom_properties[:]
+        self._proto.custom_properties.extend(prop.proto for prop in value)
+
 
 class SchematicLine(SchematicItem):
     """
@@ -1379,6 +1389,16 @@ class SchematicPin(SchematicItem):
         self._proto.alternates.extend(alt.proto for alt in value)
 
     @property
+    def custom_properties(self) -> Sequence[CustomProperty]:
+        """User-defined properties attached to the pin"""
+        return MutableWrapperSequence(self._proto.custom_properties, CustomProperty)
+
+    @custom_properties.setter
+    def custom_properties(self, value: Sequence[CustomProperty]):
+        del self._proto.custom_properties[:]
+        self._proto.custom_properties.extend(prop.proto for prop in value)
+
+    @property
     def active_alternate(self) -> str | None:
         return self._proto.active_alternate if self._proto.HasField("active_alternate") else None
 
@@ -1390,9 +1410,20 @@ class SchematicPin(SchematicItem):
             self._proto.ClearField("active_alternate")
 
 
+_child_item_types = (
+    SchematicPin,
+    SchematicField,
+    SchematicGraphicShape,
+    SchematicText,
+    SchematicTextBox,
+)
+
+
 def _unpack_child_item(
     child: SchematicSymbolChild,
-) -> SchematicPin | SchematicField | GraphicShape | Any:
+) -> (
+    SchematicPin | SchematicField | SchematicGraphicShape | SchematicText | SchematicTextBox | Any
+):
     kind = child.kind
     if kind == "SchematicPin":
         pin_proto = schematic_types_pb2.SchematicPin()
@@ -1402,15 +1433,28 @@ def _unpack_child_item(
         field_proto = schematic_types_pb2.SchematicField()
         child._proto.item.Unpack(field_proto)
         return SchematicField(proto=field_proto)
-    if kind == "GraphicShape":
-        shape_proto = base_types_pb2.GraphicShape()
+    if kind == "SchematicGraphicShape":
+        shape_proto = schematic_types_pb2.SchematicGraphicShape()
         child._proto.item.Unpack(shape_proto)
-        return cast(GraphicShape, to_concrete_shape(GraphicShape(shape_proto)))
+        return SchematicGraphicShape(proto=shape_proto)
+    if kind == "SchematicText":
+        text_proto = schematic_types_pb2.SchematicText()
+        child._proto.item.Unpack(text_proto)
+        return SchematicText(proto=text_proto)
+    if kind == "SchematicTextBox":
+        textbox_proto = schematic_types_pb2.SchematicTextBox()
+        child._proto.item.Unpack(textbox_proto)
+        return SchematicTextBox(proto=textbox_proto)
     return child._proto.item
 
 
 class SchematicSymbolChild(Wrapper):
-    """
+    """An item stored in a symbol definition (a pin, field, graphic shape, text, or text box).
+
+    Pass a concrete item to :meth:`SchematicSymbol.add_item` rather than constructing this
+    class directly; the child wrapper and its unit/body-style tags are created for you.
+    Child item positions are relative to the symbol origin, without rotation or mirroring.
+
     .. versionadded:: 0.x.y (KiCad 11)
     """
 
@@ -1432,14 +1476,34 @@ class SchematicSymbolChild(Wrapper):
             self._proto.item.Pack(self._unwrapped_item.proto)
 
     @property
-    def item(self) -> SchematicPin | SchematicField | GraphicShape | Any:
+    def item(
+        self,
+    ) -> (
+        SchematicPin
+        | SchematicField
+        | SchematicGraphicShape
+        | SchematicText
+        | SchematicTextBox
+        | Any
+    ):
         """The child's item, unpacked into a concrete wrapper when possible"""
         if self._unwrapped_item is None:
             self._unwrapped_item = _unpack_child_item(self)
-        return cast("SchematicPin | SchematicField | GraphicShape | Any", self._unwrapped_item)
+        return cast(
+            "SchematicPin | SchematicField | SchematicGraphicShape | SchematicText"
+            " | SchematicTextBox | Any",
+            self._unwrapped_item,
+        )
 
     @item.setter
     def item(self, value: Wrapper):
+        if not isinstance(value, _child_item_types):
+            allowed = ", ".join(t.__name__ for t in _child_item_types)
+            raise TypeError(
+                f"SchematicSymbolChild.item must be one of {allowed}; got {type(value).__name__}."
+                "  Note that graphic shapes must be wrapped in SchematicGraphicShape, not passed"
+                " as a bare GraphicShape subclass."
+            )
         self._proto.item.Pack(value.proto)
         self._unwrapped_item = value
 
@@ -1885,8 +1949,7 @@ class SchematicBodyStyle(Wrapper):
 
 
 class SchematicSymbol(Wrapper):
-    """
-    A symbol definition, or a library symbol.
+    """A symbol definition, or a library symbol.
 
     Child items (pins, graphics, text, fields) are stored with positions relative to
     the symbol origin and without any rotation or mirroring applied.
@@ -1996,8 +2059,50 @@ class SchematicSymbol(Wrapper):
     def items(self, value: Sequence[SchematicSymbolChild]):
         self._unwrapped_items = list(value)
 
-    def add_item(self, item: SchematicSymbolChild):
-        self._unwrapped_items.append(item)
+    def add_item(
+        self,
+        item: SchematicSymbolChild
+        | SchematicPin
+        | SchematicField
+        | SchematicGraphicShape
+        | SchematicText
+        | SchematicTextBox,
+        unit: int | None = None,
+        is_private: bool = False,
+    ):
+        """Adds an item to the symbol definition.
+
+        Accepts a :class:`SchematicSymbolChild` or a concrete child item (a
+        :class:`SchematicPin`, :class:`SchematicField`, :class:`SchematicGraphicShape`,
+        :class:`SchematicText`, or :class:`SchematicTextBox`); concrete items are wrapped
+        in a :class:`SchematicSymbolChild` automatically.
+
+        :param unit: if given, the item belongs only to this unit of a multi-unit symbol;
+            otherwise it is common to all units.
+        :param is_private: if true, the item is shown only in the symbol editor, not on
+            the schematic.
+        """
+        if isinstance(item, SchematicSymbolChild):
+            if unit is not None:
+                item.unit = unit
+            if is_private:
+                item.is_private = True
+            self._unwrapped_items.append(item)
+        elif isinstance(item, _child_item_types):
+            child = SchematicSymbolChild()
+            child.item = item
+            if unit is not None:
+                child.unit = unit
+            if is_private:
+                child.is_private = True
+            self._unwrapped_items.append(child)
+        else:
+            allowed = ", ".join(t.__name__ for t in _child_item_types)
+            raise TypeError(
+                f"add_item() requires a SchematicSymbolChild or one of {allowed};"
+                f" got {type(item).__name__}.  Note that graphic shapes must be wrapped in"
+                " SchematicGraphicShape, not passed as a bare GraphicShape subclass."
+            )
 
     @property
     def unit_count(self) -> int:
