@@ -324,6 +324,20 @@ class KiCad:
         command.document.CopyFrom(document)
         self._client.send(command, Empty)
 
+    def create_document(self, path: str, type: DocumentType.ValueType) -> DocumentSpecifier:
+        """In headless mode, creates a new document.  Not currently supported for GUI mode.
+        The new document is created in memory only; call `save` to persist to disk.
+        A project will be created for the document if it doesn't already exist.
+        Returns an error if the current document is unsaved: save or revert first.
+
+        .. versionadded:: 0.x.y (KiCad 11)
+        """
+        command = project_commands_pb2.CreateDocument()
+        command.path = path
+        command.type = type
+        response = self._client.send(command, project_commands_pb2.OpenDocumentResponse)
+        return response.document
+
     def open_library_item(
         self,
         library: str,
