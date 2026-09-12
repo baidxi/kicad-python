@@ -1301,6 +1301,8 @@ class SchematicPin(SchematicItem):
 
     @property
     def position(self) -> Vector2:
+        """Position in the symbol definition's local coordinate frame (relative to the
+        symbol origin, without any rotation or mirroring applied)"""
         return Vector2(self._proto.position)
 
     @position.setter
@@ -1880,6 +1882,11 @@ class SchematicBodyStyle(Wrapper):
 
 class SchematicSymbol(Wrapper):
     """
+    A symbol definition, or a library symbol.
+
+    Child items (pins, graphics, text, fields) are stored with positions relative to
+    the symbol origin and without any rotation or mirroring applied.
+
     .. versionadded:: 0.x.y (KiCad 11)
     """
 
@@ -2010,7 +2017,11 @@ class SchematicSymbol(Wrapper):
 
     @property
     def pins(self) -> Sequence[SchematicPin]:
-        """The symbol's pins"""
+        """The symbol's pins.
+
+        Includes pins from units that are not placed in the instance this symbol
+        belongs to(for multi-unit symbols).
+        """
         return [
             cast(SchematicPin, child.item) for child in self.items if child.kind == "SchematicPin"
         ]
@@ -2155,6 +2166,12 @@ class SchematicSymbolTransform(Wrapper):
 
 class SchematicSymbolInstance(SchematicItem):
     """
+    An instance of a symbol placed on a schematic.
+
+    Direct children of the instance (for example, fields) are stored in absolute coordinate
+    space, meaning they are relative to a sheet.  Children of the symbol definition are in
+    relative coordinate space and don't have rotation or mirroring applied.
+
     .. versionadded:: 0.x.y (KiCad 11)
     """
 
