@@ -44,6 +44,7 @@ from kipy.proto.common import types
 from kipy.proto.common.types import base_types_pb2, embedded_files_pb2, variants_pb2
 from kipy.proto.common.types.base_types_pb2 import (  # noqa
     KIID,
+    GraphicFillType,
     LineEndingStyle,
     PageOrientation,
     PageSize,
@@ -56,6 +57,7 @@ from kipy.proto.common.types.embedded_files_pb2 import (
 from kipy.proto.common.types.enums_pb2 import (  # noqa
     HorizontalAlignment,
     PathType,
+    StrokeLineStyle,
     VerticalAlignment,
 )
 from kipy.util.units import to_mm
@@ -847,9 +849,12 @@ class Polygon(GraphicShape):
     def from_outline(cls, outline: PolyLine, *holes: PolyLine) -> Self:
         """Create a polygon from an outer outline and optional holes.
 
+        The outline and holes are forced closed.
+
         .. versionadded:: 0.9.0"""
         result = cls()
         result.polygons.append(PolygonWithHoles())
+        outline.closed = True
         result.polygons[0].outline = outline
         for hole in holes:
             result.polygons[0].add_hole(hole)

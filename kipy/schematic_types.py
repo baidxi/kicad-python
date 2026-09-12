@@ -1319,6 +1319,10 @@ class SchematicPin(SchematicItem):
 
     @property
     def orientation(self) -> SchematicPinOrientation.ValueType:
+        """Which way the pin is oriented, relative to the connection point.
+
+        For example, `SPO_RIGHT` means the pin shape extends rightward from the connection
+        point, which usually means the pin is placed on the *left* side of a symbol."""
         return self._proto.orientation
 
     @orientation.setter
@@ -2703,9 +2707,19 @@ class SchematicRuleArea(SchematicItem):
 
     @shape.setter
     def shape(self, value: GraphicShape):
+        """Sets the rule area outline shape.  Polygon outlines are forced closed
+        regardless of the source polygon's ``auto_close`` flag; KiCad requires rule
+        areas to be closed polygons."""
         if value.proto.WhichOneof("geometry") != "polygon":
             raise ValueError("SchematicRuleArea shape must be a polygon")
-        self._proto.shape.CopyFrom(value.proto)
+
+        proto = base_types_pb2.GraphicShape()
+        proto.CopyFrom(value.proto)
+
+        for polygon in proto.polygon.polygons:
+            polygon.outline.closed = True
+
+        self._proto.shape.CopyFrom(proto)
 
     @property
     def exclude_from_sim(self) -> bool:

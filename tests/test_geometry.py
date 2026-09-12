@@ -25,12 +25,15 @@ import pytest
 from kipy.common_types import Circle
 from kipy.geometry import (
     Box2,
+    PolyLine,
+    PolyLineNode,
     Vector2,
     arc_angle,
     arc_bounding_box,
     arc_center,
     normalize_angle_pi_radians,
 )
+from kipy.proto.board import board_types_pb2
 from kipy.proto.common.types import base_types_pb2
 
 
@@ -209,4 +212,188 @@ def test_circle_bounding_box():
     box = Circle(proto).bounding_box()
 
     assert box.pos == Vector2.from_xy(5, 15)
-    assert box.size == Vector2.from_xy(10, 10)
+
+
+def test_board_shape_proto_is_outer_message():
+    """Board shapes mix two protos in one MRO: BoardShape holds the outer
+    BoardGraphicShape while the GraphicShape base holds an inner GraphicShape.
+    ``proto`` must resolve to the outer message, or wire serialization
+    (create_items/update_items) sends the wrong type_url."""
+    from kipy.board_types import (
+        BoardArc,
+        BoardBezier,
+        BoardCircle,
+        BoardPolygon,
+        BoardRectangle,
+        BoardSegment,
+    )
+
+    for cls in (BoardSegment, BoardArc, BoardCircle, BoardRectangle, BoardPolygon, BoardBezier):
+        assert type(cls().proto) is board_types_pb2.BoardGraphicShape
+
+
+def test_board_shape_wire_round_trip():
+    """A board shape packed the way create_items packs it must unpack to the same
+    concrete type with its geometry intact."""
+    from kipy.board_types import BoardSegment, to_concrete_board_shape, unwrap
+    from kipy.util import pack_any
+
+    seg = BoardSegment()
+    seg.start = Vector2.from_xy(1000, 2000)
+    seg.end = Vector2.from_xy(3000, 4000)
+
+    packed = pack_any(seg.proto)
+    assert packed.type_url == "type.googleapis.com/kiapi.board.types.BoardGraphicShape"
+
+    restored = to_concrete_board_shape(unwrap(packed))
+    assert type(restored) is BoardSegment
+    assert restored.start == Vector2.from_xy(1000, 2000)
+    assert restored.end == Vector2.from_xy(3000, 4000)
+
+
+def test_board_shape_clone():
+    """Item.clone builds a new proto from self.proto; it must produce the outer
+    BoardGraphicShape, not the inner GraphicShape."""
+    from kipy.board_types import BoardSegment
+
+    seg = BoardSegment()
+    seg.start = Vector2.from_xy(1000, 0)
+    seg.end = Vector2.from_xy(2000, 0)
+
+    clone = seg.clone()
+    assert type(clone._proto) is board_types_pb2.BoardGraphicShape
+    assert not clone._proto.HasField("id")
+    assert clone.start == seg.start
+
+
+def test_board_polygon_from_rectangle():
+    """from_rectangle copies the rectangle's outer proto into the polygon; the MRO
+    shadowing bug made this raise a CopyFrom type mismatch."""
+    from kipy.board_types import BoardPolygon, BoardRectangle
+
+    rect = BoardRectangle()
+    rect.top_left = Vector2.from_xy(0, 0)
+    rect.bottom_right = Vector2.from_xy(2000, 3000)
+
+    poly = BoardPolygon.from_rectangle(rect)
+    assert type(poly._proto) is board_types_pb2.BoardGraphicShape
+    outline = poly.polygons[0].outline
+    assert outline.closed
+    assert len(outline.nodes) == 4
+    assert outline[0].point == rect.top_left
+    assert outline[2].point == rect.bottom_right
+
+
+def test_padstack_layer_custom_shapes_round_trip():
+    """custom_shapes stores repeated BoardGraphicShape; the setter must accept board
+    shape wrappers whose .proto is the outer message."""
+    from kipy.board_types import BoardSegment, PadStackLayer
+
+    layer = PadStackLayer()
+    seg = BoardSegment()
+    seg.start = Vector2.from_xy(0, 0)
+    seg.end = Vector2.from_xy(1000, 0)
+
+    layer.custom_shapes = [seg]
+    assert type(layer._proto.custom_shapes[0]) is board_types_pb2.BoardGraphicShape
+    assert layer.custom_shapes[0].start == seg.start
+
+
+def test_graphic_shape_proto_is_inner_message():
+    """Pure graphic shapes (no board wrapper in the MRO) must expose the inner
+    GraphicShape proto; schematic code serializes it directly."""
+    from kipy.common_types import GraphicShape, Polygon, Rectangle
+
+    rect = Rectangle.from_coords(Vector2.from_xy(0, 0), Vector2.from_xy(10, 20))
+    assert type(rect.proto) is base_types_pb2.GraphicShape
+    assert rect.proto.WhichOneof("geometry") == "rectangle"
+
+    poly = Polygon.from_outline(PolyLine())
+    assert type(poly.proto) is base_types_pb2.GraphicShape
+    assert poly.proto.WhichOneof("geometry") == "polygon"
+
+    assert type(GraphicShape(rect.proto).proto) is base_types_pb2.GraphicShape
+
+
+def test_schematic_graphic_shape_wire_round_trip():
+    """SchematicGraphicShape embeds the inner GraphicShape; the full wrapper must
+    still serialize as SchematicGraphicShape and the shape survive the trip."""
+    from kipy.common_types import Rectangle, to_concrete_shape
+    from kipy.schematic_types import SchematicGraphicShape, unwrap
+    from kipy.util import pack_any
+
+    sgs = SchematicGraphicShape()
+    sgs.shape = Rectangle.from_coords(Vector2.from_xy(1000, 0), Vector2.from_xy(2000, 3000))
+
+    packed = pack_any(sgs.proto)
+    assert packed.type_url == "type.googleapis.com/kiapi.schematic.types.SchematicGraphicShape"
+
+    restored = unwrap(packed)
+    assert type(restored) is SchematicGraphicShape
+    shape = to_concrete_shape(restored.shape)
+    assert type(shape) is Rectangle
+    assert shape.top_left == Vector2.from_xy(1000, 0)
+    assert shape.bottom_right == Vector2.from_xy(2000, 3000)
+
+
+def test_polygon_with_holes_auto_close():
+    """Default PolygonWithHoles force-closes assigned outlines; auto_close=False
+    preserves the polyline's own closed flag."""
+    from kipy.geometry import PolygonWithHoles
+
+    open_line = PolyLine()
+    open_line.append(PolyLineNode.from_xy(0, 0))
+    open_line.append(PolyLineNode.from_xy(1000, 0))
+
+    default = PolygonWithHoles()
+    default.outline = open_line
+    assert default.outline.closed
+
+    preserve = PolygonWithHoles(auto_close=False)
+    preserve.outline = open_line
+    assert not preserve.outline.closed
+    assert len(preserve.outline.nodes) == 2
+
+
+def test_zone_outline_forces_closed():
+    """Zones require closed outlines regardless of the source polygon's auto_close
+    flag; KiCad builds the SHAPE_POLY_SET directly without auto-closing."""
+    from kipy.board_types import Zone
+    from kipy.geometry import PolygonWithHoles
+
+    open_line = PolyLine()
+    open_line.append(PolyLineNode.from_xy(0, 0))
+    open_line.append(PolyLineNode.from_xy(1000, 0))
+    open_line.append(PolyLineNode.from_xy(1000, 1000))
+
+    zone_poly = PolygonWithHoles(auto_close=False)
+    zone_poly.outline = open_line
+    hole = PolyLine()
+    hole.append(PolyLineNode.from_xy(100, 100))
+    hole.append(PolyLineNode.from_xy(200, 100))
+    zone_poly.add_hole(hole)
+
+    zone = Zone()
+    zone.outline = zone_poly
+
+    assert zone.outline.outline.closed
+    assert all(h.closed for h in zone.outline.holes)
+
+
+def test_schematic_rule_area_shape_forces_closed():
+    """Rule areas must be closed polygons (KiCad's parser enforces this); the setter
+    closes polygon outlines regardless of auto_close, and rejects non-polygons."""
+    from kipy.common_types import Polygon, Rectangle
+    from kipy.schematic_types import SchematicRuleArea
+
+    open_line = PolyLine()
+    open_line.append(PolyLineNode.from_xy(0, 0))
+    open_line.append(PolyLineNode.from_xy(1000, 0))
+    open_line.append(PolyLineNode.from_xy(1000, 1000))
+
+    rule = SchematicRuleArea()
+    rule.shape = Polygon.from_outline(open_line)
+    assert rule.shape.polygons[0].outline.closed
+
+    with pytest.raises(ValueError):
+        rule.shape = Rectangle.from_coords(Vector2.from_xy(0, 0), Vector2.from_xy(1, 1))

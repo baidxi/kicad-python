@@ -596,11 +596,21 @@ class PolygonWithHoles(Wrapper):
         self,
         proto: types.PolygonWithHoles | None = None,
         proto_ref: types.PolygonWithHoles | None = None,
+        auto_close: bool = True,
     ):
+        """Creates a polygon with an outline and optional holes.
+
+        :param auto_close: If true (the default), assigning :attr:`outline` forces the
+            outline's ``closed`` flag to True.  Set to false to preserve the assigned
+            polyline's own ``closed`` flag, e.g. to build an open polyline for the
+            schematic editor.
+        """
         self._proto = proto_ref if proto_ref is not None else types.PolygonWithHoles()
 
         if proto is not None:
             self._proto.CopyFrom(proto)
+
+        self._auto_close = auto_close
 
     def __repr__(self):
         return f"PolygonWithHoles(outline={self.outline}, holes={self.holes})"
@@ -612,8 +622,9 @@ class PolygonWithHoles(Wrapper):
     @outline.setter
     def outline(self, outline: PolyLine):
         self._proto.outline.CopyFrom(outline._proto)
-        # Outline must be a closed shape
-        self._proto.outline.closed = True
+
+        if self._auto_close:
+            self._proto.outline.closed = True
 
     @property
     def holes(self) -> MutableWrapperSequence[PolyLine]:

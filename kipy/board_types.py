@@ -423,6 +423,13 @@ class BoardShape(BoardItem):
             self._proto.CopyFrom(proto)
 
     @property
+    def proto(self):
+        """Returns the outer BoardGraphicShape proto.  Overrides GraphicShape.proto,
+        which would otherwise shadow this via the MRO and return the inner
+        GraphicShape message (the wrong type for the board item wire format)."""
+        return self._proto
+
+    @property
     def id(self) -> KIID:
         return self._proto.id
 
@@ -3249,8 +3256,15 @@ class Zone(BoardItem):
 
     @outline.setter
     def outline(self, outline: PolygonWithHoles):
+        """Sets the zone outline.  The outline and all holes are forced closed regardless
+        of the source polygon's ``auto_close`` flag; zones require closed polygons."""
         p = base_types_pb2.PolygonWithHoles()
         p.CopyFrom(outline.proto)
+        p.outline.closed = True
+
+        for hole in p.holes:
+            hole.closed = True
+
         del self._proto.outline.polygons[:]
         self._proto.outline.polygons.append(p)
 
