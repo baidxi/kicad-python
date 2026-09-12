@@ -28,20 +28,35 @@ from google.protobuf.empty_pb2 import Empty
 from kipy.client import KiCadClient
 from kipy.common_types import PageSettings, SheetPath, TitleBlockInfo
 from kipy.editor import EditorCommandsHandler
+from kipy.geometry import Vector2
 from kipy.project import Project
 from kipy.proto.common.commands import editor_commands_pb2
-from kipy.proto.common.commands.editor_commands_pb2 import GetPageSettings, SetPageSettings
+from kipy.proto.common.commands.editor_commands_pb2 import (
+    GetPageSettings,
+    HitTest,
+    HitTestResponse,
+    HitTestResult,
+    SetPageSettings,
+)
 from kipy.proto.common.types import (
     DocumentSpecifier,
     DocumentType,
     KiCadObjectType,
     base_types_pb2,
+    jobs_pb2,
 )
+from kipy.proto.schematic import schematic_jobs_pb2
 from kipy.proto.schematic.schematic_commands_pb2 import (
     GetSchematicHierarchy,
     GetSchematicNetlist,
     SchematicHierarchyResponse,
     SchematicNetlistResponse,
+)
+from kipy.schematic_jobs import (
+    BOMFieldSettings,
+    BOMFormatSettings,
+    JobResult,
+    PlotSettings,
 )
 from kipy.schematic_types import (
     BusEntry,
@@ -119,6 +134,112 @@ class Schematic(EditorCommandsHandler["SchematicItem"], VariantsCommandHandler):
             spec.sheet_path.CopyFrom(sheet_path)
         return spec
 
+    def export_svg(self, output_dir: str, plot_settings: PlotSettings | None = None) -> JobResult:
+        """Plots the schematic to SVG files in an output directory.
+
+        KiCad writes one SVG file per plotted sheet, so ``output_dir`` must
+        point to a directory rather than a file path.
+        """
+        command = schematic_jobs_pb2.RunSchematicJobExportSvg()
+        if plot_settings is not None:
+            command.plot_settings.CopyFrom(plot_settings.proto)
+        command.job_settings.document.CopyFrom(self._doc)
+        command.job_settings.output_path = output_dir
+        return JobResult(self._kicad.send(command, jobs_pb2.RunJobResponse))
+
+    def export_dxf(self, output_dir: str, plot_settings: PlotSettings | None = None) -> JobResult:
+        """Plots the schematic to DXF files in an output directory.
+
+        KiCad writes one DXF file per plotted sheet, so ``output_dir`` must
+        point to a directory rather than a file path.
+        """
+        command = schematic_jobs_pb2.RunSchematicJobExportDxf()
+        if plot_settings is not None:
+            command.plot_settings.CopyFrom(plot_settings.proto)
+        command.job_settings.document.CopyFrom(self._doc)
+        command.job_settings.output_path = output_dir
+        return JobResult(self._kicad.send(command, jobs_pb2.RunJobResponse))
+
+    def export_pdf(
+        self,
+        output_file: str,
+        plot_settings: PlotSettings | None = None,
+        property_popups: bool = False,
+        hierarchical_links: bool = False,
+        include_metadata: bool = True,
+    ) -> JobResult:
+        """Plots the schematic to a single PDF file.
+
+        KiCad writes one PDF file, so ``output_file`` must point to a file
+        path rather than a directory.
+        """
+        command = schematic_jobs_pb2.RunSchematicJobExportPdf()
+        if plot_settings is not None:
+            command.plot_settings.CopyFrom(plot_settings.proto)
+        command.property_popups = property_popups
+        command.hierarchical_links = hierarchical_links
+        command.include_metadata = include_metadata
+        command.job_settings.document.CopyFrom(self._doc)
+        command.job_settings.output_path = output_file
+        return JobResult(self._kicad.send(command, jobs_pb2.RunJobResponse))
+
+    def export_ps(self, output_dir: str, plot_settings: PlotSettings | None = None) -> JobResult:
+        """Plots the schematic to PostScript files in an output directory.
+
+        KiCad writes one PostScript file per plotted sheet, so ``output_dir``
+        must point to a directory rather than a file path.
+        """
+        command = schematic_jobs_pb2.RunSchematicJobExportPs()
+        if plot_settings is not None:
+            command.plot_settings.CopyFrom(plot_settings.proto)
+        command.job_settings.document.CopyFrom(self._doc)
+        command.job_settings.output_path = output_dir
+        return JobResult(self._kicad.send(command, jobs_pb2.RunJobResponse))
+
+    def export_netlist(
+        self,
+        output_file: str,
+        format: schematic_jobs_pb2.SchematicNetlistFormat.ValueType = schematic_jobs_pb2.SNF_KICAD_SEXPR,
+        variant_name: str = "",
+    ) -> JobResult:
+        """Exports the schematic netlist to a single output file.
+
+        KiCad writes one netlist file, so ``output_file`` must point to a
+        file path rather than a directory.
+        """
+        command = schematic_jobs_pb2.RunSchematicJobExportNetlist()
+        command.format = format
+        command.variant_name = variant_name
+        command.job_settings.document.CopyFrom(self._doc)
+        command.job_settings.output_path = output_file
+        return JobResult(self._kicad.send(command, jobs_pb2.RunJobResponse))
+
+    def export_bom(
+        self,
+        output_file: str,
+        format_settings: BOMFormatSettings | None = None,
+        field_settings: BOMFieldSettings | None = None,
+        exclude_dnp: bool = False,
+        group_symbols: bool = False,
+        variant_name: str = "",
+    ) -> JobResult:
+        """Exports the schematic bill of materials to a single output file.
+
+        KiCad writes one BOM file, so ``output_file`` must point to a file
+        path rather than a directory.
+        """
+        command = schematic_jobs_pb2.RunSchematicJobExportBOM()
+        if format_settings is not None:
+            command.format.CopyFrom(format_settings.proto)
+        if field_settings is not None:
+            command.fields.CopyFrom(field_settings.proto)
+        command.exclude_dnp = exclude_dnp
+        command.group_symbols = group_symbols
+        command.variant_name = variant_name
+        command.job_settings.document.CopyFrom(self._doc)
+        command.job_settings.output_path = output_file
+        return JobResult(self._kicad.send(command, jobs_pb2.RunJobResponse))
+
     def get_items(
         self,
         types: KiCadObjectType.ValueType | Sequence[KiCadObjectType.ValueType] | None = None,
@@ -137,6 +258,15 @@ class Schematic(EditorCommandsHandler["SchematicItem"], VariantsCommandHandler):
         """Iterates over all sheets in the schematic's hierarchy, depth-first, beginning
         with the root sheet."""
         yield from self.get_hierarchy()
+
+    def hit_test(self, item: SchematicItem, position: Vector2, tolerance: int = 0) -> bool:
+        """Performs a hit test on a schematic item at a given position."""
+        command = HitTest()
+        command.header.document.CopyFrom(self._doc)
+        command.id.CopyFrom(item.id)
+        command.position.CopyFrom(position.proto)
+        command.tolerance = tolerance
+        return self._kicad.send(command, HitTestResponse).result == HitTestResult.HTR_HIT
 
     def get_lines(
         self, sheet_path: SheetPath | SheetInstance | None = None
