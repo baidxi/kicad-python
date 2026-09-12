@@ -50,6 +50,8 @@ _any_urls = {
     "type.googleapis.com/kiapi.board.types.ReferencePoint": board_types_pb2.ReferencePoint,
     "type.googleapis.com/kiapi.board.types.GridItem": board_types_pb2.GridItem,
     "type.googleapis.com/kiapi.board.types.Constraint": board_types_pb2.Constraint,
+    "type.googleapis.com/kiapi.board.types.DrillChart": board_types_pb2.DrillChart,
+    "type.googleapis.com/kiapi.board.types.DrillMap": board_types_pb2.DrillMap,
     "type.googleapis.com/kiapi.board.types.Field": board_types_pb2.Field,
     "type.googleapis.com/kiapi.board.types.FootprintInstance": board_types_pb2.FootprintInstance,
     "type.googleapis.com/kiapi.board.types.Footprint3DModel": board_types_pb2.Footprint3DModel,

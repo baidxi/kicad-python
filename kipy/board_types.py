@@ -75,6 +75,8 @@ from kipy.proto.board.board_types_pb2 import (  # noqa
     ChamferedRectCorners,
     ConstraintAnchor,
     ConstraintType,
+    DrillChartAlign,
+    DrillChartColumnId,
     DrillShape,
     IslandRemovalMode,
     PadFabricationProperty,
@@ -105,6 +107,7 @@ from kipy.proto.board.board_types_pb2 import (  # noqa
 )
 from kipy.proto.common.types import KIID, base_types_pb2
 from kipy.proto.common.types.base_types_pb2 import LockedState
+from kipy.proto.common.types.enums_pb2 import Units
 from kipy.util import unpack_any
 from kipy.util.board_layer import COPPER_LAYERS, is_copper_layer
 from kipy.util.units import from_mm
@@ -4700,6 +4703,381 @@ class Constraint(BoardItem):
         return MutableWrapperSequence(self._proto.custom_properties, CustomProperty)
 
 
+class DrillSpan(Wrapper):
+    """A span of layers that a drill operation crosses
+
+    .. versionadded:: 0.x.0 (KiCad 11)"""
+
+    def __init__(
+        self,
+        proto: board_types_pb2.DrillSpan | None = None,
+        proto_ref: board_types_pb2.DrillSpan | None = None,
+    ):
+        self._proto = proto_ref if proto_ref is not None else board_types_pb2.DrillSpan()
+
+        if proto is not None:
+            self._proto.CopyFrom(proto)
+
+    def __repr__(self) -> str:
+        return (
+            f"DrillSpan(start={BoardLayer.Name(self.start_layer)}, "
+            f"end={BoardLayer.Name(self.end_layer)}, backdrill={self.is_backdrill}, "
+            f"non_plated={self.is_non_plated})"
+        )
+
+    @property
+    def start_layer(self) -> BoardLayer.ValueType:
+        return self._proto.start_layer
+
+    @start_layer.setter
+    def start_layer(self, layer: BoardLayer.ValueType):
+        self._proto.start_layer = layer
+
+    @property
+    def end_layer(self) -> BoardLayer.ValueType:
+        return self._proto.end_layer
+
+    @end_layer.setter
+    def end_layer(self, layer: BoardLayer.ValueType):
+        self._proto.end_layer = layer
+
+    @property
+    def is_backdrill(self) -> bool:
+        return self._proto.is_backdrill
+
+    @is_backdrill.setter
+    def is_backdrill(self, is_backdrill: bool):
+        self._proto.is_backdrill = is_backdrill
+
+    @property
+    def is_non_plated(self) -> bool:
+        return self._proto.is_non_plated
+
+    @is_non_plated.setter
+    def is_non_plated(self, is_non_plated: bool):
+        self._proto.is_non_plated = is_non_plated
+
+
+class DrillChartColumn(Wrapper):
+    """A column configuration of a drill chart
+
+    .. versionadded:: 0.x.0 (KiCad 11)"""
+
+    def __init__(
+        self,
+        proto: board_types_pb2.DrillChartColumn | None = None,
+        proto_ref: board_types_pb2.DrillChartColumn | None = None,
+    ):
+        self._proto = proto_ref if proto_ref is not None else board_types_pb2.DrillChartColumn()
+
+        if proto is not None:
+            self._proto.CopyFrom(proto)
+
+    def __repr__(self) -> str:
+        return f"DrillChartColumn(id={DrillChartColumnId.Name(self.id)}, heading={self.heading})"
+
+    @property
+    def id(self) -> DrillChartColumnId.ValueType:
+        return self._proto.id
+
+    @id.setter
+    def id(self, id: DrillChartColumnId.ValueType):
+        self._proto.id = id
+
+    @property
+    def heading(self) -> str:
+        return self._proto.heading
+
+    @heading.setter
+    def heading(self, heading: str):
+        self._proto.heading = heading
+
+    @property
+    def align(self) -> DrillChartAlign.ValueType:
+        return self._proto.align
+
+    @align.setter
+    def align(self, align: DrillChartAlign.ValueType):
+        self._proto.align = align
+
+    @property
+    def width(self) -> int:
+        """Column width in nanometers"""
+        return self._proto.width.value_nm
+
+    @width.setter
+    def width(self, width_nm: int):
+        self._proto.width.value_nm = width_nm
+
+
+class DrillChartFilter(Wrapper):
+    """Which kinds of drill operations a drill chart includes
+
+    .. versionadded:: 0.x.0 (KiCad 11)"""
+
+    def __init__(
+        self,
+        proto: board_types_pb2.DrillChartFilter | None = None,
+        proto_ref: board_types_pb2.DrillChartFilter | None = None,
+    ):
+        self._proto = proto_ref if proto_ref is not None else board_types_pb2.DrillChartFilter()
+
+        if proto is not None:
+            self._proto.CopyFrom(proto)
+
+    def __repr__(self) -> str:
+        return (
+            f"DrillChartFilter(plated={self.plated}, non_plated={self.non_plated}, "
+            f"vias={self.vias}, slots={self.slots}, backdrills={self.backdrills}, "
+            f"castellated={self.castellated})"
+        )
+
+    @property
+    def plated(self) -> bool:
+        return self._proto.plated
+
+    @plated.setter
+    def plated(self, plated: bool):
+        self._proto.plated = plated
+
+    @property
+    def non_plated(self) -> bool:
+        return self._proto.non_plated
+
+    @non_plated.setter
+    def non_plated(self, non_plated: bool):
+        self._proto.non_plated = non_plated
+
+    @property
+    def vias(self) -> bool:
+        return self._proto.vias
+
+    @vias.setter
+    def vias(self, vias: bool):
+        self._proto.vias = vias
+
+    @property
+    def slots(self) -> bool:
+        return self._proto.slots
+
+    @slots.setter
+    def slots(self, slots: bool):
+        self._proto.slots = slots
+
+    @property
+    def backdrills(self) -> bool:
+        return self._proto.backdrills
+
+    @backdrills.setter
+    def backdrills(self, backdrills: bool):
+        self._proto.backdrills = backdrills
+
+    @property
+    def castellated(self) -> bool:
+        return self._proto.castellated
+
+    @castellated.setter
+    def castellated(self, castellated: bool):
+        self._proto.castellated = castellated
+
+
+class DrillChart(BoardItem):
+    """A drill chart: a table on the board that lists the drill operations used by the board.
+
+    .. versionadded:: 0.x.0 (KiCad 11)"""
+
+    def __init__(
+        self,
+        proto: board_types_pb2.DrillChart | None = None,
+        proto_ref: board_types_pb2.DrillChart | None = None,
+    ):
+        self._proto = proto_ref if proto_ref is not None else board_types_pb2.DrillChart()
+
+        if proto is not None:
+            self._proto.CopyFrom(proto)
+
+    def __repr__(self) -> str:
+        table = self.table
+        return (
+            f"DrillChart(layer={BoardLayer.Name(table.layer)}, "
+            f"cells={table.column_count}x{len(table.cells)}, "
+            f"columns={len(self.columns)})"
+        )
+
+    @property
+    def id(self) -> KIID:
+        return self._proto.table.id
+
+    @property
+    def table(self) -> Table:
+        """The underlying table of the drill chart.  Editing the cell contents directly
+        is not supported as they will be regenerated by KiCad."""
+        return Table(proto_ref=self._proto.table)
+
+    @table.setter
+    def table(self, table: Table):
+        self._proto.table.CopyFrom(table.proto)
+
+    @property
+    def filter(self) -> DrillChartFilter:
+        return DrillChartFilter(proto_ref=self._proto.filter)
+
+    @filter.setter
+    def filter(self, filter: DrillChartFilter):
+        self._proto.filter.CopyFrom(filter.proto)
+
+    @property
+    def columns(self) -> MutableWrapperSequence[DrillChartColumn]:
+        return MutableWrapperSequence(self._proto.columns, DrillChartColumn)
+
+    @columns.setter
+    def columns(self, columns: list[DrillChartColumn]):
+        del self._proto.columns[:]
+        self._proto.columns.extend(column.proto for column in columns)
+
+    @property
+    def units(self) -> Units.ValueType:
+        return self._proto.units
+
+    @units.setter
+    def units(self, units: Units.ValueType):
+        self._proto.units = units
+
+    @property
+    def precision(self) -> int:
+        return self._proto.precision
+
+    @precision.setter
+    def precision(self, precision: int):
+        self._proto.precision = precision
+
+    @property
+    def show_totals(self) -> bool:
+        return self._proto.show_totals
+
+    @show_totals.setter
+    def show_totals(self, show_totals: bool):
+        self._proto.show_totals = show_totals
+
+    @property
+    def row_shapes(self) -> dict[int, int]:
+        """Map of row index to drill symbol index"""
+        return dict(self._proto.row_shapes)
+
+    @row_shapes.setter
+    def row_shapes(self, row_shapes: dict[int, int]):
+        self._proto.row_shapes.clear()
+        self._proto.row_shapes.update(row_shapes)
+
+    @property
+    def symbol_column(self) -> int:
+        """Index of the column that displays drill symbols"""
+        return self._proto.symbol_column
+
+    @symbol_column.setter
+    def symbol_column(self, symbol_column: int):
+        self._proto.symbol_column = symbol_column
+
+
+class DrillMap(BoardItem):
+    """A graphical item that generates drill markers (symbols) at all hole locations
+
+    .. versionadded:: 0.x.0 (KiCad 11)"""
+
+    def __init__(
+        self,
+        proto: board_types_pb2.DrillMap | None = None,
+        proto_ref: board_types_pb2.DrillMap | None = None,
+    ):
+        self._proto = proto_ref if proto_ref is not None else board_types_pb2.DrillMap()
+
+        if proto is not None:
+            self._proto.CopyFrom(proto)
+
+    def __repr__(self) -> str:
+        return (
+            f"DrillMap(position={self.position}, layer={BoardLayer.Name(self.layer)}, "
+            f"all_spans={self.all_spans})"
+        )
+
+    @property
+    def id(self) -> KIID:
+        return self._proto.id
+
+    @property
+    def layer(self) -> BoardLayer.ValueType:
+        return self._proto.layer
+
+    @layer.setter
+    def layer(self, layer: BoardLayer.ValueType):
+        self._proto.layer = layer
+
+    @property
+    def position(self) -> Vector2:
+        """Drill map position is a relative offset from the true location of the holes.
+
+        A position of (0, 0) means that the drill symbols will be overlaid on the actual
+        hole locations of the board."""
+        return Vector2(self._proto.position)
+
+    @position.setter
+    def position(self, position: Vector2):
+        self._proto.position.CopyFrom(position.proto)
+
+    @property
+    def locked(self) -> bool:
+        return self._proto.locked == LockedState.LS_LOCKED
+
+    @locked.setter
+    def locked(self, locked: bool):
+        self._proto.locked = {
+            True: LockedState.LS_LOCKED,
+            False: LockedState.LS_UNLOCKED,
+        }.get(locked, LockedState.LS_UNLOCKED)
+
+    @property
+    def all_spans(self) -> bool:
+        """Whether the map shows all drill spans, or only the span in `span`"""
+        return self._proto.all_spans
+
+    @all_spans.setter
+    def all_spans(self, all_spans: bool):
+        self._proto.all_spans = all_spans
+
+    @property
+    def span(self) -> DrillSpan:
+        return DrillSpan(proto_ref=self._proto.span)
+
+    @span.setter
+    def span(self, span: DrillSpan):
+        self._proto.span.CopyFrom(span.proto)
+
+    @property
+    def outline_slots(self) -> bool:
+        return self._proto.outline_slots
+
+    @outline_slots.setter
+    def outline_slots(self, outline_slots: bool):
+        self._proto.outline_slots = outline_slots
+
+    @property
+    def guide_cross(self) -> bool:
+        return self._proto.guide_cross
+
+    @guide_cross.setter
+    def guide_cross(self, guide_cross: bool):
+        self._proto.guide_cross = guide_cross
+
+    @property
+    def symbol_size(self) -> int:
+        """Size of the drill symbols in nanometers"""
+        return self._proto.symbol_size.value_nm
+
+    @symbol_size.setter
+    def symbol_size(self, size_nm: int):
+        self._proto.symbol_size.value_nm = size_nm
+
+
 _proto_to_object: dict[type[Message], type[Wrapper]] = {
     board_types_pb2.Arc: ArcTrack,
     board_types_pb2.Barcode: Barcode,
@@ -4721,6 +5099,8 @@ _proto_to_object: dict[type[Message], type[Wrapper]] = {
     board_types_pb2.ReferencePoint: ReferencePoint,
     board_types_pb2.GridItem: GridItem,
     board_types_pb2.Constraint: Constraint,
+    board_types_pb2.DrillChart: DrillChart,
+    board_types_pb2.DrillMap: DrillMap,
 }
 
 
