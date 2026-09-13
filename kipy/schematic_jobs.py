@@ -24,14 +24,24 @@ from collections.abc import Sequence
 
 from kipy.board_jobs import JobResult
 from kipy.proto.schematic import schematic_jobs_pb2
+from kipy.proto.schematic.schematic_jobs_pb2 import (
+    BOMFilterScope,
+    BOMSortDirection,
+    SchematicJobPageSize,
+    SchematicNetlistFormat,
+)
 from kipy.wrapper import Wrapper
 
 __all__ = (
     "BOMField",
     "BOMFieldSettings",
+    "BOMFilterScope",
     "BOMFormatSettings",
+    "BOMSortDirection",
     "JobResult",
     "PlotSettings",
+    "SchematicJobPageSize",
+    "SchematicNetlistFormat",
 )
 
 
@@ -221,6 +231,16 @@ class BOMFormatSettings(Wrapper):
     def keep_line_breaks(self, value: bool):
         self._proto.keep_line_breaks = value
 
+    @property
+    def include_byte_order_mark(self) -> bool:
+        """Whether to include a UTF-8 byte order mark at the start of the
+        exported file."""
+        return self._proto.include_byte_order_mark
+
+    @include_byte_order_mark.setter
+    def include_byte_order_mark(self, value: bool):
+        self._proto.include_byte_order_mark = value
+
 
 class BOMField(Wrapper):
     """One exported field column definition for schematic BOM jobs."""
@@ -311,3 +331,13 @@ class BOMFieldSettings(Wrapper):
     @filter.setter
     def filter(self, value: str):
         self._proto.filter = value
+
+    @property
+    def filter_scope(self) -> schematic_jobs_pb2.BOMFilterScope.ValueType:
+        """Fields searched by the filter; defaults to reference designators
+        if unspecified."""
+        return self._proto.filter_scope
+
+    @filter_scope.setter
+    def filter_scope(self, value: schematic_jobs_pb2.BOMFilterScope.ValueType):
+        self._proto.filter_scope = value
