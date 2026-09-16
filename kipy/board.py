@@ -144,6 +144,7 @@ BoardJobCommand = Union[
     board_jobs_pb2.RunBoardJobExportDxf,
     board_jobs_pb2.RunBoardJobExportPdf,
     board_jobs_pb2.RunBoardJobExportPs,
+    board_jobs_pb2.RunBoardJobExportPng,
     board_jobs_pb2.RunBoardJobExportGerbers,
     board_jobs_pb2.RunBoardJobExportDrill,
     board_jobs_pb2.RunBoardJobExportPosition,
@@ -809,6 +810,36 @@ class Board(EditorCommandsHandler["BoardItem"], VariantsCommandHandler):
         command.y_scale_adjust = y_scale_adjust
         command.force_a4 = force_a4
         command.use_global_settings = use_global_settings
+        command.job_settings.document.CopyFrom(self._doc)
+        command.job_settings.output_path = output_path
+        return JobResult(self._kicad.send(command, jobs_pb2.RunJobResponse))
+
+    def export_png(
+        self,
+        output_path: str,
+        plot_settings: PlotSettings | None = None,
+        dpi: int | None = None,
+        antialiasing: jobs_pb2.AntialiasingMode.ValueType = jobs_pb2.AAM_UNKNOWN,
+        page_mode: board_jobs_pb2.BoardJobPaginationMode.ValueType = BoardJobPaginationMode.BJPM_ALL_LAYERS_ONE_PAGE,
+    ) -> JobResult:
+        """Plots the board to PNG.
+
+        :param output_path: Sets the directory or filename of the export
+        :param plot_settings: Controls the general shared schematic plot settings
+        :param dpi: Sets the resolution of the generated image.  When omitted, the default of 300
+            is used.  KiCad accepts between 72 and 2400 DPI.
+        :param antialiasing: Controls whether the output image is anti-aliased (enabled by default)
+        :param page_mode: Set to ``BJPM_ALL_LAYERS_ONE_PAGE``, ``output_path`` is taken as a filename and
+            one file is created.  Otherwise, the board layers in ``plot_settings`` are each plotted
+            to a file in the directory given by ``output_path``.
+        """
+        command = board_jobs_pb2.RunBoardJobExportPng()
+        if plot_settings is not None:
+            command.plot_settings.CopyFrom(plot_settings.proto)
+        if dpi is not None:
+            command.dpi = dpi
+        command.antialiasing = antialiasing
+        command.page_mode = page_mode
         command.job_settings.document.CopyFrom(self._doc)
         command.job_settings.output_path = output_path
         return JobResult(self._kicad.send(command, jobs_pb2.RunJobResponse))

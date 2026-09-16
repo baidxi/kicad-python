@@ -134,30 +134,48 @@ class Schematic(EditorCommandsHandler["SchematicItem"], VariantsCommandHandler):
             spec.sheet_path.CopyFrom(sheet_path)
         return spec
 
-    def export_svg(self, output_dir: str, plot_settings: PlotSettings | None = None) -> JobResult:
-        """Plots the schematic to SVG files in an output directory.
+    def export_svg(
+        self,
+        output_path: str,
+        plot_settings: PlotSettings | None = None,
+        sheet_mode: schematic_jobs_pb2.SchematicJobSheetMode.ValueType = schematic_jobs_pb2.SJSM_UNKNOWN,
+    ) -> JobResult:
+        """Plots the schematic to SVG.
 
-        KiCad writes one SVG file per plotted sheet, so ``output_dir`` must
-        point to a directory rather than a file path.
+        :param output_path: Sets the directory or filename of the export
+        :param plot_settings: Controls the general shared schematic plot settings
+        :param sheet_mode: Set to ``SJSM_ALL_SHEETS``, ``output_path`` is taken as a directory and
+            one file per sheet is created.  Otherwise, the sheet pointed to by this schematic
+            object is plotted to the file given by ``output_path``.
         """
         command = schematic_jobs_pb2.RunSchematicJobExportSvg()
         if plot_settings is not None:
             command.plot_settings.CopyFrom(plot_settings.proto)
+        command.plot_settings.sheet_mode = sheet_mode
         command.job_settings.document.CopyFrom(self._doc)
-        command.job_settings.output_path = output_dir
+        command.job_settings.output_path = output_path
         return JobResult(self._kicad.send(command, jobs_pb2.RunJobResponse))
 
-    def export_dxf(self, output_dir: str, plot_settings: PlotSettings | None = None) -> JobResult:
-        """Plots the schematic to DXF files in an output directory.
+    def export_dxf(
+        self,
+        output_path: str,
+        plot_settings: PlotSettings | None = None,
+        sheet_mode: schematic_jobs_pb2.SchematicJobSheetMode.ValueType = schematic_jobs_pb2.SJSM_UNKNOWN,
+    ) -> JobResult:
+        """Plots the schematic to DXF.
 
-        KiCad writes one DXF file per plotted sheet, so ``output_dir`` must
-        point to a directory rather than a file path.
+        :param output_path: Sets the directory or filename of the export
+        :param plot_settings: Controls the general shared schematic plot settings
+        :param sheet_mode: Set to ``SJSM_ALL_SHEETS``, ``output_path`` is taken as a directory and
+            one file per sheet is created.  Otherwise, the sheet pointed to by this schematic
+            object is plotted to the file given by ``output_path``.
         """
         command = schematic_jobs_pb2.RunSchematicJobExportDxf()
         if plot_settings is not None:
             command.plot_settings.CopyFrom(plot_settings.proto)
+        command.plot_settings.sheet_mode = sheet_mode
         command.job_settings.document.CopyFrom(self._doc)
-        command.job_settings.output_path = output_dir
+        command.job_settings.output_path = output_path
         return JobResult(self._kicad.send(command, jobs_pb2.RunJobResponse))
 
     def export_pdf(
@@ -183,17 +201,56 @@ class Schematic(EditorCommandsHandler["SchematicItem"], VariantsCommandHandler):
         command.job_settings.output_path = output_file
         return JobResult(self._kicad.send(command, jobs_pb2.RunJobResponse))
 
-    def export_ps(self, output_dir: str, plot_settings: PlotSettings | None = None) -> JobResult:
-        """Plots the schematic to PostScript files in an output directory.
+    def export_ps(
+        self,
+        output_path: str,
+        plot_settings: PlotSettings | None = None,
+        sheet_mode: schematic_jobs_pb2.SchematicJobSheetMode.ValueType = schematic_jobs_pb2.SJSM_ALL_SHEETS,
+    ) -> JobResult:
+        """Plots the schematic to PostScript.
 
-        KiCad writes one PostScript file per plotted sheet, so ``output_dir``
-        must point to a directory rather than a file path.
+        :param output_path: Sets the directory or filename of the export
+        :param plot_settings: Controls the general shared schematic plot settings
+        :param sheet_mode: Set to ``SJSM_ALL_SHEETS``, ``output_path`` is taken as a directory and
+            one file per sheet is created.  Otherwise, the sheet pointed to by this schematic
+            object is plotted to the file given by ``output_path``.
         """
         command = schematic_jobs_pb2.RunSchematicJobExportPs()
         if plot_settings is not None:
             command.plot_settings.CopyFrom(plot_settings.proto)
+        command.plot_settings.sheet_mode = sheet_mode
         command.job_settings.document.CopyFrom(self._doc)
-        command.job_settings.output_path = output_dir
+        command.job_settings.output_path = output_path
+        return JobResult(self._kicad.send(command, jobs_pb2.RunJobResponse))
+
+    def export_png(
+        self,
+        output_path: str,
+        plot_settings: PlotSettings | None = None,
+        dpi: int | None = None,
+        antialiasing: jobs_pb2.AntialiasingMode.ValueType = jobs_pb2.AAM_STANDARD,
+        sheet_mode: schematic_jobs_pb2.SchematicJobSheetMode.ValueType = schematic_jobs_pb2.SJSM_ALL_SHEETS,
+    ) -> JobResult:
+        """Plots the schematic to PNG.
+
+        :param output_path: Sets the directory or filename of the export
+        :param plot_settings: Controls the general shared schematic plot settings
+        :param dpi: Sets the resolution of the generated image.  When omitted, the default of 300
+            is used.  KiCad accepts between 72 and 2400 DPI.
+        :param antialiasing: Controls whether the output image is anti-aliased (enabled by default)
+        :param sheet_mode: Set to ``SJSM_ALL_SHEETS``, ``output_path`` is taken as a directory and
+            one file per sheet is created.  Otherwise, the sheet pointed to by this schematic
+            object is plotted to the file given by ``output_path``.
+        """
+        command = schematic_jobs_pb2.RunSchematicJobExportPng()
+        if plot_settings is not None:
+            command.plot_settings.CopyFrom(plot_settings.proto)
+        command.plot_settings.sheet_mode = sheet_mode
+        if dpi is not None:
+            command.dpi = dpi
+        command.antialiasing = antialiasing
+        command.job_settings.document.CopyFrom(self._doc)
+        command.job_settings.output_path = output_path
         return JobResult(self._kicad.send(command, jobs_pb2.RunJobResponse))
 
     def export_netlist(

@@ -28,6 +28,7 @@ from kipy.proto.schematic.schematic_jobs_pb2 import (
     BOMFilterScope,
     BOMSortDirection,
     SchematicJobPageSize,
+    SchematicJobSheetMode,
     SchematicNetlistFormat,
 )
 from kipy.wrapper import Wrapper
@@ -41,6 +42,7 @@ __all__ = (
     "JobResult",
     "PlotSettings",
     "SchematicJobPageSize",
+    "SchematicJobSheetMode",
     "SchematicNetlistFormat",
 )
 
@@ -159,6 +161,15 @@ class PlotSettings(Wrapper):
     @theme.setter
     def theme(self, value: str):
         self._proto.theme = value
+
+    @property
+    def sheet_mode(self) -> schematic_jobs_pb2.SchematicJobSheetMode.ValueType:
+        """Selects directory (all sheets) or single-file (one sheet) output semantics."""
+        return self._proto.sheet_mode
+
+    @sheet_mode.setter
+    def sheet_mode(self, value: schematic_jobs_pb2.SchematicJobSheetMode.ValueType):
+        self._proto.sheet_mode = value
 
 
 class BOMFormatSettings(Wrapper):
