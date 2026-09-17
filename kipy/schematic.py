@@ -98,7 +98,7 @@ class Schematic(EditorCommandsHandler["SchematicItem"], VariantsCommandHandler):
         self._doc = document
 
     def __repr__(self) -> str:
-        return f"Schematic(filename={self.name}, path={self._doc.sheet_path})"
+        return f"Schematic(root={self.name}, path={self._doc.sheet_path.path_human_readable})"
 
     @property
     def client(self) -> KiCadClient:
