@@ -18,5 +18,6 @@ and merge requests to enhance the documentation are welcome.
 
    kicad
    project
+   schematic
    board
    utilities
