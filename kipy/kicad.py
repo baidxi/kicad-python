@@ -394,7 +394,11 @@ class KiCad:
         docs = self.get_open_documents(DocumentType.DOCTYPE_SCHEMATIC)
         if len(docs) == 0:
             raise ApiError("Expected to be able to retrieve at least one schematic")
-        return Schematic(self._client, docs[0])
+        # The returned specifier may carry the sheet the KiCad UI currently has open;
+        # drop it so that queries cover all sheets; for_sheet() can be used to specify one.
+        doc = docs[0]
+        doc.ClearField("sheet_path")
+        return Schematic(self._client, doc)
 
     def get_library_items(
         self, type: LibraryType.ValueType, nicknames: Sequence[str] = ()

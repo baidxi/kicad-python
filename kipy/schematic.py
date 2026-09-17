@@ -124,8 +124,10 @@ class Schematic(EditorCommandsHandler["SchematicItem"], VariantsCommandHandler):
 
     def _spec(self, sheet_path: SheetPath | SheetInstance | None) -> DocumentSpecifier:
         """Builds the document specifier for an item query.  When no sheet path is
-        given, the specifier has no sheet path set, which requests items from all
-        sheets in the document."""
+        given, the specifier falls back to the sheet path this Schematic is bound to
+        (see :meth:`for_sheet`).  If this Schematic is not bound to a sheet, the
+        specifier has no sheet path set, which requests items from all sheets in the
+        document."""
         spec = DocumentSpecifier()
         spec.type = DocumentType.DOCTYPE_SCHEMATIC
         spec.project.CopyFrom(self._doc.project)
@@ -135,6 +137,8 @@ class Schematic(EditorCommandsHandler["SchematicItem"], VariantsCommandHandler):
             spec.sheet_path.CopyFrom(sheet_path.proto)
         elif sheet_path is not None:
             spec.sheet_path.CopyFrom(sheet_path)
+        elif self._doc.HasField("sheet_path"):
+            spec.sheet_path.CopyFrom(self._doc.sheet_path)
         return spec
 
     def export_svg(
@@ -310,7 +314,9 @@ class Schematic(EditorCommandsHandler["SchematicItem"], VariantsCommandHandler):
 
         :param types: Optional type or types of items to retrieve.
         :param sheet_path: Optional sheet to scope the query to.  If not provided, items
-            from all sheets in the schematic are returned.
+            from the sheet this Schematic is bound to are returned, or from all sheets
+            in the schematic if this Schematic is not bound to a sheet (see
+            :meth:`for_sheet`).
         """
         return self._get_items(types, self._spec(sheet_path))
 
