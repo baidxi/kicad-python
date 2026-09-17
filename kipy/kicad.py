@@ -30,6 +30,7 @@ import sys
 import time
 from collections.abc import Sequence
 from tempfile import gettempdir
+from typing import cast
 
 from google.protobuf.empty_pb2 import Empty
 
@@ -39,6 +40,7 @@ else:
     from typing_extensions import Self
 
 from kipy.board import Board
+from kipy.board_types import Footprint
 from kipy.client import ApiError, KiCadClient
 from kipy.common_types import (
     CompoundShape,
@@ -52,6 +54,7 @@ from kipy.errors import FutureVersionError, LibraryCommandError
 from kipy.geometry import Box2
 from kipy.kicad_api_version import KICAD_API_VERSION
 from kipy.project import Project
+from kipy.proto.board import board_types_pb2
 from kipy.proto.common import commands
 from kipy.proto.common.commands import (
     base_commands_pb2,
@@ -68,8 +71,11 @@ from kipy.proto.common.types.library_types_pb2 import (
     LibraryTableScope,
     LibraryType,
 )
+from kipy.proto.schematic import schematic_types_pb2
 from kipy.schematic import Schematic
+from kipy.schematic_types import SchematicSymbol
 from kipy.server import KiCadServer, find_kicad_cli
+from kipy.util import unpack_any
 
 _UNKNOWN_API_VERSION = "unknown"
 
@@ -446,6 +452,82 @@ class KiCad:
         .. versionadded:: 0.x.y (KiCad 11)
         """
         return self.get_library_items(LibraryType.LT_FOOTPRINT, nicknames)
+
+    def get_library_symbol(
+        self, lib_id: LibraryIdentifier | str, document: DocumentSpecifier | None = None
+    ) -> SchematicSymbol:
+        """Retrieves the definition of a symbol from a library
+
+        Requires the libraries to have been loaded already.  Use :meth:`load_all_libraries`
+        first in headless contexts.
+
+        :param lib_id: The symbol to retrieve, either as a :class:`LibraryIdentifier` or a
+            string such as ``"Device:R"``.
+        :param document: Optional document specifier used to enable project-specific
+            libraries; if not given, only global libraries are searched.
+        :return: The symbol definition.
+
+        .. versionadded:: 0.x.y (KiCad 11)
+        """
+        return cast(
+            SchematicSymbol, self._get_library_item(LibraryType.LT_SYMBOL, lib_id, document)
+        )
+
+    def get_library_footprint(
+        self, lib_id: LibraryIdentifier | str, document: DocumentSpecifier | None = None
+    ) -> Footprint:
+        """Retrieves the definition of a footprint from a library
+
+        Requires the libraries to have been loaded already.  Use :meth:`load_all_libraries`
+        first in headless contexts.
+
+        :param lib_id: The footprint to retrieve, either as a :class:`LibraryIdentifier` or a
+            string such as ``"Resistor_SMD:R_0603_1608Metric"``.
+        :param document: Optional document specifier used to enable project-specific
+            libraries; if not given, only global libraries are searched.
+        :return: The footprint definition.
+
+        .. versionadded:: 0.x.y (KiCad 11)
+        """
+        return cast(Footprint, self._get_library_item(LibraryType.LT_FOOTPRINT, lib_id, document))
+
+    def _get_library_item(
+        self,
+        library_type: LibraryType.ValueType,
+        lib_id: LibraryIdentifier | str,
+        document: DocumentSpecifier | None,
+    ) -> SchematicSymbol | Footprint:
+        command = library_commands_pb2.GetItemsFromLibrary()
+        command.type = library_type
+
+        if document is not None:
+            command.document.CopyFrom(document)
+
+        if isinstance(lib_id, str):
+            library, _, name = lib_id.partition(":")
+            if name == "":
+                raise ValueError("lib_id must be in the format <nickname>:<item name>")
+            command.item_ids.add(library_nickname=library, entry_name=name)
+        else:
+            command.item_ids.add().CopyFrom(lib_id.proto)
+
+        response = self._client.send(command, editor_commands_pb2.GetItemsResponse)
+
+        if response.status != base_types_pb2.ItemRequestStatus.IRS_OK:
+            raise ApiError(f"Failed to retrieve library item: {response.status}")
+
+        if len(response.items) == 0:
+            raise ApiError("Requested item was not found in the library")
+
+        concrete = unpack_any(response.items[0])
+
+        if isinstance(concrete, schematic_types_pb2.SchematicSymbol):
+            return SchematicSymbol(proto=concrete)
+
+        if isinstance(concrete, board_types_pb2.Footprint):
+            return Footprint(proto=concrete)
+
+        raise ApiError(f"Unexpected item type received from library: {type(concrete).__name__}")
 
     def get_library_statuses(
         self,
