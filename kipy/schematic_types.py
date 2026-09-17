@@ -70,6 +70,10 @@ class SchematicItem(Item):
 
 class SchematicField(SchematicItem):
     """
+    A field is a text item attached to another item that holds a name and value.  Some items
+    (such as symbols) have mandatory fields that always exist, and other items (such as labels)
+    don't have any fields by default but may have custom fields attached.
+
     .. versionadded:: 0.x.y (KiCad 11)
     """
 
@@ -146,7 +150,12 @@ class SchematicField(SchematicItem):
 
 
 class SchematicLine(SchematicItem):
-    """
+    """A line segment on a schematic, which may be a net or bus wire or a graphic line (see
+    ``type``). Wires and buses form electrical connections to each other and to pins at their
+    endpoints. KiCad automatically cleans up wires (whether added in the GUI or by the API) to
+    remove overlapping wire segments and split wire segments at intersections with other wire
+    endpoints or pins. Wires can form connections with labels anywhere along their length.
+
     .. versionadded:: 0.x.y (KiCad 11)
     """
 
@@ -247,7 +256,7 @@ class SchematicLine(SchematicItem):
 
 
 class Junction(SchematicItem):
-    """
+    """A junction is a circular symbol that indicates the intersection of 3 or more wire endpoints.
     Note: junctions in KiCad are computed dynamically based on line intersections.
 
     .. versionadded:: 0.x.y (KiCad 11)
@@ -313,7 +322,9 @@ class Junction(SchematicItem):
 
 
 class NoConnectMarker(SchematicItem):
-    """
+    """A no-connect marker is a X-shaped symbol that can be placed on a wire or pin, and marks the
+    net it is attached to as intentionally isolated.
+
     .. versionadded:: 0.x.y (KiCad 11)
     """
 
@@ -369,7 +380,8 @@ class NoConnectMarker(SchematicItem):
 
 
 class BusEntry(SchematicItem):
-    """
+    """A bus entry is a short diagonal wire segment that attaches a wire to a bus.
+
     .. versionadded:: 0.x.y (KiCad 11)
     """
 
@@ -441,7 +453,9 @@ class BusEntry(SchematicItem):
 
 
 class SchematicText(SchematicItem):
-    """
+    """A single-line text item.  Text items are used for notes and other annotations.  They do not
+    impact the netlist.
+
     .. versionadded:: 0.x.y (KiCad 11)
     """
 
@@ -513,6 +527,11 @@ class SchematicText(SchematicItem):
 
 
 class SchematicTextBox(SchematicItem):
+    """A multi-line text item with optional border.  Text items are used for notes and other
+    annotations.  They do not impact the netlist.
+
+    .. versionadded:: 0.x.y (KiCad 11)"""
+
     def __init__(
         self,
         proto: schematic_types_pb2.SchematicTextBox | None = None,
@@ -704,7 +723,8 @@ class SchematicGraphicShape(SchematicItem):
 
 
 class SchematicImage(SchematicItem):
-    """
+    """A bitmap image placed on a schematic.
+
     .. versionadded:: 0.x.y (KiCad 11)
     """
 
@@ -776,7 +796,10 @@ class SchematicImage(SchematicItem):
 
 
 class BaseLabel(SchematicItem):
-    """
+    """The base class for schematic labels.  Labels are special text items that give names to
+    electrical nets on a schematic.  They form connections at their ``position`` to other
+    connected items (such as wires or pins).
+
     .. versionadded:: 0.x.y (KiCad 11)
     """
 
@@ -844,7 +867,8 @@ class BaseLabel(SchematicItem):
 
 
 class ShapeLabel(BaseLabel):
-    """
+    """A ``BaseLabel`` that can take on a graphical shape
+
     .. versionadded:: 0.x.y (KiCad 11)
     """
 
@@ -858,7 +882,9 @@ class ShapeLabel(BaseLabel):
 
 
 class LocalLabel(BaseLabel):
-    """
+    """Local labels are single-line text labels with no extra graphical decoration.  They create
+    sheet-specific net labels (such as `/NET1` or `/Subsheet/NET2`).
+
     .. versionadded:: 0.x.y (KiCad 11)
     """
 
@@ -877,7 +903,9 @@ class LocalLabel(BaseLabel):
 
 
 class GlobalLabel(ShapeLabel):
-    """
+    """Global labels are single-line text labels with a graphical border.  They create global
+    labels with no sheet-specific prefix (such as `NET1`).
+
     .. versionadded:: 0.x.y (KiCad 11)
     """
 
@@ -904,7 +932,11 @@ class GlobalLabel(ShapeLabel):
 
 
 class HierarchicalLabel(ShapeLabel):
-    """
+    """Hierarchical labels are special local labels that include a hierarchical port symbol and
+    match up with a hierarchical sheet pin on the sheet symbol one level up in the hierarchy.
+    They indicate a net that is exposed as a sheet pin for connection elsewhere in a hierarchical
+    schematic.  See also: ``SheetPin``.
+
     .. versionadded:: 0.x.y (KiCad 11)
     """
 
@@ -925,7 +957,11 @@ class HierarchicalLabel(ShapeLabel):
 
 
 class DirectiveLabel(ShapeLabel):
-    """
+    """Directive labels are special labels that apply specific design rules to items rather than
+    applying a net name.  They can also be used to apply rules to many items by creating a
+    ``SchematicRuleArea`` and placing a ``DirectiveLabel`` on its border.  All items enclosed by
+    or intersecting the border of the rule area will have the same directives applied.
+
     .. versionadded:: 0.x.y (KiCad 11)
     """
 
@@ -1036,7 +1072,9 @@ class Group(SchematicItem):
 
 
 class SheetPin(ShapeLabel):
-    """
+    """A pin on a hierarchical sheet symbol (``SheetSymbol``) that is paired with a hierarchical
+    label on the subsheet (see ``HierarchicalLabel``).
+
     .. versionadded:: 0.x.y (KiCad 11)
     """
 
@@ -1063,7 +1101,10 @@ class SheetPin(ShapeLabel):
 
 
 class SheetSymbol(SchematicItem):
-    """
+    """The graphical representation of a hierarchical sub-sheet on its parent sheet.  A sheet
+    symbol contains the metadata about the sub-sheet such as its filename and instance name, as
+    well as its pins and other graphic attributes.  Sheet symbols may also have custom fields.
+
     .. versionadded:: 0.x.y (KiCad 11)
     """
 
@@ -1234,7 +1275,11 @@ class SheetSymbol(SchematicItem):
 
 
 class SchematicPinAlternate(Wrapper):
-    """
+    """An alternate definition for a ``SchematicPin``.  Pins may have multiple different functions
+    defined using alternates, and these will show as user-selectable when the symbol is placed on
+    a schematic.  Alternates may change the name, shape, and electrical function of a pin, but not
+    the number (since that is the true identity of a pin and how it maps to a footprint pad).
+
     .. versionadded:: 0.x.y (KiCad 11)
     """
 
@@ -1276,7 +1321,10 @@ class SchematicPinAlternate(Wrapper):
 
 
 class SchematicPin(SchematicItem):
-    """
+    """A symbol pin.  Pins form electrical connection at their ``position`` and then extend back to
+    the symbol body by their ``length``.  Pins map to footprint pads according to their ``number``
+    property, which, despite the name, does not need to be strictly numeric.
+
     .. versionadded:: 0.x.y (KiCad 11)
     """
 
@@ -1295,6 +1343,7 @@ class SchematicPin(SchematicItem):
 
     @property
     def name(self) -> str:
+        """A functional name for the pin, for example 'VCC'."""
         return self._proto.name
 
     @name.setter
@@ -1303,6 +1352,7 @@ class SchematicPin(SchematicItem):
 
     @property
     def number(self) -> str:
+        """The identifier for this pin which maps it to a footprint pad.  May be alphanumeric."""
         return self._proto.number
 
     @number.setter
@@ -1329,7 +1379,7 @@ class SchematicPin(SchematicItem):
 
     @property
     def orientation(self) -> SchematicPinOrientation.ValueType:
-        """Which way the pin is oriented, relative to the connection point.
+        """Which way the pin is oriented, relative to the connection point (`position`).
 
         For example, `SPO_RIGHT` means the pin shape extends rightward from the connection
         point, which usually means the pin is placed on the *left* side of a symbol."""
@@ -1997,6 +2047,14 @@ class SchematicSymbol(Wrapper):
 
     @property
     def type(self) -> SchematicSymbolType.ValueType:
+        """The type of the symbol (normal, local power, or global power).
+
+        A power symbol is one that drives a net name from a single hidden power input pin. To
+        create a normal power symbol, set ``type`` to ``SchematicSymbolType.SST_GLOBAL_POWER`` and
+        add a single hidden pin of type ``ElectricalPinType.EPT_POWER_INPUT``, normally with length
+        0.  The power symbol will drive a net according to its ``value_field`` contents.  A local
+        power symbol (``SchematicSymbolType.SST_LOCAL_POWER``) will act like a local label on the
+        sheet it is placed on rather than a global label."""
         return self._proto.type
 
     @type.setter
