@@ -390,14 +390,16 @@ class ArcTrack(BoardItem):
         """Calculates the angle between the start and end of the arc in radians
 
         :return: The angle of the arc, or None if the arc is degenerate
+
         .. versionadded:: 0.4.0"""
         return arc_angle(self.start, self.mid, self.end)
 
     def length(self) -> float:
         """Calculates arc track length in nanometers
 
-        :return: The length of the arc, or the distance between the start and end points if the
-                 arc is degenerate
+        :return: The length of the arc, or the distance between the start and end points if
+            the arc is degenerate
+
         .. versionadded:: 0.3.0"""
         angle = self.angle()
         if angle is None:
@@ -2195,7 +2197,8 @@ class Via(BoardItem):
         pad diameter on the front copper layer otherwise.  Setting this property will set the
         padstack mode to PST_NORMAL as a side-effect.
 
-        To get or set the diameter for other padstack types, use the padstack property directly.
+        To get or set the diameter for other padstack types, use the :attr:`padstack` property
+        directly.
 
         .. versionadded:: 0.3.0 with KiCad 9.0.1"""
         if len(self.padstack.copper_layers) == 0:
@@ -2809,7 +2812,8 @@ class FootprintInstance(BoardItem):
         """The layer on which the footprint is placed (BoardLayer.BL_F_Cu or BoardLayer.BL_B_Cu)
 
         NOTE: Do not use this property to try to flip an existing footprint to the other side
-        of a board.  Use ``Board.flip_items`` or ``Board.flip_items_by_id`` instead."""
+        of a board.  Use :meth:`~kipy.board.Board.flip_items` or
+        :meth:`~kipy.board.Board.flip_items_by_id` instead."""
         return self._proto.layer
 
     @layer.setter
@@ -3257,7 +3261,8 @@ class Zone(BoardItem):
     @outline.setter
     def outline(self, outline: PolygonWithHoles):
         """Sets the zone outline.  The outline and all holes are forced closed regardless
-        of the source polygon's ``auto_close`` flag; zones require closed polygons."""
+        of the source polygon's :class:`PolygonWithHoles` ``auto_close`` flag; zones require
+        closed polygons."""
         p = base_types_pb2.PolygonWithHoles()
         p.CopyFrom(outline.proto)
         p.outline.closed = True
@@ -3986,8 +3991,8 @@ class BoardEditorAppearanceSettings(Wrapper):
 class Group(BoardItem):
     """Represents a group of items on a board
 
-    Groups store item membership by ID only.  See the documentation for `items` and `item_ids`
-    for details.
+    Groups store item membership by ID only.  See the documentation for :attr:`items` and
+    :attr:`item_ids` for details.
 
     .. versionadded:: 0.7.0 (KiCad 10.0.0)"""
 
@@ -4020,7 +4025,7 @@ class Group(BoardItem):
     @item_ids.setter
     def item_ids(self, ids: Sequence[KIID]):
         """Setting this property will invalidate the cache of concrete items
-        returned by the `items` property."""
+        returned by the :attr:`items` property."""
         del self._proto.items[:]
         self._proto.items.extend(ids)
         self._unwrapped_items = None
@@ -4032,9 +4037,9 @@ class Group(BoardItem):
         Accessing this property will cause API traffic to resolve the items
         by their KIID from the document.
 
-        Note that the group does not own these items; `item_ids` is the actual
+        Note that the group does not own these items; :attr:`item_ids` is the actual
         way that group membership is tracked.  This means that you cannot just
-        add items to a group and then to a document by setting this `items`
+        add items to a group and then to a document by setting this :attr:`items`
         property, you also need to add the items to the document separately."""
         if self._unwrapped_items is None and self._item_resolver is not None and self._item_ids:
             self._unwrapped_items = self._item_resolver(self._item_ids)
@@ -5051,7 +5056,7 @@ class DrillMap(BoardItem):
 
     @property
     def all_spans(self) -> bool:
-        """Whether the map shows all drill spans, or only the span in `span`"""
+        """Whether the map shows all drill spans, or only the span in :attr:`span`"""
         return self._proto.all_spans
 
     @all_spans.setter

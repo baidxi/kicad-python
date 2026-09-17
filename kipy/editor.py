@@ -42,8 +42,8 @@ class EditorCommandsHandler(Generic[_ItemT_co]):
     """Mixin implementing the commands that KiCad handles identically for every
     open editor document.
 
-    Subclasses must provide ``_kicad`` (a KiCadClient), ``_doc`` (the
-    DocumentSpecifier of the open document), and ``_item_from_message``, which
+    Subclasses must provide ``_kicad`` (a :class:`KiCadClient`), ``_doc`` (the
+    :class:`DocumentSpecifier` of the open document), and ``_item_from_message``, which
     converts a generic unwrapped message into the document's concrete type.
     """
 
@@ -82,16 +82,17 @@ class EditorCommandsHandler(Generic[_ItemT_co]):
         self._kicad.send(command, Empty)
 
     def begin_commit(self) -> Commit:
-        """Begins a commit transaction on the document, returning a Commit object that can be
-        used to push or drop (cancel) the commit.  Each commit represents a set of changes that
-        can be undone or redone as a single operation.
+        """Begins a commit transaction on the document, returning a :class:`Commit` object
+        that can be used to push or drop (cancel) the commit.  Each commit represents a set of
+        changes that can be undone or redone as a single operation.
 
-        If you do not call begin_commit, any changes made to the document will be committed
-        immediately, which will result in multiple steps being added to the undo history.
+        If you do not call :meth:`begin_commit`, any changes made to the document will be
+        committed immediately, which will result in multiple steps being added to the undo
+        history.
 
-        If you call begin_commit, changes made to the document will not be reflected in the
-        editor until you call push_commit.  This allows you to group multiple changes into a
-        single undo step.
+        If you call :meth:`begin_commit`, changes made to the document will not be reflected
+        in the editor until you call :meth:`push_commit`.  This allows you to group multiple
+        changes into a single undo step.
         """
         command = editor_commands_pb2.BeginCommit()
         command.header.document.CopyFrom(self._doc)
@@ -137,7 +138,7 @@ class EditorCommandsHandler(Generic[_ItemT_co]):
     ) -> Sequence[_ItemT_co]:
         """Retrieves items from the document, optionally filtering to a single or set of types.
 
-        Providing no `types` filter will result in all valid types for the given document
+        Providing no ``types`` filter will result in all valid types for the given document
         being retrieved on KiCad 10.0.7 and newer, and is an error on older versions."""
         return self._get_items(types, self._doc)
 

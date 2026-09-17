@@ -50,7 +50,7 @@ __all__ = (
 class PlotSettings(Wrapper):
     """Shared settings for schematic plotting jobs.
 
-    When plotting all sheets, set ``plot_all=True`` and leave ``plot_pages``
+    When plotting all sheets, set :attr:`plot_all` to True and leave :attr:`plot_pages`
     empty unless you know the exact sheet-instance paths to filter.
     """
 

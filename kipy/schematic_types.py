@@ -151,7 +151,7 @@ class SchematicField(SchematicItem):
 
 class SchematicLine(SchematicItem):
     """A line segment on a schematic, which may be a net or bus wire or a graphic line (see
-    ``type``). Wires and buses form electrical connections to each other and to pins at their
+    :attr:`type`). Wires and buses form electrical connections to each other and to pins at their
     endpoints. KiCad automatically cleans up wires (whether added in the GUI or by the API) to
     remove overlapping wire segments and split wire segments at intersections with other wire
     endpoints or pins. Wires can form connections with labels anywhere along their length.
@@ -658,14 +658,14 @@ class SchematicGraphicShape(SchematicItem):
     Although the underlying GraphicShape classes are shared between board and schematic in this API,
     there are some important differences:
 
-    1. `segment` shapes are not supported in the schematic editor.  To draw a two-point line
-       segment, either create a SchematicLine object, or create a `polygon` shape with only two
-       points.
+    1. :class:`Segment` shapes are not supported in the schematic editor.  To draw a two-point
+       line segment, either create a :class:`SchematicLine` object, or create a :class:`Polygon`
+       shape with only two points.
 
-    2. `polygon` shapes are more limited than in the board editor.  The schematic editor supports a
-       single polyline, and it does not use the explicit `closed` flag in
-       :meth:`PolygonWithHoles.outline`. To create a closed polygon, duplicate the starting point
-       as the last point.
+    2. :class:`Polygon` shapes are more limited than in the board editor.  The schematic editor
+       supports a single polyline, and it does not use the explicit :attr:`PolyLine.closed` flag
+       in :attr:`PolygonWithHoles.outline`. To create a closed polygon, duplicate the starting
+       point as the last point.
 
     .. versionadded:: 0.x.y (KiCad 11)
     """
@@ -798,7 +798,7 @@ class SchematicImage(SchematicItem):
 
 class BaseLabel(SchematicItem):
     """The base class for schematic labels.  Labels are special text items that give names to
-    electrical nets on a schematic.  They form connections at their ``position`` to other
+    electrical nets on a schematic.  They form connections at their :attr:`position` to other
     connected items (such as wires or pins).
 
     .. versionadded:: 0.x.y (KiCad 11)
@@ -905,7 +905,7 @@ class LocalLabel(BaseLabel):
 
 class GlobalLabel(ShapeLabel):
     """Global labels are single-line text labels with a graphical border.  They create global
-    labels with no sheet-specific prefix (such as `NET1`).
+    labels with no sheet-specific prefix (such as ``NET1``).
 
     .. versionadded:: 0.x.y (KiCad 11)
     """
@@ -936,7 +936,7 @@ class HierarchicalLabel(ShapeLabel):
     """Hierarchical labels are special local labels that include a hierarchical port symbol and
     match up with a hierarchical sheet pin on the sheet symbol one level up in the hierarchy.
     They indicate a net that is exposed as a sheet pin for connection elsewhere in a hierarchical
-    schematic.  See also: ``SheetPin``.
+    schematic.  See also :class:`SheetPin`.
 
     .. versionadded:: 0.x.y (KiCad 11)
     """
@@ -960,8 +960,8 @@ class HierarchicalLabel(ShapeLabel):
 class DirectiveLabel(ShapeLabel):
     """Directive labels are special labels that apply specific design rules to items rather than
     applying a net name.  They can also be used to apply rules to many items by creating a
-    ``SchematicRuleArea`` and placing a ``DirectiveLabel`` on its border.  All items enclosed by
-    or intersecting the border of the rule area will have the same directives applied.
+    ``SchematicRuleArea`` and placing a :class:`DirectiveLabel` on its border.  All items
+    enclosed by or intersecting the border of the rule area will have the same directives applied.
 
     .. versionadded:: 0.x.y (KiCad 11)
     """
@@ -983,8 +983,8 @@ class DirectiveLabel(ShapeLabel):
 class Group(SchematicItem):
     """Represents a group of items on a schematic.
 
-    Groups store item membership by ID only.  See the documentation for `items` and `item_ids`
-    for details.
+    Groups store item membership by ID only.  See the documentation for :attr:`items` and
+    :attr:`item_ids` for details.
 
     .. versionadded:: 0.x.y (KiCad 11)
     """
@@ -1033,7 +1033,7 @@ class Group(SchematicItem):
     @item_ids.setter
     def item_ids(self, ids: Sequence[KIID]):
         """Setting this property will invalidate the cache of concrete items
-        returned by the `items` property."""
+        returned by the :attr:`items` property."""
         del self._proto.items[:]
         self._proto.items.extend(ids)
         self._unwrapped_items = None
@@ -1045,9 +1045,9 @@ class Group(SchematicItem):
         Accessing this property will cause API traffic to resolve the items
         by their KIID from the document.
 
-        Note that the group does not own these items; `item_ids` is the actual
+        Note that the group does not own these items; :attr:`item_ids` is the actual
         way that group membership is tracked.  This means that you cannot just
-        add items to a group and then to a document by setting this `items`
+        add items to a group and then to a document by setting this :attr:`items`
         property, you also need to add the items to the document separately."""
         if self._unwrapped_items is None and self._item_resolver is not None and self._item_ids:
             self._unwrapped_items = self._item_resolver(self._item_ids)
@@ -1073,8 +1073,8 @@ class Group(SchematicItem):
 
 
 class SheetPin(ShapeLabel):
-    """A pin on a hierarchical sheet symbol (``SheetSymbol``) that is paired with a hierarchical
-    label on the subsheet (see ``HierarchicalLabel``).
+    """A pin on a hierarchical sheet symbol (:class:`SheetSymbol`) that is paired with a
+    hierarchical label on the subsheet (see :class:`HierarchicalLabel`).
 
     .. versionadded:: 0.x.y (KiCad 11)
     """
@@ -1276,10 +1276,11 @@ class SheetSymbol(SchematicItem):
 
 
 class SchematicPinAlternate(Wrapper):
-    """An alternate definition for a ``SchematicPin``.  Pins may have multiple different functions
-    defined using alternates, and these will show as user-selectable when the symbol is placed on
-    a schematic.  Alternates may change the name, shape, and electrical function of a pin, but not
-    the number (since that is the true identity of a pin and how it maps to a footprint pad).
+    """An alternate definition for a :class:`SchematicPin`.  Pins may have multiple different
+    functions defined using alternates, and these will show as user-selectable when the symbol is
+    placed on a schematic.  Alternates may change the name, shape, and electrical function of a
+    pin, but not the number (since that is the true identity of a pin and how it maps to a
+    footprint pad).
 
     .. versionadded:: 0.x.y (KiCad 11)
     """
@@ -1322,9 +1323,9 @@ class SchematicPinAlternate(Wrapper):
 
 
 class SchematicPin(SchematicItem):
-    """A symbol pin.  Pins form electrical connection at their ``position`` and then extend back to
-    the symbol body by their ``length``.  Pins map to footprint pads according to their ``number``
-    property, which, despite the name, does not need to be strictly numeric.
+    """A symbol pin.  Pins form electrical connection at their :attr:`position` and then extend
+    back to the symbol body by their :attr:`length`.  Pins map to footprint pads according to
+    their :attr:`number` property, which, despite the name, does not need to be strictly numeric.
 
     .. versionadded:: 0.x.y (KiCad 11)
     """
@@ -1380,9 +1381,9 @@ class SchematicPin(SchematicItem):
 
     @property
     def orientation(self) -> SchematicPinOrientation.ValueType:
-        """Which way the pin is oriented, relative to the connection point (`position`).
+        """Which way the pin is oriented, relative to the connection point (:attr:`position`).
 
-        For example, `SPO_RIGHT` means the pin shape extends rightward from the connection
+        For example, ``SPO_RIGHT`` means the pin shape extends rightward from the connection
         point, which usually means the pin is placed on the *left* side of a symbol."""
         return self._proto.orientation
 
@@ -2053,9 +2054,9 @@ class SchematicSymbol(Wrapper):
         A power symbol is one that drives a net name from a single hidden power input pin. To
         create a normal power symbol, set ``type`` to ``SchematicSymbolType.SST_GLOBAL_POWER`` and
         add a single hidden pin of type ``ElectricalPinType.EPT_POWER_INPUT``, normally with length
-        0.  The power symbol will drive a net according to its ``value_field`` contents.  A local
-        power symbol (``SchematicSymbolType.SST_LOCAL_POWER``) will act like a local label on the
-        sheet it is placed on rather than a global label."""
+        0.  The power symbol will drive a net according to its :attr:`value_field` contents.  A
+        local power symbol (``SchematicSymbolType.SST_LOCAL_POWER``) will act like a local label
+        on the sheet it is placed on rather than a global label."""
         return self._proto.type
 
     @type.setter
@@ -2337,8 +2338,8 @@ class SchematicSymbolInstance(SchematicItem):
     An instance of a symbol placed on a schematic.
 
     Direct children of the instance (for example, fields) are stored in absolute coordinate
-    space, meaning they are relative to a sheet.  Children of the symbol definition are in
-    relative coordinate space and don't have rotation or mirroring applied.
+    space, meaning they are relative to a sheet.  Children of the :class:`SchematicSymbol`
+    definition are in relative coordinate space and don't have rotation or mirroring applied.
 
     .. versionadded:: 0.x.y (KiCad 11)
     """
@@ -2630,7 +2631,7 @@ class SchematicHierarchy:
     """The sheet hierarchy of a schematic, returned from
     :meth:`kipy.schematic.Schematic.get_hierarchy`.
 
-    ``root`` provides the first top-level sheet of the schematic, and
+    :attr:`root` provides the first top-level sheet of the schematic, and
     iterating the hierarchy yields every sheet depth-first, beginning with the root.
 
     .. versionadded:: 0.x.y (KiCad 11)"""
@@ -2872,8 +2873,8 @@ class SchematicRuleArea(SchematicItem):
     @shape.setter
     def shape(self, value: GraphicShape):
         """Sets the rule area outline shape.  Polygon outlines are forced closed
-        regardless of the source polygon's ``auto_close`` flag; KiCad requires rule
-        areas to be closed polygons."""
+        regardless of the source polygon's :class:`kipy.geometry.PolygonWithHoles`
+        ``auto_close`` flag; KiCad requires rule areas to be closed polygons."""
         if value.proto.WhichOneof("geometry") != "polygon":
             raise ValueError("SchematicRuleArea shape must be a polygon")
 

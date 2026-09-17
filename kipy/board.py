@@ -831,9 +831,10 @@ class Board(EditorCommandsHandler["BoardItem"], VariantsCommandHandler):
         :param dpi: Sets the resolution of the generated image.  When omitted, the default of 300
             is used.  KiCad accepts between 72 and 2400 DPI.
         :param antialiasing: Controls whether the output image is anti-aliased (enabled by default)
-        :param page_mode: Set to ``BJPM_ALL_LAYERS_ONE_PAGE``, ``output_path`` is taken as a filename and
-            one file is created.  Otherwise, the board layers in ``plot_settings`` are each plotted
-            to a file in the directory given by ``output_path``.
+        :param page_mode: Set to ``BJPM_ALL_LAYERS_ONE_PAGE``, ``output_path`` is taken as a
+            filename and one file is created.  Otherwise, the board layers in
+            :class:`PlotSettings` are each plotted to a file in the directory given by
+            ``output_path``.
         """
         command = board_jobs_pb2.RunBoardJobExportPng()
         if plot_settings is not None:
@@ -1111,7 +1112,7 @@ class Board(EditorCommandsHandler["BoardItem"], VariantsCommandHandler):
     ) -> Sequence[BoardItem]:
         """Retrieves items from the board, optionally filtering to a single or set of types
 
-        Providing no `types` filter will result in all valid types for the given document
+        Providing no ``types`` filter will result in all valid types for the given document
         being retrieved on KiCad 10.0.7 and newer, and is an error on older versions."""
         return self._to_concrete_items(super().get_items(types))
 
@@ -1631,7 +1632,7 @@ class Board(EditorCommandsHandler["BoardItem"], VariantsCommandHandler):
 
     def get_layer_by_name(self, layer_name: str) -> board_types_pb2.BoardLayer.ValueType:
         """Retrieves a board layer ID from the given name, which may be either a KiCad standard
-        layer name (e.g. `In1.Cu`) or a user-defined name in the current board.  Returns
+        layer name (e.g. ``In1.Cu``) or a user-defined name in the current board.  Returns
         BL_UNDEFINED if the given name doesn't map to any layer in the current board.
 
         .. versionadded:: 0.8.0 (KiCad 10.0.6)"""
@@ -1651,11 +1652,11 @@ class Board(EditorCommandsHandler["BoardItem"], VariantsCommandHandler):
     def expand_text_variables(
         self, text: str | list[str], *, expand_env_vars: bool = False
     ) -> str | list[str]:
-        """Expands text variables in a string or list of strings.  Any text variables that do not
-        exist will be left as-is in the output.
+        """Expands text variables in a string or list of strings.  Any text variables that do
+        not exist will be left as-is in the output.
 
-        .. param:: expand_env_vars will expand environment variables in addition to built-in
-                                   KiCad text variables when True.
+        :param expand_env_vars: will expand environment variables in addition to built-in
+            KiCad text variables when True.
         """
         command = project_commands_pb2.ExpandTextVariables()
         command.document.CopyFrom(self._doc)

@@ -134,7 +134,8 @@ class Item(Wrapper):
 
     def clone(self) -> Self:
         """Creates a copy of this item with the ID field cleared, so that it can be passed to
-        create_items where KiCad will generate a new unique ID for it
+        :meth:`~kipy.editor.EditorCommandsHandler.create_items` where KiCad will generate a new
+        unique ID for it
 
         .. versionadded:: 0.8.0"""
         new_proto = self.proto.__class__()

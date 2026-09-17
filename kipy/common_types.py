@@ -191,6 +191,7 @@ class TextAttributes(Wrapper):
     def visible(self) -> bool:
         """
         .. deprecated:: 0.3.0 removed in KiCad 9.0.1
+
         Text items are always visible as of 9.0.1, only Fields can be set to hidden
         """
         return self._proto.visible
@@ -734,6 +735,7 @@ class Arc(GraphicShape):
         """Calculates the angle between the start and end of the arc in radians
 
         :return: The angle of the arc, or None if the arc is degenerate
+
         .. versionadded:: 0.4.0"""
         return arc_angle(self.start, self.mid, self.end)
 

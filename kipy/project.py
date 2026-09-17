@@ -96,8 +96,8 @@ class Project:
     ) -> str | list[str]:
         """Expands text variables in the given text, optionally expanding environment variables
 
-        .. param:: expand_env_vars will expand environment variables in addition to built-in
-                                           KiCad text variables when True.
+        :param expand_env_vars: will expand environment variables in addition to built-in
+            KiCad text variables when True.
         """
 
         command = project_commands_pb2.ExpandTextVariables()

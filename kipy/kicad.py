@@ -184,8 +184,8 @@ class KiCad:
         :param kicad_token: A token that can be provided to the client to uniquely identify a
             KiCad instance.  Leave default to read from the KICAD_API_TOKEN environment variable.
         :param timeout_ms: The maximum time to wait for a response from KiCad, in milliseconds
-        :param headless: Start and connect to a headless `kicad-cli api-server` instance.
-        :param kicad_cli_path: Optional path to `kicad-cli`.
+        :param headless: Start and connect to a headless ``kicad-cli api-server`` instance.
+        :param kicad_cli_path: Optional path to ``kicad-cli``.
         :param file_path: Optional path to a board, schematic, or project file to pre-load in headless mode.
         """
         self._server: KiCadServer | None = None
@@ -273,7 +273,7 @@ class KiCad:
     def get_kicad_binary_path(self, binary_name: str) -> str:
         """Returns the full path to the given KiCad binary
 
-        :param binary_name: The short name of the binary, such as `kicad-cli` or `kicad-cli.exe`.
+        :param binary_name: The short name of the binary, such as ``kicad-cli`` or ``kicad-cli.exe``.
                             If on Windows, an `.exe` extension will be assumed if not present.
         :return: The full path to the binary
         """
@@ -349,7 +349,8 @@ class KiCad:
 
     def create_document(self, path: str, type: DocumentType.ValueType) -> DocumentSpecifier:
         """In headless mode, creates a new document.  Not currently supported for GUI mode.
-        The new document is created in memory only; call `save` to persist to disk.
+        The new document is created in memory only; call
+        :meth:`~kipy.editor.EditorCommandsHandler.save` to persist to disk.
         A project will be created for the document if it doesn't already exist.
         Returns an error if the current document is unsaved: save or revert first.
 
@@ -567,11 +568,11 @@ class KiCad:
 
         NOTE: KiCad may need to load the schematic and PCB editor dynamic libraries if they
         have not been loaded already prior to this call (such as if you call this right after
-        starting `kicad-cli`).  In this case, KiCad may briefly stop responding to API messages,
+        starting ``kicad-cli``).  In this case, KiCad may briefly stop responding to API messages,
         which can cause transient timeout errors if your connection timeout is set to a low value.
 
         :param types: The type(s) of library to load.  If not given, all types are loaded.
-        :raise: ``LibraryCommandError`` if the load request could not be processed.
+        :raise: :class:`LibraryCommandError` if the load request could not be processed.
 
         .. versionadded:: 0.x.y (KiCad 11)
         """
@@ -605,7 +606,7 @@ class KiCad:
             here; choose one table.
         :param nicknames: The library nickname(s) to reload.  If empty, all libraries
             matching the given type and scope are reloaded.
-        :raise: ``LibraryCommandError`` if one of the given nicknames could not be reloaded
+        :raise: :class:`LibraryCommandError` if one of the given nicknames could not be reloaded
             (usually because the nickname could not be found in the library tables).
 
         .. versionadded:: 0.x.y (KiCad 11)
@@ -639,8 +640,8 @@ class KiCad:
             :class:`TimeoutError`.
         :param scope: Which table scope(s) to query.
         :return: The final status of each library.  Libraries whose status is not
-            ``LLS_LOADED`` did not finish loading; check ``error_message`` on those
-            entries for details.
+            ``LLS_LOADED`` did not finish loading; check :attr:`LibraryStatus.error_message`
+            on those entries for details.
 
         .. versionadded:: 0.x.y (KiCad 11)
         """

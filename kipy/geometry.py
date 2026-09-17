@@ -601,9 +601,9 @@ class PolygonWithHoles(Wrapper):
         """Creates a polygon with an outline and optional holes.
 
         :param auto_close: If true (the default), assigning :attr:`outline` forces the
-            outline's ``closed`` flag to True.  Set to false to preserve the assigned
-            polyline's own ``closed`` flag, e.g. to build an open polyline for the
-            schematic editor.
+            outline's :attr:`PolyLine.closed` flag to True.  Set to false to preserve the
+            assigned polyline's own :attr:`PolyLine.closed` flag, e.g. to build an open polyline
+            for the schematic editor.
         """
         self._proto = proto_ref if proto_ref is not None else types.PolygonWithHoles()
 
@@ -817,6 +817,7 @@ def arc_angle(start: Vector2, mid: Vector2, end: Vector2) -> float | None:
     """Calculates the angle between the start and end of the arc in radians
 
     :return: The angle of the arc, or None if the arc is degenerate
+
     .. versionadded:: 0.4.0"""
     center = arc_center(start, mid, end)
     if center is None:

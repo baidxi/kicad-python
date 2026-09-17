@@ -501,7 +501,7 @@ class Schematic(EditorCommandsHandler["SchematicItem"], VariantsCommandHandler):
         """Returns a Schematic bound to the given sheet, e.g. one from :meth:`get_hierarchy` or
         one of its children.
 
-        The returned object can be used to make calls (`get_items`, etc) on a subsheet.
+        The returned object can be used to make calls (:meth:`get_items`, etc) on a subsheet.
         """
         spec = DocumentSpecifier()
         spec.type = DocumentType.DOCTYPE_SCHEMATIC
@@ -578,7 +578,7 @@ class Schematic(EditorCommandsHandler["SchematicItem"], VariantsCommandHandler):
             in a schematic that cannot be used to drive a board until the annotation is fixed.
         :param sheet_path: Optional sheet to place the symbol on; uses the sheet this
             Schematic is bound to if not given (falling back to the sheet currently
-            active in KiCad if this object is not bound to a sheet).  Use ``for_sheet``
+            active in KiCad if this object is not bound to a sheet).  Use :meth:`for_sheet`
             or pass an explicit ``sheet_path`` to place symbols on a subsheet if this
             object holds the root sheet.
         :return: The newly-placed symbol instance.
