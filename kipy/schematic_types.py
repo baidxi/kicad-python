@@ -3066,6 +3066,7 @@ _proto_to_object: dict[type[Message], type[Wrapper]] = {
     schematic_types_pb2.SheetPin: SheetPin,
     schematic_types_pb2.SheetSymbol: SheetSymbol,
     schematic_types_pb2.SchematicPin: SchematicPin,
+    schematic_types_pb2.SchematicSymbol: SchematicSymbol,
     schematic_types_pb2.SchematicSymbolInstance: SchematicSymbolInstance,
     schematic_types_pb2.SchematicRuleArea: SchematicRuleArea,
     schematic_types_pb2.SchematicTable: SchematicTable,

@@ -2592,10 +2592,10 @@ class Footprint(Wrapper):
     ):
         self._proto = proto_ref if proto_ref is not None else board_types_pb2.Footprint()
 
-        self._unwrapped_items = [unwrap(item) for item in self._proto.items]
-
         if proto is not None:
             self._proto.CopyFrom(proto)
+
+        self._unwrapped_items = [unwrap(item) for item in self._proto.items]
 
     def _pack(self):
         """Packs all items in the footprint into the proto"""
@@ -5101,6 +5101,7 @@ _proto_to_object: dict[type[Message], type[Wrapper]] = {
     board_types_pb2.Dimension: Dimension,
     board_types_pb2.Field: Field,
     board_types_pb2.Footprint3DModel: Footprint3DModel,
+    board_types_pb2.Footprint: Footprint,
     board_types_pb2.FootprintInstance: FootprintInstance,
     board_types_pb2.Net: Net,
     board_types_pb2.Pad: Pad,
