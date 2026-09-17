@@ -66,7 +66,8 @@ requires = [
     "poetry-core>=2.0.0,<3.0.0",
     "protoletariat == 3.3.*",
     "setuptools",
-    "mypy-protobuf == 3.6.*"
+    "mypy-protobuf == 3.6.*",
+    "protoc-wheel-0==29"
 ]
 build-backend = "poetry.core.masonry.api"
 
