@@ -479,6 +479,11 @@ class KiCad:
         preloads libraries on its own.  The load proceeds asynchronously; use
         :meth:`wait_for_libraries` to wait for it to finish.
 
+        NOTE: KiCad may need to load the schematic and PCB editor dynamic libraries if they
+        have not been loaded already prior to this call (such as if you call this right after
+        starting `kicad-cli`).  In this case, KiCad may briefly stop responding to API messages,
+        which can cause transient timeout errors if your connection timeout is set to a low value.
+
         :param types: The type(s) of library to load.  If not given, all types are loaded.
         :raise: ``LibraryCommandError`` if the load request could not be processed.
 

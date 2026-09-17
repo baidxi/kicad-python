@@ -72,11 +72,12 @@ from kipy.common_types import (
     Color,
     EmbeddedFile,
     EmbeddedFiles,
+    LibraryIdentifier,
     TextAttributes,
     TitleBlockInfo,
 )
 from kipy.editor import EditorCommandsHandler
-from kipy.geometry import Box2, PolygonWithHoles, Vector2
+from kipy.geometry import Angle, Box2, PolygonWithHoles, Vector2
 from kipy.project import NetClass, Project
 from kipy.proto.board import board_commands_pb2, board_jobs_pb2, board_pb2, board_types_pb2
 from kipy.proto.board.board_commands_pb2 import (  # noqa
@@ -122,6 +123,7 @@ from kipy.proto.common.commands.editor_commands_pb2 import (
     HitTestResponse,
     HitTestResult,
 )
+from kipy.proto.common.commands.library_commands_pb2 import PlaceFromLibraryResponse
 from kipy.proto.common.envelope_pb2 import ApiStatusCode
 from kipy.proto.common.types import (
     KIID,
@@ -1928,3 +1930,44 @@ class Board(EditorCommandsHandler["BoardItem"], VariantsCommandHandler):
         cmd.board.CopyFrom(self._doc)
         cmd.plot_settings.CopyFrom(plot_settings.proto)
         self._kicad.send(cmd, Empty)
+
+    def place_footprint_from_library(
+        self,
+        lib_id: LibraryIdentifier | str,
+        position: Vector2,
+        orientation: Angle | None = None,
+        layer: board_types_pb2.BoardLayer.ValueType = board_types_pb2.BoardLayer.BL_F_Cu,
+    ) -> FootprintInstance:
+        """Places a footprint from a library onto the board
+
+        :param lib_id: The footprint to place, either as a :class:`LibraryIdentifier` or a
+            string such as ``"Resistor_SMD:R_0603_1608Metric"``.
+        :param position: The position to place the footprint at.
+        :param orientation: Optional orientation; 0 degrees if not given.
+        :param layer: The copper layer to place the footprint on.  Must be ``BL_F_Cu`` or
+            ``BL_B_Cu``; the footprint is flipped when placed on ``BL_B_Cu``.
+        :return: The newly-placed footprint instance.
+
+        .. versionadded:: 0.x.y (KiCad 11)
+        """
+        command = board_commands_pb2.PlaceFootprintFromLibrary()
+        command.header.document.CopyFrom(self._doc)
+
+        if isinstance(lib_id, str):
+            library, _, name = lib_id.partition(":")
+            if name == "":
+                raise ValueError("lib_id must be in the format <nickname>:<footprint name>")
+            command.lib_id.library_nickname = library
+            command.lib_id.entry_name = name
+        else:
+            command.lib_id.CopyFrom(lib_id.proto)
+
+        command.position.CopyFrom(position.proto)
+
+        if orientation is not None:
+            command.orientation.CopyFrom(orientation.proto)
+
+        command.layer = layer
+
+        response = self._kicad.send(command, PlaceFromLibraryResponse)
+        return cast(FootprintInstance, unwrap(response.item))

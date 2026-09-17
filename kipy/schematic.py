@@ -26,7 +26,7 @@ from typing import Any, cast
 from google.protobuf.empty_pb2 import Empty
 
 from kipy.client import KiCadClient
-from kipy.common_types import PageSettings, SheetPath, TitleBlockInfo
+from kipy.common_types import LibraryIdentifier, PageSettings, SheetPath, TitleBlockInfo
 from kipy.editor import EditorCommandsHandler
 from kipy.geometry import Vector2
 from kipy.project import Project
@@ -38,6 +38,7 @@ from kipy.proto.common.commands.editor_commands_pb2 import (
     HitTestResult,
     SetPageSettings,
 )
+from kipy.proto.common.commands.library_commands_pb2 import PlaceFromLibraryResponse
 from kipy.proto.common.types import (
     DocumentSpecifier,
     DocumentType,
@@ -49,6 +50,7 @@ from kipy.proto.schematic import schematic_jobs_pb2
 from kipy.proto.schematic.schematic_commands_pb2 import (
     GetSchematicHierarchy,
     GetSchematicNetlist,
+    PlaceSymbolFromLibrary,
     SchematicHierarchyResponse,
     SchematicNetlistResponse,
 )
@@ -75,6 +77,7 @@ from kipy.schematic_types import (
     SchematicNet,
     SchematicRuleArea,
     SchematicSymbolInstance,
+    SchematicSymbolOrientation,
     SchematicTable,
     SchematicText,
     SchematicTextBox,
@@ -532,3 +535,68 @@ class Schematic(EditorCommandsHandler["SchematicItem"], VariantsCommandHandler):
         command.document.CopyFrom(self._doc)
         command.page_settings.CopyFrom(page_settings.proto)
         return PageSettings(self._kicad.send(command, base_types_pb2.PageSettings))
+
+    def place_symbol_from_library(
+        self,
+        lib_id: LibraryIdentifier | str,
+        position: Vector2,
+        orientation: SchematicSymbolOrientation.ValueType | None = None,
+        unit: int | None = None,
+        reference: str | None = None,
+        sheet_path: SheetPath | SheetInstance | None = None,
+    ) -> SchematicSymbolInstance:
+        """Places a symbol from a library onto the schematic
+
+        If ``reference`` is not given, KiCad will either leave the symbol unannotated or
+        automatically annotate it depending on the user's current auto-annotation
+        preference.
+
+        :param lib_id: The symbol to place, either as a :class:`LibraryIdentifier` or a
+            string such as ``"Device:R"``.
+        :param position: The position to place the symbol at.
+        :param orientation: Optional orientation; SchematicSymbolOrientation.SSO_0 if not given.
+        :param unit: Optional unit number for multi-unit symbols; places the first unit if
+            not given.
+        :param reference: Optional reference designator to assign to the new symbol. KiCad
+            currently requires that references be in the format <prefix><number> and automatically
+            appends a letter for multi-unit symbols.  Reference designators must be unique within
+            a schematic for a valid netlist to be generated.  Assigning a non-unique reference or
+            one that does not meet KiCad's requirements will be accepted by the API but will result
+            in a schematic that cannot be used to drive a board until the annotation is fixed.
+        :param sheet_path: Optional sheet to place the symbol on; uses the sheet this
+            Schematic is bound to if not given (falling back to the sheet currently
+            active in KiCad if this object is not bound to a sheet).  Use ``for_sheet``
+            or pass an explicit ``sheet_path`` to place symbols on a subsheet if this
+            object holds the root sheet.
+        :return: The newly-placed symbol instance.
+
+        .. versionadded:: 0.x.y (KiCad 11)
+        """
+        command = PlaceSymbolFromLibrary()
+        command.header.document.CopyFrom(self._spec(sheet_path))
+
+        if isinstance(lib_id, str):
+            library, _, name = lib_id.partition(":")
+            if name == "":
+                raise ValueError("lib_id must be in the format <nickname>:<symbol name>")
+            command.lib_id.library_nickname = library
+            command.lib_id.entry_name = name
+        else:
+            command.lib_id.CopyFrom(lib_id.proto)
+
+        command.position.CopyFrom(position.proto)
+
+        if orientation is not None:
+            command.orientation = orientation
+
+        if unit is not None:
+            if unit < 1:
+                raise ValueError("unit must be a positive integer")
+            command.unit.unit = unit
+
+        if reference is not None:
+            command.reference = reference
+
+        response = self._kicad.send(command, PlaceFromLibraryResponse)
+        item = cast(SchematicSymbolInstance, unwrap(response.item))
+        return item
