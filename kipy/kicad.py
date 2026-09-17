@@ -27,6 +27,7 @@ import platform
 import random
 import string
 import sys
+import time
 from collections.abc import Sequence
 from tempfile import gettempdir
 
@@ -39,8 +40,15 @@ else:
 
 from kipy.board import Board
 from kipy.client import ApiError, KiCadClient
-from kipy.common_types import CompoundShape, PathType, Text, TextBox
-from kipy.errors import FutureVersionError
+from kipy.common_types import (
+    CompoundShape,
+    LibraryIdentifier,
+    LibraryStatus,
+    PathType,
+    Text,
+    TextBox,
+)
+from kipy.errors import FutureVersionError, LibraryCommandError
 from kipy.geometry import Box2
 from kipy.kicad_api_version import KICAD_API_VERSION
 from kipy.project import Project
@@ -48,9 +56,18 @@ from kipy.proto.common import commands
 from kipy.proto.common.commands import (
     base_commands_pb2,
     editor_commands_pb2,
+    library_commands_pb2,
     project_commands_pb2,
 )
 from kipy.proto.common.types import DocumentSpecifier, DocumentType, base_types_pb2
+
+# Re-exported protobuf enum types
+from kipy.proto.common.types.library_types_pb2 import (
+    LibraryCommandStatus,
+    LibraryLoadStatus,
+    LibraryTableScope,
+    LibraryType,
+)
 from kipy.schematic import Schematic
 from kipy.server import KiCadServer, find_kicad_cli
 
@@ -378,6 +395,177 @@ class KiCad:
         if len(docs) == 0:
             raise ApiError("Expected to be able to retrieve at least one schematic")
         return Schematic(self._client, docs[0])
+
+    def get_library_items(
+        self, type: LibraryType.ValueType, nicknames: Sequence[str] = ()
+    ) -> Sequence[LibraryIdentifier]:
+        """Retrieves the identifiers of all items contained in the given library or libraries
+
+        Library loading happens asynchronously after KiCad starts up, so this command may
+        return an empty list if the requested libraries have not finished loading yet.
+        Use :meth:`wait_for_libraries` to wait until the libraries you need have finished
+        loading.
+
+        :param type: The type of library to query
+        :param nicknames: The library nickname(s) to query.  If empty, all libraries of the
+            given type are queried.
+
+        .. versionadded:: 0.x.y (KiCad 11)
+        """
+        command = library_commands_pb2.GetLibraryItems()
+        command.type = type
+        command.nickname.extend(nicknames)
+        response = self._client.send(command, library_commands_pb2.LibraryItemsResponse)
+        return [LibraryIdentifier(item) for item in response.items]
+
+    def get_library_symbols(self, nicknames: Sequence[str] = ()) -> Sequence[LibraryIdentifier]:
+        """Retrieves the identifiers of all symbols contained in the given library or libraries
+
+        See :meth:`get_library_items` for caveats about asynchronous library loading.
+
+        :param nicknames: The library nickname(s) to query.  If empty, all symbol libraries
+            are queried.
+
+        .. versionadded:: 0.x.y (KiCad 11)
+        """
+        return self.get_library_items(LibraryType.LT_SYMBOL, nicknames)
+
+    def get_library_footprints(self, nicknames: Sequence[str] = ()) -> Sequence[LibraryIdentifier]:
+        """Retrieves the identifiers of all footprints contained in the given library or
+        libraries
+
+        See :meth:`get_library_items` for caveats about asynchronous library loading.
+
+        :param nicknames: The library nickname(s) to query.  If empty, all footprint
+            libraries are queried.
+
+        .. versionadded:: 0.x.y (KiCad 11)
+        """
+        return self.get_library_items(LibraryType.LT_FOOTPRINT, nicknames)
+
+    def get_library_statuses(
+        self,
+        types: LibraryType.ValueType | Sequence[LibraryType.ValueType] | None = None,
+        scope: LibraryTableScope.ValueType = LibraryTableScope.LTS_BOTH,
+    ) -> Sequence[LibraryStatus]:
+        """Retrieves the load status of each library in the given table scope(s)
+
+        :param types: The type(s) of library to query.  If not given, all types are queried.
+        :param scope: Which table scope(s) to query (global, project, or both).
+        :return: One :class:`LibraryStatus` per enabled library row in the queried tables.
+
+        .. versionadded:: 0.x.y (KiCad 11)
+        """
+        command = library_commands_pb2.GetLibraryStatuses()
+
+        if types is not None:
+            if isinstance(types, int):
+                command.types.append(types)
+            else:
+                command.types.extend(types)
+
+        command.scope = scope
+        response = self._client.send(command, library_commands_pb2.LibraryStatusResponse)
+        return [LibraryStatus(entry) for entry in response.libraries]
+
+    def load_all_libraries(
+        self,
+        types: LibraryType.ValueType | Sequence[LibraryType.ValueType] | None = None,
+    ):
+        """Starts a background load of all libraries of the given type(s) that are listed
+        in the library tables
+
+        This command is only available in headless (command-line) mode; in GUI mode KiCad
+        preloads libraries on its own.  The load proceeds asynchronously; use
+        :meth:`wait_for_libraries` to wait for it to finish.
+
+        :param types: The type(s) of library to load.  If not given, all types are loaded.
+        :raise: ``LibraryCommandError`` if the load request could not be processed.
+
+        .. versionadded:: 0.x.y (KiCad 11)
+        """
+        command = library_commands_pb2.LoadAllLibraries()
+
+        if types is not None:
+            if isinstance(types, int):
+                command.type.append(types)
+            else:
+                command.type.extend(types)
+
+        status = self._client.send(command, LibraryCommandStatus)
+
+        if status.code != LibraryCommandStatus.Code.LCS_OK:
+            raise LibraryCommandError(status.error_message, code=status.code)
+
+    def reload_library(
+        self,
+        type: LibraryType.ValueType,
+        scope: LibraryTableScope.ValueType,
+        nicknames: Sequence[str] = (),
+    ):
+        """Reloads library table row(s) from disk
+
+        The reload process operates asynchronously; updated library content will not be
+        available until the load has completed.  Use :meth:`wait_for_libraries` to wait
+        for the reload to finish.
+
+        :param type: The type of library to reload.
+        :param scope: Which table to look up the libraries in.  ``LTS_BOTH`` is not valid
+            here; choose one table.
+        :param nicknames: The library nickname(s) to reload.  If empty, all libraries
+            matching the given type and scope are reloaded.
+        :raise: ``LibraryCommandError`` if one of the given nicknames could not be reloaded
+            (usually because the nickname could not be found in the library tables).
+
+        .. versionadded:: 0.x.y (KiCad 11)
+        """
+        if type == LibraryTableScope.LTS_BOTH:
+            raise ValueError("LTS_BOTH is not valid for reload_library")
+
+        command = library_commands_pb2.ReloadLibrary()
+        command.type = type
+        command.scope = scope
+        command.nickname.extend(nicknames)
+        status = self._client.send(command, LibraryCommandStatus)
+
+        if status.code != LibraryCommandStatus.Code.LCS_OK:
+            raise LibraryCommandError(status.error_message, code=status.code)
+
+    def wait_for_libraries(
+        self,
+        types: LibraryType.ValueType | Sequence[LibraryType.ValueType] | None = None,
+        interval_ms: int = 500,
+        timeout_s: float = 60.0,
+        scope: LibraryTableScope.ValueType = LibraryTableScope.LTS_BOTH,
+    ) -> Sequence[LibraryStatus]:
+        """Waits until no queried libraries are still loading, polling with
+        :meth:`get_library_statuses`.
+
+        :param types: The type(s) of library to wait for.  If not given, all types are
+            waited for.
+        :param interval_ms: How long to sleep between status polls, in milliseconds.
+        :param timeout_s: Maximum time to wait, in seconds, before raising
+            :class:`TimeoutError`.
+        :param scope: Which table scope(s) to query.
+        :return: The final status of each library.  Libraries whose status is not
+            ``LLS_LOADED`` did not finish loading; check ``error_message`` on those
+            entries for details.
+
+        .. versionadded:: 0.x.y (KiCad 11)
+        """
+        deadline = time.monotonic() + timeout_s
+        statuses: Sequence[LibraryStatus] = []
+
+        while True:
+            statuses = self.get_library_statuses(types, scope)
+
+            if all(entry.status != LibraryLoadStatus.LLS_LOADING for entry in statuses):
+                return statuses
+
+            if time.monotonic() >= deadline:
+                raise TimeoutError("Timed out waiting for libraries to finish loading")
+
+            time.sleep(interval_ms / 1000.0)
 
     # Utility functions
 

@@ -41,7 +41,12 @@ from kipy.geometry import (
     arc_start_angle,
 )
 from kipy.proto.common import types
-from kipy.proto.common.types import base_types_pb2, embedded_files_pb2, variants_pb2
+from kipy.proto.common.types import (
+    base_types_pb2,
+    embedded_files_pb2,
+    library_types_pb2,
+    variants_pb2,
+)
 from kipy.proto.common.types.base_types_pb2 import (  # noqa
     KIID,
     GraphicFillType,
@@ -331,6 +336,50 @@ class LibraryIdentifier(Wrapper):
 
     def __str__(self) -> str:
         return f"{self.library}:{self.name}"
+
+
+class LibraryStatus(Wrapper):
+    def __init__(
+        self,
+        proto: types.LibraryStatusEntry | None = None,
+        proto_ref: types.LibraryStatusEntry | None = None,
+    ):
+        self._proto = proto_ref if proto_ref is not None else types.LibraryStatusEntry()
+
+        if proto is not None:
+            self._proto.CopyFrom(proto)
+
+    def __repr__(self) -> str:
+        status = library_types_pb2.LibraryLoadStatus.Name(self.status)
+        return f"LibraryStatus({self.nickname!r}, {status})"
+
+    @property
+    def nickname(self) -> str:
+        """The library nickname (the first part of a LIB_ID)"""
+        return self._proto.entry.nickname
+
+    @property
+    def type(self) -> library_types_pb2.LibraryType.ValueType:
+        """The kind of content managed by this library"""
+        return self._proto.entry.type
+
+    @property
+    def scope(self) -> library_types_pb2.LibraryTableScope.ValueType:
+        """Which library table this library belongs to"""
+        return self._proto.entry.scope
+
+    @property
+    def status(self) -> library_types_pb2.LibraryLoadStatus.ValueType:
+        """The load status of this library"""
+        return self._proto.status
+
+    @property
+    def error_message(self) -> str | None:
+        """The error message if the library failed to load, otherwise ``None``"""
+        if self._proto.HasField("error_message"):
+            return self._proto.error_message
+
+        return None
 
 
 class StrokeAttributes(Wrapper):

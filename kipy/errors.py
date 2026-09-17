@@ -19,6 +19,7 @@
 # SOFTWARE.
 
 from kipy.proto.common import ApiStatusCode
+from kipy.proto.common.types.library_types_pb2 import LibraryCommandStatus
 
 
 class ConnectionError(Exception):
@@ -45,9 +46,31 @@ class ApiError(Exception):
 
     @property
     def raw_message(self) -> str:
-        return self.raw_message
+        return self._raw_message
 
 
 class FutureVersionError(Exception):
     """Raised when a version check shows that kicad-python is talking to a version of KiCad
     newer than the one it was built against"""
+
+
+class LibraryCommandError(Exception):
+    """Raised when KiCad returns an error from a library command"""
+
+    def __init__(
+        self,
+        message: str,
+        raw_message: str = "",
+        code: LibraryCommandStatus.Code.ValueType = LibraryCommandStatus.Code.LCS_ERROR,
+    ):
+        super().__init__(message)
+        self._raw_message = raw_message
+        self._code = code
+
+    @property
+    def code(self) -> LibraryCommandStatus.Code.ValueType:
+        return self._code
+
+    @property
+    def raw_message(self) -> str:
+        return self._raw_message
