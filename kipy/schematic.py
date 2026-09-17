@@ -89,7 +89,14 @@ from kipy.variants import VariantsCommandHandler
 
 
 class Schematic(EditorCommandsHandler["SchematicItem"], VariantsCommandHandler):
-    """
+    """A representation of the schematic of a KiCad project, or a view into a subsheet of that
+    schematic.  This class is the main entrypoint to interacting with or creating schematics with
+    the API.  Schematics in a project may be split across many different sheets; each sheet is its
+    own graphical canvas and has a unique :class:`SheetPath`.  Use :meth:`get_hierarchy` to get the
+    sheets in a project, and :meth:`for_sheet` to get a version of this schematic object scoped to
+    a particular sheet.  The sheet scope determines whether the result of queries like
+    :meth:`get_items` covers the entire schematic or just one sheet.
+
     .. versionadded:: 0.x.y (KiCad 11)
     """
 

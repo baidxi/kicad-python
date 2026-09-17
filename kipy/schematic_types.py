@@ -662,9 +662,10 @@ class SchematicGraphicShape(SchematicItem):
        segment, either create a SchematicLine object, or create a `polygon` shape with only two
        points.
 
-    2. `polygon` shapes are more limited than in the board editor.  The schematic editor supports
-       a single polyline, and it does not use the explicit `closed` flag in `PolygonWithHoles.outline`.
-       To create a closed polygon, duplicate the starting point as the last point.
+    2. `polygon` shapes are more limited than in the board editor.  The schematic editor supports a
+       single polyline, and it does not use the explicit `closed` flag in
+       :meth:`PolygonWithHoles.outline`. To create a closed polygon, duplicate the starting point
+       as the last point.
 
     .. versionadded:: 0.x.y (KiCad 11)
     """
