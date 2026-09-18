@@ -50,8 +50,10 @@ __all__ = (
 class PlotSettings(Wrapper):
     """Shared settings for schematic plotting jobs.
 
-    When plotting all sheets, set :attr:`plot_all` to True and leave :attr:`plot_pages`
-    empty unless you know the exact sheet-instance paths to filter.
+    Set :attr:`plot_all` to plot every sheet. When it is set, :attr:`plot_pages`
+    filters the plotted sheets by page number (e.g. ``"2"``). When :attr:`plot_all` is not set,
+    :attr:`plot_pages` is ignored and only the current sheet (or sheet targeted by the
+    document, if one is provided).
     """
 
     def __init__(
