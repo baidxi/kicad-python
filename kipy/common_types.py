@@ -44,6 +44,7 @@ from kipy.proto.common import types
 from kipy.proto.common.types import (
     base_types_pb2,
     embedded_files_pb2,
+    jobs_pb2,
     library_types_pb2,
     variants_pb2,
 )
@@ -1481,3 +1482,42 @@ class DesignVariant(Wrapper):
     @description.setter
     def description(self, value: str):
         self._proto.description = value
+
+
+class JobResult(Wrapper):
+    """A result returned from running an export job.  Provides overall status and a list of
+    files created by the job."""
+
+    def __init__(
+        self,
+        proto: jobs_pb2.RunJobResponse | None = None,
+        proto_ref: jobs_pb2.RunJobResponse | None = None,
+    ):
+        self._proto = proto_ref if proto_ref is not None else jobs_pb2.RunJobResponse()
+        if proto is not None:
+            self._proto.CopyFrom(proto)
+
+    def __repr__(self) -> str:
+        return (
+            f"<JobResult succeeded={self.succeeded} "
+            f"output_paths={self.output_paths} message={self.message!r}>"
+        )
+
+    def __bool__(self) -> bool:
+        return self.succeeded
+
+    @property
+    def status(self) -> jobs_pb2.JobStatus.ValueType:
+        return self._proto.status
+
+    @property
+    def output_paths(self) -> list[str]:
+        return list(self._proto.output_path)
+
+    @property
+    def message(self) -> str:
+        return self._proto.message
+
+    @property
+    def succeeded(self) -> bool:
+        return self._proto.status == jobs_pb2.JS_SUCCESS

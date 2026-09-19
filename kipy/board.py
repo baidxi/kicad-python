@@ -31,7 +31,6 @@ from google.protobuf.empty_pb2 import Empty
 from kipy.board_jobs import (
     Export3DSettings,
     Ipc2581ExportSettings,
-    JobResult,
     PlotSettings,
     PositionExportSettings,
     RenderSettings,
@@ -72,6 +71,7 @@ from kipy.common_types import (
     Color,
     EmbeddedFile,
     EmbeddedFiles,
+    JobResult,
     LibraryIdentifier,
     TextAttributes,
     TitleBlockInfo,

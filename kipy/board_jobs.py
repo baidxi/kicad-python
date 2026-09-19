@@ -24,44 +24,8 @@ from collections.abc import Sequence
 
 from kipy.geometry import Vector2, Vector3D
 from kipy.proto.board import board_jobs_pb2, board_types_pb2
-from kipy.proto.common.types import enums_pb2, jobs_pb2
+from kipy.proto.common.types import enums_pb2
 from kipy.wrapper import Wrapper
-
-
-class JobResult(Wrapper):
-    def __init__(
-        self,
-        proto: jobs_pb2.RunJobResponse | None = None,
-        proto_ref: jobs_pb2.RunJobResponse | None = None,
-    ):
-        self._proto = proto_ref if proto_ref is not None else jobs_pb2.RunJobResponse()
-        if proto is not None:
-            self._proto.CopyFrom(proto)
-
-    def __repr__(self) -> str:
-        return (
-            f"<JobResult succeeded={self.succeeded} "
-            f"output_paths={self.output_paths} message={self.message!r}>"
-        )
-
-    def __bool__(self) -> bool:
-        return self.succeeded
-
-    @property
-    def status(self) -> jobs_pb2.JobStatus.ValueType:
-        return self._proto.status
-
-    @property
-    def output_paths(self) -> list[str]:
-        return list(self._proto.output_path)
-
-    @property
-    def message(self) -> str:
-        return self._proto.message
-
-    @property
-    def succeeded(self) -> bool:
-        return self._proto.status == jobs_pb2.JS_SUCCESS
 
 
 class PlotSettings(Wrapper):

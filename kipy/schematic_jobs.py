@@ -22,7 +22,7 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 
-from kipy.board_jobs import JobResult
+from kipy.common_types import JobResult
 from kipy.proto.schematic import schematic_jobs_pb2
 from kipy.proto.schematic.schematic_jobs_pb2 import (
     BOMFilterScope,
