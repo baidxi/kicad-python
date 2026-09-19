@@ -57,6 +57,7 @@ setuptools = "^75.6.0"
 sphinx = "7.4"
 furo = "^2024.8.6"
 pytest = "^8.3.4"
+python-dotenv = "^1.0"
 
 [tool.poetry.requires-plugins]
 poetry-plugin-export = ">=1.8"

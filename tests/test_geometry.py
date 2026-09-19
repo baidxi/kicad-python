@@ -24,6 +24,7 @@ import pytest
 
 from kipy.common_types import Circle
 from kipy.geometry import (
+    Angle,
     Box2,
     PolyLine,
     PolyLineNode,
@@ -397,3 +398,71 @@ def test_schematic_rule_area_shape_forces_closed():
 
     with pytest.raises(ValueError):
         rule.shape = Rectangle.from_coords(Vector2.from_xy(0, 0), Vector2.from_xy(1, 1))
+
+
+def test_vector2_proto_ref_shares_storage():
+    """Vector2(proto_ref=...) is a live view: mutations land in the parent proto."""
+    holder = base_types_pb2.Vector2()
+    view = Vector2(proto_ref=holder)
+    view.x = 1234
+    assert holder.x_nm == 1234
+
+    holder.x_nm = 4321
+    assert view.x == 4321
+
+
+def test_angle_proto_ref_shares_storage():
+    """Angle(proto_ref=...) is a live view: mutations land in the parent proto."""
+    holder = base_types_pb2.Angle()
+    view = Angle(proto_ref=holder)
+    view.degrees = 12.5
+    assert holder.value_degrees == pytest.approx(12.5)
+
+    holder.value_degrees = -3.25
+    assert view.degrees == pytest.approx(-3.25)
+
+
+def test_vector2_copy_constructor():
+    source = base_types_pb2.Vector2(x_nm=1, y_nm=2)
+    copy = Vector2(source)
+    copy.x = 99
+    assert source.x_nm == 1
+
+
+def test_angle_copy_constructor():
+    source = base_types_pb2.Angle(value_degrees=5.0)
+    copy = Angle(source)
+    copy.degrees = 77.0
+    assert source.value_degrees == pytest.approx(5.0)
+
+
+def test_vector2_copy_constructor_accepts_wrapper():
+    source = Vector2.from_xy(3, 4)
+    copy = Vector2(source)
+    copy.x = 30
+    assert source.x == 3
+
+
+def test_angle_copy_constructor_accepts_wrapper():
+    source = Angle.from_degrees(10)
+    copy = Angle(source)
+    copy.degrees = 20
+    assert source.degrees == pytest.approx(10)
+
+
+def test_vector2_iadd_isub():
+    holder = base_types_pb2.Vector2()
+    view = Vector2(proto_ref=holder)
+    view += Vector2.from_xy(10, 20)
+    view -= Vector2.from_xy(5, 7)
+    assert view == Vector2.from_xy(5, 13)
+    assert holder.x_nm == 5 and holder.y_nm == 13
+
+
+def test_angle_iadd_isub():
+    holder = base_types_pb2.Angle()
+    view = Angle(proto_ref=holder)
+    view += Angle.from_degrees(90)
+    view -= Angle.from_degrees(30)
+    assert view.degrees == pytest.approx(60)
+    assert holder.value_degrees == pytest.approx(60)

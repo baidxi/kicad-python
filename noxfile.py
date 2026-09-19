@@ -41,3 +41,15 @@ def tests(session: Session) -> None:
     session.install("poetry")
     session.run("poetry", "install", "--with", "dev")
     session.run("pytest")
+
+
+@nox.session
+def live_tests(session: Session) -> None:
+    """Run the live tests against a headless KiCad.
+
+    Requires kicad-cli; set the KICAD_CLI environment variable (or put it in a
+    repo-root .env file) if it is not installed in a default location.
+    """
+    session.install("poetry")
+    session.run("poetry", "install", "--with", "dev")
+    session.run("pytest", "--live")
