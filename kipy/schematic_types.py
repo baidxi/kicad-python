@@ -1124,6 +1124,10 @@ class SheetSymbol(SchematicItem):
 
     @property
     def path(self) -> SheetPath:
+        """The sheet that contains this instance.
+
+        On a create or update request, the targeted sheet comes from the request header, and this
+        field reports the sheet the returned instance was read from."""
         return SheetPath(proto_ref=self._proto.path)
 
     @path.setter
@@ -1132,6 +1136,7 @@ class SheetSymbol(SchematicItem):
 
     @property
     def page_number(self) -> str:
+        """Page numbers in KiCad are arbitrary user data and don't have to be numeric"""
         return self._proto.page_number
 
     @page_number.setter
@@ -1267,6 +1272,7 @@ class SheetSymbol(SchematicItem):
 
     @property
     def variants(self) -> Sequence[SheetVariant]:
+        """The variants carried by this instance."""
         return MutableWrapperSequence(self._proto.variants.variants, SheetVariant)
 
     @variants.setter
@@ -1579,6 +1585,7 @@ class SchematicSymbolChild(Wrapper):
 
     @property
     def is_private(self) -> bool:
+        """Private items are only shown in the symbol editor, not the schematic"""
         return self._proto.is_private
 
     @is_private.setter
@@ -1679,6 +1686,7 @@ class SchematicSymbolVariant(Wrapper):
 
     @property
     def attributes(self) -> SchematicSymbolAttributes:
+        """complete set of attributes for a symbol with this variant"""
         return SchematicSymbolAttributes(proto_ref=self._proto.attributes)
 
     @attributes.setter
@@ -1746,6 +1754,7 @@ class PinMapEntry(Wrapper):
 
     @property
     def pad_number(self) -> str:
+        """bracketed stacked list allowed, e.g. '[4,9]'"""
         return self._proto.pad_number
 
     @pad_number.setter
@@ -2268,6 +2277,7 @@ class SchematicSymbol(Wrapper):
 
     @property
     def show_pin_numbers(self) -> bool:
+        """Whether pin numbers are shown for all pins of this symbol"""
         return self._proto.show_pin_numbers
 
     @show_pin_numbers.setter
@@ -2276,6 +2286,7 @@ class SchematicSymbol(Wrapper):
 
     @property
     def show_pin_names(self) -> bool:
+        """Whether pin names are shown for all pins of this symbol"""
         return self._proto.show_pin_names
 
     @show_pin_names.setter
@@ -2284,6 +2295,7 @@ class SchematicSymbol(Wrapper):
 
     @property
     def pin_name_offset(self) -> int:
+        """Distance between the pin and its name text; 0 means the name is inside the body outline"""
         return self._proto.pin_name_offset.value_nm
 
     @pin_name_offset.setter
@@ -2373,6 +2385,12 @@ class SchematicSymbolInstance(SchematicItem):
 
     @property
     def path(self) -> SheetPath:
+        """Symbol instances may refer to the same graphical symbol from multiple different sheets
+        in a hierarchical schematic.  Each instance will have its own reference designator, and
+        may also have a different selected unit and other attributes.
+
+        On a create or update request, the targeted sheet comes from the request header, and this
+        field reports the sheet the returned instance was read from."""
         return SheetPath(proto_ref=self._proto.path)
 
     @path.setter
@@ -2475,6 +2493,8 @@ class SchematicSymbolInstance(SchematicItem):
 
     @property
     def attributes(self) -> SchematicSymbolAttributes:
+        """The attributes of the default variant, shared by every instance of this symbol.  Give one
+        instance its own attributes through a named variant instead."""
         return SchematicSymbolAttributes(proto_ref=self._proto.attributes)
 
     @attributes.setter

@@ -459,6 +459,7 @@ class Export3DSettings(Wrapper):
 
     @property
     def vrml_units(self) -> enums_pb2.Units.ValueType:
+        """Inches, millimeters, meters, or tenths of an inch are accepted"""
         return self._proto.vrml_units
 
     @vrml_units.setter
@@ -766,6 +767,7 @@ class PositionExportSettings(Wrapper):
 
     @property
     def units(self) -> enums_pb2.Units.ValueType:
+        """Inches or millimeters are accepted"""
         return self._proto.units
 
     @units.setter
@@ -834,6 +836,7 @@ class Ipc2581ExportSettings(Wrapper):
 
     @property
     def units(self) -> enums_pb2.Units.ValueType:
+        """Inches or millimeters are accepted"""
         return self._proto.units
 
     @units.setter
@@ -956,6 +959,7 @@ class SvgExportSettings(Wrapper):
 
     @property
     def page_mode(self) -> board_jobs_pb2.BoardJobPaginationMode.ValueType:
+        """Supports ``BJPM_ALL_LAYERS_ONE_PAGE`` and ``BJPM_EACH_LAYER_OWN_FILE``."""
         return self._proto.page_mode
 
     @page_mode.setter
@@ -1001,6 +1005,7 @@ class DxfExportSettings(Wrapper):
 
     @property
     def units(self) -> enums_pb2.Units.ValueType:
+        """Inches or millimeters are accepted"""
         return self._proto.units
 
     @units.setter
@@ -1009,6 +1014,7 @@ class DxfExportSettings(Wrapper):
 
     @property
     def page_mode(self) -> board_jobs_pb2.BoardJobPaginationMode.ValueType:
+        """Supports ``BJPM_ALL_LAYERS_ONE_PAGE`` and ``BJPM_EACH_LAYER_OWN_FILE``."""
         return self._proto.page_mode
 
     @page_mode.setter
@@ -1107,6 +1113,7 @@ class PsExportSettings(Wrapper):
 
     @property
     def page_mode(self) -> board_jobs_pb2.BoardJobPaginationMode.ValueType:
+        """Supports ``BJPM_ALL_LAYERS_ONE_PAGE`` and ``BJPM_EACH_LAYER_OWN_FILE``."""
         return self._proto.page_mode
 
     @page_mode.setter
@@ -1178,6 +1185,9 @@ class GerberExportSettings(Wrapper):
 
     @property
     def use_board_plot_params(self) -> bool:
+        """If true, the Gerber plot settings stored in the board file are used instead of the
+        settings provided in this class.  When set, the layers list is derived from the
+        board's plot layer selection."""
         return self._proto.use_board_plot_params
 
     @use_board_plot_params.setter
@@ -1186,6 +1196,7 @@ class GerberExportSettings(Wrapper):
 
     @property
     def create_gerber_job_file(self) -> bool:
+        """If true, a Gerber job file (.gbrjob) is created alongside the plot outputs."""
         return self._proto.create_gerber_job_file
 
     @create_gerber_job_file.setter
@@ -1194,6 +1205,7 @@ class GerberExportSettings(Wrapper):
 
     @property
     def include_netlist_attributes(self) -> bool:
+        """If true, Gerber X2 netlist attributes are included in the plot outputs."""
         return self._proto.include_netlist_attributes
 
     @include_netlist_attributes.setter
@@ -1202,6 +1214,7 @@ class GerberExportSettings(Wrapper):
 
     @property
     def use_x2_format(self) -> bool:
+        """If true, Gerber X2 format is used."""
         return self._proto.use_x2_format
 
     @use_x2_format.setter
@@ -1210,6 +1223,7 @@ class GerberExportSettings(Wrapper):
 
     @property
     def disable_aperture_macros(self) -> bool:
+        """If true, aperture macros are disabled in the plot outputs."""
         return self._proto.disable_aperture_macros
 
     @disable_aperture_macros.setter
@@ -1218,6 +1232,7 @@ class GerberExportSettings(Wrapper):
 
     @property
     def use_protel_file_extensions(self) -> bool:
+        """If true, Protel-style file extensions are used (e.g. .gbr → .gtl)."""
         return self._proto.use_protel_file_extensions
 
     @use_protel_file_extensions.setter
@@ -1324,6 +1339,7 @@ class DrillExportSettings(Wrapper):
 
     @property
     def units(self) -> enums_pb2.Units.ValueType:
+        """Inches or millimeters are accepted"""
         return self._proto.units
 
     @units.setter
@@ -1356,6 +1372,7 @@ class DrillExportSettings(Wrapper):
 
     @property
     def map_format(self) -> board_jobs_pb2.DrillMapFormat.ValueType:
+        """Set to a valid value to generate a drill map.  Leave unset for no drill map."""
         return self._proto.map_format
 
     @map_format.setter
@@ -1364,6 +1381,7 @@ class DrillExportSettings(Wrapper):
 
     @property
     def gerber_precision(self) -> board_jobs_pb2.DrillGerberPrecision.ValueType:
+        """When generating drill files in Gerber format, the precision to use for coordinates"""
         return self._proto.gerber_precision
 
     @gerber_precision.setter
@@ -1385,6 +1403,7 @@ class DrillExportSettings(Wrapper):
 
     @property
     def report_format(self) -> board_jobs_pb2.DrillReportFormat.ValueType:
+        """Set to a valid value to generate a drill report.  Leave unset for no report."""
         return self._proto.report_format
 
     @report_format.setter
@@ -1505,6 +1524,7 @@ class OdbExportSettings(Wrapper):
 
     @property
     def units(self) -> enums_pb2.Units.ValueType:
+        """Inches or millimeters are accepted"""
         return self._proto.units
 
     @units.setter
@@ -1557,6 +1577,7 @@ class StatsExportSettings(Wrapper):
 
     @property
     def units(self) -> enums_pb2.Units.ValueType:
+        """Inches or millimeters are accepted"""
         return self._proto.units
 
     @units.setter

@@ -193,6 +193,8 @@ class BOMFormatSettings(Wrapper):
 
     @property
     def preset_name(self) -> str:
+        """If supplied, will apply a preset to the other format settings.  Built-in values 'CSV',
+        'TSV', and 'Semicolons' are always available, as well as any user-saved presets."""
         return self._proto.preset_name
 
     @preset_name.setter
@@ -201,6 +203,7 @@ class BOMFormatSettings(Wrapper):
 
     @property
     def field_delimiter(self) -> str:
+        """Delimiter between fields (columns) in a data row"""
         return self._proto.field_delimiter
 
     @field_delimiter.setter
@@ -209,6 +212,7 @@ class BOMFormatSettings(Wrapper):
 
     @property
     def string_delimiter(self) -> str:
+        """Character to use for quoting strings"""
         return self._proto.string_delimiter
 
     @string_delimiter.setter
@@ -217,6 +221,7 @@ class BOMFormatSettings(Wrapper):
 
     @property
     def ref_delimiter(self) -> str:
+        """Delimiter between reference designators when exporting a list (e.g. "R1,R3,R5")"""
         return self._proto.ref_delimiter
 
     @ref_delimiter.setter
@@ -225,6 +230,7 @@ class BOMFormatSettings(Wrapper):
 
     @property
     def ref_range_delimiter(self) -> str:
+        """Delimiter between reference designators when exporting a range (e.g. "R1-R10")"""
         return self._proto.ref_range_delimiter
 
     @ref_range_delimiter.setter
@@ -233,6 +239,7 @@ class BOMFormatSettings(Wrapper):
 
     @property
     def keep_tabs(self) -> bool:
+        """Whether tab characters in field values will be preserved when exporting or stripped"""
         return self._proto.keep_tabs
 
     @keep_tabs.setter
@@ -241,6 +248,7 @@ class BOMFormatSettings(Wrapper):
 
     @property
     def keep_line_breaks(self) -> bool:
+        """Whether line breaks in field values will be preserved when exporting or stripped"""
         return self._proto.keep_line_breaks
 
     @keep_line_breaks.setter
@@ -272,6 +280,7 @@ class BOMField(Wrapper):
 
     @property
     def name(self) -> str:
+        """The name of the field in KiCad to export"""
         return self._proto.name
 
     @name.setter
@@ -280,6 +289,7 @@ class BOMField(Wrapper):
 
     @property
     def label(self) -> str:
+        """The name to give the field in the exported BOM (i.e. the column header name)"""
         return self._proto.label
 
     @label.setter
@@ -288,6 +298,7 @@ class BOMField(Wrapper):
 
     @property
     def group_by(self) -> bool:
+        """Whether or not to group exported components by this field"""
         return self._proto.group_by
 
     @group_by.setter
@@ -309,6 +320,9 @@ class BOMFieldSettings(Wrapper):
 
     @property
     def preset_name(self) -> str:
+        """If supplied, will apply a default or user-stored preset to the other field settings.
+        Default values available include 'Default Editing', 'Grouped By Value',
+        'Grouped By Value and Footprint', and 'Attributes'."""
         return self._proto.preset_name
 
     @preset_name.setter
@@ -334,6 +348,7 @@ class BOMFieldSettings(Wrapper):
 
     @property
     def sort_direction(self) -> schematic_jobs_pb2.BOMSortDirection.ValueType:
+        """Sort direction; defaults to ascending if unspecified"""
         return self._proto.sort_direction
 
     @sort_direction.setter

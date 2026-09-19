@@ -1303,12 +1303,19 @@ class SolderMaskOverrides(Wrapper):
             self._proto.CopyFrom(proto)
 
     @property
-    def solder_mask_margin(self) -> int:
-        return self._proto.solder_mask_margin.value_nm
+    def solder_mask_margin(self) -> int | None:
+        """Solder mask expansion/contraction.  Absence of this field means the margin will be taken
+        from this object's parent or the board design rules."""
+        if self._proto.HasField("solder_mask_margin"):
+            return self._proto.solder_mask_margin.value_nm
+        return None
 
     @solder_mask_margin.setter
-    def solder_mask_margin(self, margin_nm: int):
-        self._proto.solder_mask_margin.value_nm = margin_nm
+    def solder_mask_margin(self, margin_nm: int | None):
+        if margin_nm is None:
+            self._proto.ClearField("solder_mask_margin")
+        else:
+            self._proto.solder_mask_margin.value_nm = margin_nm
 
     @property
     def expose_copper(self) -> bool:
@@ -1337,6 +1344,7 @@ class SolderPasteOverrides(Wrapper):
 
     @property
     def solder_paste_margin(self) -> int | None:
+        """Solder paste expansion/contraction"""
         if self._proto.HasField("solder_paste_margin"):
             return self._proto.solder_paste_margin.value_nm
         return None
@@ -1350,6 +1358,7 @@ class SolderPasteOverrides(Wrapper):
 
     @property
     def solder_paste_margin_ratio(self) -> float | None:
+        """Solder paste expansion/contraction ratio"""
         if self._proto.HasField("solder_paste_margin_ratio"):
             return self._proto.solder_paste_margin_ratio.value
         return None
@@ -1379,6 +1388,7 @@ class PadTeardropSettings(Wrapper):
 
     @property
     def mode(self) -> PadTeardropMode.ValueType:
+        """Whether to enable teardrops"""
         return self._proto.mode
 
     @mode.setter
@@ -1482,6 +1492,8 @@ class PadStackLayer(Wrapper):
 
     @property
     def layer(self) -> BoardLayer.ValueType:
+        """The board layer of this padstack entry.  For Front/Inner/Back padstacks, In1_Cu is used
+        to represent inner layers."""
         return self._proto.layer
 
     @layer.setter
@@ -1490,6 +1502,7 @@ class PadStackLayer(Wrapper):
 
     @property
     def shape(self) -> PadStackShape.ValueType:
+        """The shape of the pad on this layer"""
         return self._proto.shape
 
     @shape.setter
@@ -1498,6 +1511,7 @@ class PadStackLayer(Wrapper):
 
     @property
     def size(self) -> Vector2:
+        """The size (x and y) of the shape on this layer"""
         return Vector2(self._proto.size)
 
     @size.setter
@@ -1506,6 +1520,8 @@ class PadStackLayer(Wrapper):
 
     @property
     def offset(self) -> Vector2:
+        """The offset of the center of this shape from the center of the pad (which is defined as
+        the hole center)"""
         return Vector2(self._proto.offset)
 
     @offset.setter
@@ -1514,6 +1530,8 @@ class PadStackLayer(Wrapper):
 
     @property
     def corner_rounding_ratio(self) -> float:
+        """How much to round the corners of the shape by, as a fraction of min(size.x, size.y)
+        Only used for ``PSS_ROUNDRECT`` or ``PSS_CHAMFEREDRECT``"""
         return self._proto.corner_rounding_ratio
 
     @corner_rounding_ratio.setter
@@ -1522,6 +1540,8 @@ class PadStackLayer(Wrapper):
 
     @property
     def chamfer_ratio(self) -> float:
+        """How much to round the corners of the shape by, as a fraction of min(size.x, size.y)
+        Only used for ``PSS_CHAMFEREDRECT``"""
         return self._proto.chamfer_ratio
 
     @chamfer_ratio.setter
@@ -1534,6 +1554,8 @@ class PadStackLayer(Wrapper):
 
     @property
     def trapezoid_delta(self) -> Vector2:
+        """The difference in side length between the short and long pads in a trapezoid.  Only one
+        of x or y may be nonzero. Only used for ``PSS_TRAPEZOID``"""
         return Vector2(self._proto.trapezoid_delta)
 
     @trapezoid_delta.setter
@@ -1557,6 +1579,8 @@ class PadStackLayer(Wrapper):
 
     @property
     def custom_anchor_shape(self) -> PadStackShape.ValueType:
+        """If shape == ``PSS_CUSTOM``, defines the shape of the anchor (only ``PSS_CIRCLE`` and
+        ``PSS_RECTANGLE`` supported at present)"""
         return self._proto.custom_anchor_shape
 
     @custom_anchor_shape.setter
@@ -1565,6 +1589,7 @@ class PadStackLayer(Wrapper):
 
     @property
     def zone_settings(self) -> board_types_pb2.ZoneConnectionSettings:
+        """Reserved for future use -- at the moment, zone connection settings are not per-layer"""
         return self._proto.zone_settings
 
     @zone_settings.setter
@@ -1585,6 +1610,7 @@ class DrillProperties(Wrapper):
 
     @property
     def start_layer(self) -> BoardLayer.ValueType:
+        """Lowest (closest to F_Cu) layer this drill exists on."""
         return self._proto.start_layer
 
     @start_layer.setter
@@ -1593,6 +1619,7 @@ class DrillProperties(Wrapper):
 
     @property
     def end_layer(self) -> BoardLayer.ValueType:
+        """Highest (closest to B_Cu) layer this drill exists on."""
         return self._proto.end_layer
 
     @end_layer.setter
@@ -1714,6 +1741,8 @@ class PadStackOuterLayer(Wrapper):
 
     @property
     def solder_mask_settings(self) -> SolderMaskOverrides:
+        """NOTE: At present, KiCad does not support different solder mask expansion settings for
+        the top and bottom layers"""
         return SolderMaskOverrides(proto_ref=self._proto.solder_mask_settings)
 
     @solder_mask_settings.setter
@@ -1722,6 +1751,8 @@ class PadStackOuterLayer(Wrapper):
 
     @property
     def solder_paste_settings(self) -> SolderPasteOverrides:
+        """NOTE: At present, KiCad does not support different solder paste expansion settings for
+        the top and bottom layers"""
         return SolderPasteOverrides(proto_ref=self._proto.solder_paste_settings)
 
     @solder_paste_settings.setter
@@ -1762,6 +1793,7 @@ class PadStack(BoardItem):
 
     @property
     def type(self) -> board_types_pb2.PadStackType.ValueType:
+        """What type of pad stack this represents."""
         return self._proto.type
 
     @type.setter
@@ -1799,10 +1831,12 @@ class PadStack(BoardItem):
 
     @property
     def drill(self) -> DrillProperties:
+        """Properties of the drilled hole in this padstack, if it has one"""
         return DrillProperties(proto_ref=self._proto.drill)
 
     @property
     def unconnected_layer_removal(self) -> UnconnectedLayerRemoval.ValueType:
+        """How to treat pad shapes on unconnected layers."""
         return self._proto.unconnected_layer_removal
 
     @unconnected_layer_removal.setter
@@ -1821,6 +1855,7 @@ class PadStack(BoardItem):
 
     @property
     def angle(self) -> Angle:
+        """The overall rotation of this padstack (affects all layers)"""
         return Angle(proto_ref=self._proto.angle)
 
     @angle.setter
@@ -1829,14 +1864,17 @@ class PadStack(BoardItem):
 
     @property
     def front_outer_layers(self) -> PadStackOuterLayer:
+        """Solder mask and paste settings for the front"""
         return PadStackOuterLayer(proto_ref=self._proto.front_outer_layers)
 
     @property
     def back_outer_layers(self) -> PadStackOuterLayer:
+        """Solder mask and paste settings for the back"""
         return PadStackOuterLayer(proto_ref=self._proto.back_outer_layers)
 
     @property
     def zone_settings(self) -> ZoneConnectionSettings:
+        """Controls for how copper zones connect to the padstack"""
         return ZoneConnectionSettings(proto_ref=self._proto.zone_settings)
 
     @property
@@ -1882,7 +1920,7 @@ class PadStack(BoardItem):
     def is_masked(self, layer: BoardLayer.ValueType = BoardLayer.BL_UNDEFINED) -> bool:
         """
         Returns true if the padstack is masked on the given copper layer, or on either layer if
-        layer is BL_UNDEFINED.
+        layer is ``BL_UNDEFINED``.
         """
         if layer == BoardLayer.BL_UNDEFINED:
             return (
@@ -1930,7 +1968,7 @@ class SymbolPinInfo(Wrapper):
 
     @property
     def type(self) -> base_types_pb2.ElectricalPinType.ValueType:
-        """The electrical type of the associated symbol pin (EPT_UNKNOWN if not)"""
+        """The electrical type of the associated symbol pin (``EPT_UNKNOWN`` if not)"""
         return self._proto.type
 
     @type.setter
@@ -1980,6 +2018,7 @@ class Pad(BoardItem):
 
     @property
     def position(self) -> Vector2:
+        """A pad's position is always relative to the parent footprint's origin"""
         return Vector2(self._proto.position)
 
     @position.setter
@@ -1988,6 +2027,9 @@ class Pad(BoardItem):
 
     @property
     def fab_property(self) -> PadFabricationProperty.ValueType:
+        """Fabrication property of the pad
+
+        .. versionadded:: 0.x.0 (KiCad 10.0.7)"""
         return self._proto.fab_property
 
     @fab_property.setter
@@ -2140,6 +2182,7 @@ class Via(BoardItem):
 
     @property
     def position(self) -> Vector2:
+        """The location of the via's center point"""
         return Vector2(self._proto.position)
 
     @position.setter
@@ -2187,15 +2230,16 @@ class Via(BoardItem):
 
     @property
     def padstack(self) -> PadStack:
+        """The pad stack definition for this via."""
         return PadStack(proto_ref=self._proto.pad_stack)
 
     @property
     def diameter(self) -> int:
         """A helper property to get or set the diameter of the via on all copper layers.
 
-        Warning: only makes sense if the via's padstack mode is PST_NORMAL.  This will return the
+        Warning: only makes sense if the via's padstack mode is ``PST_NORMAL``.  This will return the
         pad diameter on the front copper layer otherwise.  Setting this property will set the
-        padstack mode to PST_NORMAL as a side-effect.
+        padstack mode to ``PST_NORMAL`` as a side-effect.
 
         To get or set the diameter for other padstack types, use the :attr:`padstack` property
         directly.
@@ -2392,6 +2436,7 @@ class Footprint3DModel(Wrapper):
 
     @property
     def scale(self) -> Vector3D:
+        """Scaling factor along each axis"""
         return Vector3D(self._proto.scale)
 
     @scale.setter
@@ -2400,6 +2445,7 @@ class Footprint3DModel(Wrapper):
 
     @property
     def rotation(self) -> Vector3D:
+        """Rotation around each axis, in degrees"""
         return Vector3D(self._proto.rotation)
 
     @rotation.setter
@@ -2408,6 +2454,7 @@ class Footprint3DModel(Wrapper):
 
     @property
     def offset(self) -> Vector3D:
+        """Offset from footprint center"""
         return Vector3D(self._proto.offset)
 
     @offset.setter
@@ -4543,6 +4590,7 @@ class CartesianGridItemAttributes(Wrapper):
 
     @property
     def extent(self) -> Vector2:
+        """Half the width of the grid in x/y axis"""
         return Vector2(self._proto.extent)
 
     @extent.setter
@@ -4551,6 +4599,7 @@ class CartesianGridItemAttributes(Wrapper):
 
     @property
     def spacing(self) -> Vector2:
+        """Spacing between snap points on x/y axis"""
         return Vector2(self._proto.spacing)
 
     @spacing.setter
@@ -4575,6 +4624,7 @@ class PolarGridItemAttributes(Wrapper):
 
     @property
     def radius_extent(self) -> int:
+        """Radial extent from the center"""
         return self._proto.radius_extent.value_nm
 
     @radius_extent.setter
@@ -4583,6 +4633,7 @@ class PolarGridItemAttributes(Wrapper):
 
     @property
     def radius_spacing(self) -> int:
+        """Radial spacing of snap points"""
         return self._proto.radius_spacing.value_nm
 
     @radius_spacing.setter
@@ -4591,6 +4642,7 @@ class PolarGridItemAttributes(Wrapper):
 
     @property
     def phi_extent(self) -> Angle:
+        """Angle covered by the grid"""
         return Angle(proto_ref=self._proto.phi_extent)
 
     @phi_extent.setter
@@ -4599,6 +4651,7 @@ class PolarGridItemAttributes(Wrapper):
 
     @property
     def phi_spacing(self) -> Angle:
+        """Angular spacing between snap points"""
         return Angle(proto_ref=self._proto.phi_spacing)
 
     @phi_spacing.setter
@@ -4631,6 +4684,7 @@ class GridItem(BoardItem):
 
     @property
     def position(self) -> Vector2:
+        """Centre and rotation of the grid"""
         return Vector2(self._proto.position)
 
     @position.setter
@@ -4685,6 +4739,7 @@ class GridItem(BoardItem):
 
     @property
     def tick_interval(self) -> int:
+        """Every Nth line is drawn ephasized; 0 for no major ticks"""
         return self._proto.tick_interval
 
     @tick_interval.setter

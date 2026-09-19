@@ -1231,6 +1231,7 @@ class PageSettings(Wrapper):
 
     @property
     def user_page_size(self) -> Vector2:
+        """Relevant only when page_size == ``PS_USER``"""
         return Vector2(proto_ref=self._proto.user_page_size)
 
     @user_page_size.setter
@@ -1247,6 +1248,8 @@ class PageSettings(Wrapper):
 
     @property
     def drawing_sheet(self) -> str:
+        """Path to a .kicad_wks drawing sheet file.
+        Empty string means the default (built-in) drawing sheet is used."""
         return self._proto.drawing_sheet
 
     @drawing_sheet.setter
@@ -1287,6 +1290,7 @@ class EmbeddedFile(Wrapper):
 
     @property
     def data(self) -> bytes:
+        """zstd-compressed payload, base64-encoded."""
         return self._proto.data
 
     @data.setter
@@ -1295,6 +1299,7 @@ class EmbeddedFile(Wrapper):
 
     @property
     def data_hash(self) -> str:
+        """MurmurHash3 integrity hash"""
         return self._proto.data_hash
 
     @data_hash.setter
@@ -1477,6 +1482,7 @@ class DesignVariant(Wrapper):
 
     @property
     def description(self) -> str:
+        """The default variant is addressed by the empty string"""
         return self._proto.description
 
     @description.setter
@@ -1516,6 +1522,8 @@ class JobResult(Wrapper):
 
     @property
     def message(self) -> str:
+        """Optional message containing warning or error details. Should be empty if status is
+        ``JS_SUCCESS``."""
         return self._proto.message
 
     @property

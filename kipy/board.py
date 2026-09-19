@@ -182,6 +182,7 @@ class ImportNetlistResult(Wrapper):
 
     @property
     def report(self) -> str:
+        """Human-readable report of changes and any warnings or errors."""
         return self._proto.report
 
     @property
@@ -419,7 +420,7 @@ class BoardStackupLayer(Wrapper):
 
     @property
     def layer(self) -> BoardLayer.ValueType:
-        """The board layer this stackup entry corresponds to, or BL_UNDEFINED if this entry is
+        """The board layer this stackup entry corresponds to, or ``BL_UNDEFINED`` if this entry is
         a dielectric layer"""
         return self._proto.layer
 
@@ -1633,7 +1634,7 @@ class Board(EditorCommandsHandler["BoardItem"], VariantsCommandHandler):
     def get_layer_by_name(self, layer_name: str) -> board_types_pb2.BoardLayer.ValueType:
         """Retrieves a board layer ID from the given name, which may be either a KiCad standard
         layer name (e.g. ``In1.Cu``) or a user-defined name in the current board.  Returns
-        BL_UNDEFINED if the given name doesn't map to any layer in the current board.
+        ``BL_UNDEFINED`` if the given name doesn't map to any layer in the current board.
 
         .. versionadded:: 0.8.0 (KiCad 10.0.6)"""
         cmd = board_commands_pb2.GetBoardLayerByName()
@@ -1805,7 +1806,7 @@ class Board(EditorCommandsHandler["BoardItem"], VariantsCommandHandler):
     def interactive_move(self, items: KIID | Iterable[KIID]):
         """Initiates an interactive move operation on one or more items on the board.  The user
         will be able to move the items interactively in the KiCad editor.  This is a blocking
-        operation; this function will return immediately but future API calls will return AS_BUSY
+        operation; this function will return immediately but future API calls will return ``AS_BUSY``
         until the interactive move is complete."""
         cmd = board_commands_pb2.InteractiveMoveItems()
         cmd.board.CopyFrom(self._doc)
@@ -1826,7 +1827,7 @@ class Board(EditorCommandsHandler["BoardItem"], VariantsCommandHandler):
     ):
         """Refills all zones on the board.  If block is True, this function will block until the
         refill operation is complete.  If block is False, this function will return immediately,
-        and future API calls will return AS_BUSY until the refill operation is complete.
+        and future API calls will return ``AS_BUSY`` until the refill operation is complete.
 
         :param zones: An optional list of zone IDs to fill.  If empty or absent, all zones will be
                       filled (Since: 0.x.0 / KiCad 11.0)

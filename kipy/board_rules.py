@@ -884,6 +884,7 @@ class CustomRuleConstraint(Wrapper):
 
     @property
     def numeric(self) -> base_types_pb2.MinOptMax | None:
+        """nanometers, picoseconds, or unitless depending on constraint type"""
         if self._proto.WhichOneof("value") == "numeric":
             return self._proto.numeric
         return None

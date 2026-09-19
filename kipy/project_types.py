@@ -47,6 +47,8 @@ class NetClass(Wrapper):
 
     @property
     def name(self) -> str:
+        """The name of the netclass (the literal string "Default" for the default netclass)
+        May be empty for composite netclasses"""
         return self._proto.name
 
     @property

@@ -598,7 +598,7 @@ class Schematic(EditorCommandsHandler["SchematicItem"], VariantsCommandHandler):
         :param lib_id: The symbol to place, either as a :class:`LibraryIdentifier` or a
             string such as ``"Device:R"``.
         :param position: The position to place the symbol at.
-        :param orientation: Optional orientation; SchematicSymbolOrientation.SSO_0 if not given.
+        :param orientation: Optional orientation; ``SchematicSymbolOrientation.SSO_0`` if not given.
         :param unit: Optional unit number for multi-unit symbols; places the first unit if
             not given.
         :param reference: Optional reference designator to assign to the new symbol. KiCad
