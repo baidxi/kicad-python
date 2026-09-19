@@ -37,6 +37,7 @@ from kipy.common_types import (
     SheetPath,
     StrokeAttributes,
     Text,
+    TextAttributes,
     TextBox,
     to_concrete_shape,
 )
@@ -801,6 +802,13 @@ class BaseLabel(SchematicItem):
     electrical nets on a schematic.  They form connections at their :attr:`position` to other
     connected items (such as wires or pins).
 
+    The orientation of a label is controlled by :attr:`spin_style`, not by
+    ``text.attributes.angle``: KiCad derives both the text angle and the horizontal justification
+    from the spin style, and an angle set via ``text.attributes.angle`` is overwritten by
+    the spin style when the label is unpacked by KiCad.  For example, ``SLSS_UP`` renders the text
+    vertically with its start anchored at the label position, while ``SLSS_RIGHT`` renders it
+    horizontally with the text extending away from the anchor according to the justification.
+
     .. versionadded:: 0.x.y (KiCad 11)
     """
 
@@ -825,7 +833,9 @@ class BaseLabel(SchematicItem):
 
     @property
     def text(self) -> Text:
-        return Text(proto_ref=self.proto.text)
+        """The label text.  Setting ``attributes.angle`` on this text raises
+        :class:`AttributeError`; use :attr:`spin_style` to control label orientation"""
+        return LabelText(proto_ref=self.proto.text)
 
     @text.setter
     def text(self, value: Text):
@@ -865,6 +875,36 @@ class BaseLabel(SchematicItem):
     def custom_properties(self, value: Sequence[CustomProperty]):
         del self.proto.custom_properties[:]
         self.proto.custom_properties.extend(prop.proto for prop in value)
+
+
+class LabelText(Text):
+    """A :class:`Text` that rejects angle assignment, because KiCad derives label orientation
+    from the label's spin style rather than from the text angle"""
+
+    @property
+    def attributes(self) -> TextAttributes:
+        return _LabelAttributes(proto_ref=self._proto.attributes)
+
+    @attributes.setter
+    def attributes(self, attributes: TextAttributes):
+        self._proto.attributes.CopyFrom(attributes.proto)
+
+
+class _LabelAttributes(TextAttributes):
+    @property
+    def angle(self) -> float:
+        """The orientation of the text in degrees.  Reading is supported, but assignment raises
+        :class:`AttributeError` because KiCad overwrites a label's text angle from its spin style
+        (see :class:`BaseLabel`)"""
+        return self._proto.angle.value_degrees
+
+    @angle.setter
+    def angle(self, angle: float):
+        raise AttributeError(
+            "Labels do not support setting text.attributes.angle: KiCad sets label angle and "
+            "justification from spin_style, and any angle set here is overwritten.  "
+            "Set spin_style instead (e.g. SchematicLabelSpinStyle.SLSS_UP)"
+        )
 
 
 class ShapeLabel(BaseLabel):
