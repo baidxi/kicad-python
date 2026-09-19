@@ -54,11 +54,16 @@ from kipy.proto.schematic.schematic_commands_pb2 import (
     SchematicHierarchyResponse,
     SchematicNetlistResponse,
 )
-from kipy.schematic_jobs import (
+from kipy.schematic_jobs import (  # noqa
     BOMFieldSettings,
+    BOMFilterScope,
     BOMFormatSettings,
+    BOMSortDirection,
     JobResult,
     PlotSettings,
+    SchematicJobPageSize,
+    SchematicJobSheetMode,
+    SchematicNetlistFormat,
 )
 from kipy.schematic_types import (
     BusEntry,
@@ -156,7 +161,8 @@ class Schematic(EditorCommandsHandler["SchematicItem"], VariantsCommandHandler):
     ) -> JobResult:
         """Plots the schematic to SVG.
 
-        :param output_path: Sets the directory or filename of the export
+        :param output_path: Sets the directory or filename of the export. Relative paths are
+            resolved from the project directory.
         :param plot_settings: Controls the general shared schematic plot settings
         :param sheet_mode: Set to ``SJSM_ALL_SHEETS``, ``output_path`` is taken as a directory and
             one file per sheet is created.  Otherwise, the sheet pointed to by this schematic
@@ -178,7 +184,8 @@ class Schematic(EditorCommandsHandler["SchematicItem"], VariantsCommandHandler):
     ) -> JobResult:
         """Plots the schematic to DXF.
 
-        :param output_path: Sets the directory or filename of the export
+        :param output_path: Sets the directory or filename of the export. Relative paths are
+            resolved from the project directory.
         :param plot_settings: Controls the general shared schematic plot settings
         :param sheet_mode: Set to ``SJSM_ALL_SHEETS``, ``output_path`` is taken as a directory and
             one file per sheet is created.  Otherwise, the sheet pointed to by this schematic
@@ -202,8 +209,15 @@ class Schematic(EditorCommandsHandler["SchematicItem"], VariantsCommandHandler):
     ) -> JobResult:
         """Plots the schematic to a single PDF file.
 
-        KiCad writes one PDF file, so ``output_file`` must point to a file
-        path rather than a directory.
+        :param output_file: Sets the filename of the export. Relative paths are resolved from
+            the project directory.
+        :param plot_settings: Controls the general shared schematic plot settings
+        :param property_popups: Controls whether popup menus with object properties should be
+            generated in the PDF.
+        :param hierarchical_links: Controls whether hierarchical labels should be generated as
+            hyperlinkst to other sheets in the PDF.
+        :param include_metadata: When enabled, the generated PDF will include document properties
+            from the AUTHOR and SUBJECT text variables.
         """
         command = schematic_jobs_pb2.RunSchematicJobExportPdf()
         if plot_settings is not None:
@@ -223,7 +237,8 @@ class Schematic(EditorCommandsHandler["SchematicItem"], VariantsCommandHandler):
     ) -> JobResult:
         """Plots the schematic to PostScript.
 
-        :param output_path: Sets the directory or filename of the export
+        :param output_path: Sets the directory or filename of the export. Relative paths are
+            resolved from the project directory.
         :param plot_settings: Controls the general shared schematic plot settings
         :param sheet_mode: Set to ``SJSM_ALL_SHEETS``, ``output_path`` is taken as a directory and
             one file per sheet is created.  Otherwise, the sheet pointed to by this schematic
@@ -247,7 +262,8 @@ class Schematic(EditorCommandsHandler["SchematicItem"], VariantsCommandHandler):
     ) -> JobResult:
         """Plots the schematic to PNG.
 
-        :param output_path: Sets the directory or filename of the export
+        :param output_path: Sets the directory or filename of the export. Relative paths are
+            resolved from the project directory.
         :param plot_settings: Controls the general shared schematic plot settings
         :param dpi: Sets the resolution of the generated image.  When omitted, the default of 300
             is used.  KiCad accepts between 72 and 2400 DPI.
@@ -275,8 +291,11 @@ class Schematic(EditorCommandsHandler["SchematicItem"], VariantsCommandHandler):
     ) -> JobResult:
         """Exports the schematic netlist to a single output file.
 
-        KiCad writes one netlist file, so ``output_file`` must point to a
-        file path rather than a directory.
+        :param output_file: Sets the filename of the export. Relative paths are resolved from
+            the project directory.
+        :param format: Sets the netlist format to use for the export.
+        :param variant_name: If non-empty, selects a schematic variant to generate the netlist
+            for; uses the default variant otherwise.
         """
         command = schematic_jobs_pb2.RunSchematicJobExportNetlist()
         command.format = format
@@ -294,10 +313,18 @@ class Schematic(EditorCommandsHandler["SchematicItem"], VariantsCommandHandler):
         group_symbols: bool = False,
         variant_name: str = "",
     ) -> JobResult:
-        """Exports the schematic bill of materials to a single output file.
+        """Exports the schematic bill of materials (BOM) to a single output file.
 
-        KiCad writes one BOM file, so ``output_file`` must point to a file
-        path rather than a directory.
+        :param output_file: Sets the filename of the export. Relative paths are resolved from
+            the project directory.
+        :param format_settings: Controls the format of the BOM (see
+            :class:`~kipy.schematic_jobs.BOMFormatSettings`)
+        :param field_settings: Controls which symbol fields to export (see
+            :class:`~kipy.schematic_jobs.BOMFieldSettings`)
+        :param exclude_dnp: Excludes symbols marked as do not populate (DNP) from the BOM.
+        :param group_symbols: Groups symbols together into a single BOM row when their fields
+            match one of the :class:`~kipy.schematic_jobs.BOMField` where
+            :attr:`~kipy.schematic_jobs.BOMField.group_by` is True.
         """
         command = schematic_jobs_pb2.RunSchematicJobExportBOM()
         if format_settings is not None:

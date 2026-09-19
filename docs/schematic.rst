@@ -26,3 +26,12 @@ These objects can be placed on a schematic (and some can also exist inside a sch
 .. automodule:: kipy.schematic_types
    :members:
    :undoc-members:
+
+Schematic Jobs
+===============
+
+Classes related to schematic output jobs (file exports)
+
+.. automodule:: kipy.schematic_jobs
+   :members:
+   :undoc-members:
