@@ -25,7 +25,7 @@ build-docs:
 
 # Builds docs for released tags listed in docs/versions.txt
 build-docs-versions:
-  image: docker:28-git
+  image: docker:28
   services:
     - docker:28-dind
   stage: build
@@ -34,6 +34,7 @@ build-docs-versions:
   before_script:
     - docker info
     - docker login -u gitlab-ci-token -p "$CI_JOB_TOKEN" "$CI_REGISTRY"
+    - apk add --no-cache git
   script:
     - |
       VERSIONS="${DOCS_VERSIONS:-$(grep -v -e '^\s*#' -e '^\s*$' docs/versions.txt | tr '\n' ' ')}"
