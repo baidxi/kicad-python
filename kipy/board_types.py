@@ -1001,7 +1001,7 @@ class Barcode(BoardItem):
 
     @property
     def orientation(self) -> Angle:
-        return Angle(self._proto.orientation)
+        return Angle(proto_ref=self._proto.orientation)
 
     @orientation.setter
     def orientation(self, value: Angle):
@@ -1245,7 +1245,7 @@ class ThermalSpokeSettings(Wrapper):
 
     @property
     def angle(self) -> Angle:
-        return Angle(self._proto.angle)
+        return Angle(proto_ref=self._proto.angle)
 
     @angle.setter
     def angle(self, angle: Angle):
@@ -1288,7 +1288,7 @@ class ZoneConnectionSettings(Wrapper):
 
     @property
     def thermal_spokes(self) -> ThermalSpokeSettings:
-        return ThermalSpokeSettings(self._proto.thermal_spokes)
+        return ThermalSpokeSettings(proto_ref=self._proto.thermal_spokes)
 
 
 class SolderMaskOverrides(Wrapper):
@@ -1821,7 +1821,7 @@ class PadStack(BoardItem):
 
     @property
     def angle(self) -> Angle:
-        return Angle(self._proto.angle)
+        return Angle(proto_ref=self._proto.angle)
 
     @angle.setter
     def angle(self, angle: Angle):
@@ -2731,7 +2731,7 @@ class FootprintInstance(BoardItem):
 
     @property
     def position(self) -> Vector2:
-        return Vector2(self._proto.position)
+        return Vector2(proto_ref=self._proto.position)
 
     @position.setter
     def position(self, position: Vector2):
@@ -2797,13 +2797,14 @@ class FootprintInstance(BoardItem):
 
     @property
     def orientation(self) -> Angle:
-        return Angle(self._proto.orientation)
+        return Angle(proto_ref=self._proto.orientation)
 
     @orientation.setter
     def orientation(self, orientation: Angle):
-        orientation.normalize180()
-        delta = orientation - self.orientation
-        self._proto.orientation.CopyFrom(orientation.proto)
+        normalized = Angle(orientation.proto).normalize180()
+        live = self.orientation
+        delta = normalized - live
+        live.degrees = normalized.degrees
 
         for field in [
             self.reference_field,
@@ -3086,7 +3087,7 @@ class HatchFillSettings(Wrapper):
 
     @property
     def orientation(self) -> Angle:
-        return Angle(self._proto.orientation)
+        return Angle(proto_ref=self._proto.orientation)
 
     @orientation.setter
     def orientation(self, orientation: Angle):
@@ -3176,7 +3177,7 @@ class ThievingFillSettings(Wrapper):
 
     @property
     def orientation(self) -> Angle:
-        return Angle(self._proto.orientation)
+        return Angle(proto_ref=self._proto.orientation)
 
     @orientation.setter
     def orientation(self, orientation: Angle):
@@ -4590,7 +4591,7 @@ class PolarGridItemAttributes(Wrapper):
 
     @property
     def phi_extent(self) -> Angle:
-        return Angle(self._proto.phi_extent)
+        return Angle(proto_ref=self._proto.phi_extent)
 
     @phi_extent.setter
     def phi_extent(self, extent: Angle):
@@ -4598,7 +4599,7 @@ class PolarGridItemAttributes(Wrapper):
 
     @property
     def phi_spacing(self) -> Angle:
-        return Angle(self._proto.phi_spacing)
+        return Angle(proto_ref=self._proto.phi_spacing)
 
     @phi_spacing.setter
     def phi_spacing(self, spacing: Angle):
@@ -4638,7 +4639,7 @@ class GridItem(BoardItem):
 
     @property
     def orientation(self) -> Angle:
-        return Angle(self._proto.orientation)
+        return Angle(proto_ref=self._proto.orientation)
 
     @orientation.setter
     def orientation(self, orientation: Angle):

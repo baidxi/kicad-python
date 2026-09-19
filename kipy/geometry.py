@@ -37,11 +37,15 @@ else:
 class Vector2(Wrapper):
     """Wraps a kiapi.common.types.Vector2, aka VECTOR2I"""
 
-    def __init__(self, proto: types.Vector2 | None = None):
-        self._proto = types.Vector2()
+    def __init__(
+        self,
+        proto: types.Vector2 | Wrapper | None = None,
+        proto_ref: types.Vector2 | None = None,
+    ):
+        self._proto = proto_ref if proto_ref is not None else types.Vector2()
 
         if proto is not None:
-            self._proto.CopyFrom(proto)
+            self._proto.CopyFrom(proto.proto if isinstance(proto, Wrapper) else proto)
 
     def __repr__(self):
         return f"Vector2({self.x}, {self.y})"
@@ -121,6 +125,16 @@ class Vector2(Wrapper):
         r.x = int(float(r.x) * scalar)
         r.y = int(float(r.y) * scalar)
         return r
+
+    def __iadd__(self, other: Vector2) -> Self:
+        self.x += other.x
+        self.y += other.y
+        return self
+
+    def __isub__(self, other: Vector2) -> Self:
+        self.x -= other.x
+        self.y -= other.y
+        return self
 
     def length(self) -> float:
         return math.sqrt(self.x * self.x + self.y * self.y)
@@ -334,11 +348,15 @@ class Box2:
 
 
 class Angle(Wrapper):
-    def __init__(self, proto: types.Angle | None = None):
-        self._proto = types.Angle()
+    def __init__(
+        self,
+        proto: types.Angle | Wrapper | None = None,
+        proto_ref: types.Angle | None = None,
+    ):
+        self._proto = proto_ref if proto_ref is not None else types.Angle()
 
         if proto is not None:
-            self._proto.CopyFrom(proto)
+            self._proto.CopyFrom(proto.proto if isinstance(proto, Wrapper) else proto)
 
     def __repr__(self):
         return f"Angle({self.degrees})"
@@ -362,6 +380,14 @@ class Angle(Wrapper):
         if isinstance(other, Angle):
             return self.degrees == other.degrees
         return NotImplemented
+
+    def __iadd__(self, other: Angle) -> Self:
+        self.degrees += other.degrees
+        return self
+
+    def __isub__(self, other: Angle) -> Self:
+        self.degrees -= other.degrees
+        return self
 
     def __add__(self, other: Angle) -> Angle:
         return Angle.from_degrees(self.degrees + other.degrees)

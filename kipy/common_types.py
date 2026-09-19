@@ -284,7 +284,7 @@ class TextAttributes(Wrapper):
 
     @property
     def size(self) -> Vector2:
-        return Vector2(self._proto.size)
+        return Vector2(proto_ref=self._proto.size)
 
     @size.setter
     def size(self, size: Vector2):
@@ -487,7 +487,7 @@ class Text(Wrapper):
 
     @property
     def position(self) -> Vector2:
-        return Vector2(self._proto.position)
+        return Vector2(proto_ref=self._proto.position)
 
     @position.setter
     def position(self, pos: Vector2):
@@ -523,7 +523,7 @@ class TextBox(Wrapper):
 
     @property
     def top_left(self) -> Vector2:
-        return Vector2(self._proto.top_left)
+        return Vector2(proto_ref=self._proto.top_left)
 
     @top_left.setter
     def top_left(self, pos: Vector2):
@@ -531,7 +531,7 @@ class TextBox(Wrapper):
 
     @property
     def bottom_right(self) -> Vector2:
-        return Vector2(self._proto.bottom_right)
+        return Vector2(proto_ref=self._proto.bottom_right)
 
     @bottom_right.setter
     def bottom_right(self, pos: Vector2):
@@ -630,7 +630,7 @@ class Segment(GraphicShape):
 
     @property
     def start(self) -> Vector2:
-        return Vector2(self._graphic_proto.segment.start)
+        return Vector2(proto_ref=self._graphic_proto.segment.start)
 
     @start.setter
     def start(self, point: Vector2):
@@ -638,7 +638,7 @@ class Segment(GraphicShape):
 
     @property
     def end(self) -> Vector2:
-        return Vector2(self._graphic_proto.segment.end)
+        return Vector2(proto_ref=self._graphic_proto.segment.end)
 
     @end.setter
     def end(self, point: Vector2):
@@ -680,7 +680,7 @@ class Arc(GraphicShape):
 
     @property
     def start(self) -> Vector2:
-        return Vector2(self._graphic_proto.arc.start)
+        return Vector2(proto_ref=self._graphic_proto.arc.start)
 
     @start.setter
     def start(self, point: Vector2):
@@ -688,7 +688,7 @@ class Arc(GraphicShape):
 
     @property
     def mid(self) -> Vector2:
-        return Vector2(self._graphic_proto.arc.mid)
+        return Vector2(proto_ref=self._graphic_proto.arc.mid)
 
     @mid.setter
     def mid(self, point: Vector2):
@@ -696,7 +696,7 @@ class Arc(GraphicShape):
 
     @property
     def end(self) -> Vector2:
-        return Vector2(self._graphic_proto.arc.end)
+        return Vector2(proto_ref=self._graphic_proto.arc.end)
 
     @end.setter
     def end(self, point: Vector2):
@@ -774,7 +774,7 @@ class Circle(GraphicShape):
 
     @property
     def center(self) -> Vector2:
-        return Vector2(self._graphic_proto.circle.center)
+        return Vector2(proto_ref=self._graphic_proto.circle.center)
 
     @center.setter
     def center(self, point: Vector2):
@@ -782,7 +782,7 @@ class Circle(GraphicShape):
 
     @property
     def radius_point(self) -> Vector2:
-        return Vector2(self._graphic_proto.circle.radius_point)
+        return Vector2(proto_ref=self._graphic_proto.circle.radius_point)
 
     @radius_point.setter
     def radius_point(self, radius_point: Vector2):
@@ -834,7 +834,7 @@ class Rectangle(GraphicShape):
 
     @property
     def top_left(self) -> Vector2:
-        return Vector2(self._graphic_proto.rectangle.top_left)
+        return Vector2(proto_ref=self._graphic_proto.rectangle.top_left)
 
     @top_left.setter
     def top_left(self, point: Vector2):
@@ -842,7 +842,7 @@ class Rectangle(GraphicShape):
 
     @property
     def bottom_right(self) -> Vector2:
-        return Vector2(self._graphic_proto.rectangle.bottom_right)
+        return Vector2(proto_ref=self._graphic_proto.rectangle.bottom_right)
 
     @bottom_right.setter
     def bottom_right(self, point: Vector2):
@@ -944,7 +944,7 @@ class Bezier(GraphicShape):
 
     @property
     def start(self) -> Vector2:
-        return Vector2(self._graphic_proto.bezier.start)
+        return Vector2(proto_ref=self._graphic_proto.bezier.start)
 
     @start.setter
     def start(self, point: Vector2):
@@ -952,7 +952,7 @@ class Bezier(GraphicShape):
 
     @property
     def control1(self) -> Vector2:
-        return Vector2(self._graphic_proto.bezier.control1)
+        return Vector2(proto_ref=self._graphic_proto.bezier.control1)
 
     @control1.setter
     def control1(self, point: Vector2):
@@ -960,7 +960,7 @@ class Bezier(GraphicShape):
 
     @property
     def control2(self) -> Vector2:
-        return Vector2(self._graphic_proto.bezier.control2)
+        return Vector2(proto_ref=self._graphic_proto.bezier.control2)
 
     @control2.setter
     def control2(self, point: Vector2):
@@ -968,7 +968,7 @@ class Bezier(GraphicShape):
 
     @property
     def end(self) -> Vector2:
-        return Vector2(self._graphic_proto.bezier.end)
+        return Vector2(proto_ref=self._graphic_proto.bezier.end)
 
     @end.setter
     def end(self, point: Vector2):
@@ -1231,7 +1231,7 @@ class PageSettings(Wrapper):
 
     @property
     def user_page_size(self) -> Vector2:
-        return Vector2(self._proto.user_page_size)
+        return Vector2(proto_ref=self._proto.user_page_size)
 
     @user_page_size.setter
     def user_page_size(self, value: Vector2):

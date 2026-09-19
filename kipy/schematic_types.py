@@ -188,7 +188,7 @@ class SchematicLine(SchematicItem):
 
     @property
     def start(self) -> Vector2:
-        return Vector2(self._proto.start)
+        return Vector2(proto_ref=self._proto.start)
 
     @start.setter
     def start(self, value: Vector2):
@@ -196,7 +196,7 @@ class SchematicLine(SchematicItem):
 
     @property
     def end(self) -> Vector2:
-        return Vector2(self._proto.end)
+        return Vector2(proto_ref=self._proto.end)
 
     @end.setter
     def end(self, value: Vector2):
@@ -288,7 +288,7 @@ class Junction(SchematicItem):
 
     @property
     def position(self) -> Vector2:
-        return Vector2(self._proto.position)
+        return Vector2(proto_ref=self._proto.position)
 
     @position.setter
     def position(self, value: Vector2):
@@ -354,7 +354,7 @@ class NoConnectMarker(SchematicItem):
 
     @property
     def position(self) -> Vector2:
-        return Vector2(self._proto.position)
+        return Vector2(proto_ref=self._proto.position)
 
     @position.setter
     def position(self, value: Vector2):
@@ -411,7 +411,7 @@ class BusEntry(SchematicItem):
 
     @property
     def position(self) -> Vector2:
-        return Vector2(self._proto.position)
+        return Vector2(proto_ref=self._proto.position)
 
     @position.setter
     def position(self, value: Vector2):
@@ -419,7 +419,7 @@ class BusEntry(SchematicItem):
 
     @property
     def size(self) -> Vector2:
-        return Vector2(self._proto.size)
+        return Vector2(proto_ref=self._proto.size)
 
     @size.setter
     def size(self, value: Vector2):
@@ -493,7 +493,7 @@ class SchematicText(SchematicItem):
 
     @property
     def position(self) -> Vector2:
-        return Vector2(self._proto.text.position)
+        return Vector2(proto_ref=self._proto.text.position)
 
     @position.setter
     def position(self, value: Vector2):
@@ -571,7 +571,7 @@ class SchematicTextBox(SchematicItem):
 
     @property
     def top_left(self) -> Vector2:
-        return Vector2(self._proto.textbox.top_left)
+        return Vector2(proto_ref=self._proto.textbox.top_left)
 
     @top_left.setter
     def top_left(self, value: Vector2):
@@ -579,7 +579,7 @@ class SchematicTextBox(SchematicItem):
 
     @property
     def bottom_right(self) -> Vector2:
-        return Vector2(self._proto.textbox.bottom_right)
+        return Vector2(proto_ref=self._proto.textbox.bottom_right)
 
     @bottom_right.setter
     def bottom_right(self, value: Vector2):
@@ -755,7 +755,7 @@ class SchematicImage(SchematicItem):
 
     @property
     def position(self) -> Vector2:
-        return Vector2(self._proto.position)
+        return Vector2(proto_ref=self._proto.position)
 
     @position.setter
     def position(self, value: Vector2):
@@ -763,7 +763,7 @@ class SchematicImage(SchematicItem):
 
     @property
     def transform_origin_offset(self) -> Vector2:
-        return Vector2(self._proto.transform_origin_offset)
+        return Vector2(proto_ref=self._proto.transform_origin_offset)
 
     @transform_origin_offset.setter
     def transform_origin_offset(self, value: Vector2):
@@ -817,7 +817,7 @@ class BaseLabel(SchematicItem):
 
     @property
     def position(self) -> Vector2:
-        return Vector2(self.proto.position)
+        return Vector2(proto_ref=self.proto.position)
 
     @position.setter
     def position(self, value: Vector2):
@@ -1124,7 +1124,7 @@ class SheetSymbol(SchematicItem):
 
     @property
     def path(self) -> SheetPath:
-        return SheetPath(self._proto.path)
+        return SheetPath(proto_ref=self._proto.path)
 
     @path.setter
     def path(self, path: SheetPath):
@@ -1151,7 +1151,7 @@ class SheetSymbol(SchematicItem):
 
     @property
     def position(self) -> Vector2:
-        return Vector2(self._proto.position)
+        return Vector2(proto_ref=self._proto.position)
 
     @position.setter
     def position(self, value: Vector2):
@@ -1159,7 +1159,7 @@ class SheetSymbol(SchematicItem):
 
     @property
     def size(self) -> Vector2:
-        return Vector2(self._proto.size)
+        return Vector2(proto_ref=self._proto.size)
 
     @size.setter
     def size(self, value: Vector2):
@@ -1365,7 +1365,7 @@ class SchematicPin(SchematicItem):
     def position(self) -> Vector2:
         """Position in the symbol definition's local coordinate frame (relative to the
         symbol origin, without any rotation or mirroring applied)"""
-        return Vector2(self._proto.position)
+        return Vector2(proto_ref=self._proto.position)
 
     @position.setter
     def position(self, value: Vector2):
@@ -2381,7 +2381,7 @@ class SchematicSymbolInstance(SchematicItem):
 
     @property
     def position(self) -> Vector2:
-        return Vector2(self._proto.position)
+        return Vector2(proto_ref=self._proto.position)
 
     @position.setter
     def position(self, value: Vector2):
