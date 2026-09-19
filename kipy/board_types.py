@@ -2738,6 +2738,11 @@ class FootprintInstance(BoardItem):
         """Changes the footprint position, which will also update the positions of all the
         contained items since KiCad footprint children are stored with absolute positions"""
         delta = position - self.position
+
+        local_delta = Vector2.from_xy(delta.x, delta.y).rotate(
+            Angle.from_degrees(-self.orientation.degrees), Vector2.from_xy(0, 0)
+        )
+
         self._proto.position.CopyFrom(position.proto)
 
         for field in [
@@ -2754,7 +2759,37 @@ class FootprintInstance(BoardItem):
             elif isinstance(item, (Pad, BoardText)):
                 item.position += delta
             elif isinstance(item, Zone):
-                item.move(delta)
+                # Zone outlines inside a footprint definition are stored in the footprint's
+                # local coordinate frame but any filled polys are in the board frame
+                item.outline.move(local_delta)
+
+                for polygons in item.filled_polygons.values():
+                    for polygon in polygons:
+                        polygon.move(delta)
+            elif isinstance(item, BoardTextBox):
+                item.top_left += delta
+                item.bottom_right += delta
+            elif isinstance(item, (Barcode, ReferencePoint)):
+                item.position += delta
+            elif isinstance(item, Dimension):
+                dimension = to_concrete_dimension(item)
+                assert dimension
+
+                if isinstance(dimension, (AlignedDimension, OrthogonalDimension, LeaderDimension)):
+                    dimension.start += delta
+                    dimension.end += delta
+                elif isinstance(dimension, RadialDimension):
+                    dimension.center += delta
+                    dimension.radius_point += delta
+                elif isinstance(dimension, CenterDimension):
+                    dimension.center += delta
+                    dimension.end += delta
+
+                dimension.text.position += delta
+            elif isinstance(item, Table):
+                for cell in item.cells:
+                    cell.text.top_left += delta
+                    cell.text.bottom_right += delta
             elif isinstance(item, BoardShape):
                 shape = to_concrete_board_shape(item)
                 assert shape
@@ -2779,23 +2814,58 @@ class FootprintInstance(BoardItem):
             field.text.position = field.text.position.rotate(delta, self.position)
             field.text.attributes.angle += delta.degrees
 
-        updated_items: list[Item] = []
+        updated_items: list[Wrapper] = []
         for item in self.definition.items:
             if isinstance(item, Field):
                 item.text.position = item.text.position.rotate(delta, self.position)
                 item.text.attributes.angle += delta.degrees
-                updated_items.append(item)
             elif isinstance(item, Pad):
                 item.position = item.position.rotate(delta, self.position)
                 item.padstack.angle += delta
-                updated_items.append(item)
             elif isinstance(item, BoardText):
                 item.position = item.position.rotate(delta, self.position)
                 item.attributes.angle += delta.degrees
-                updated_items.append(item)
+            elif isinstance(item, BoardTextBox):
+                item.top_left = item.top_left.rotate(delta, self.position)
+                item.bottom_right = item.bottom_right.rotate(delta, self.position)
+                item.attributes.angle += delta.degrees
+            elif isinstance(item, Table):
+                for cell in item.cells:
+                    cell.text.top_left = cell.text.top_left.rotate(delta, self.position)
+                    cell.text.bottom_right = cell.text.bottom_right.rotate(delta, self.position)
+                    cell.text.attributes.angle += delta.degrees
+            elif isinstance(item, DrillChart):
+                for cell in item.table.cells:
+                    cell.text.top_left = cell.text.top_left.rotate(delta, self.position)
+                    cell.text.bottom_right = cell.text.bottom_right.rotate(delta, self.position)
+                    cell.text.attributes.angle += delta.degrees
+            elif isinstance(item, Barcode):
+                item.position = item.position.rotate(delta, self.position)
+                item.orientation += delta
+            elif isinstance(item, ReferencePoint):
+                item.position = item.position.rotate(delta, self.position)
+            elif isinstance(item, Dimension):
+                dimension = to_concrete_dimension(item)
+                assert dimension
+
+                if isinstance(dimension, (AlignedDimension, OrthogonalDimension, LeaderDimension)):
+                    dimension.start = dimension.start.rotate(delta, self.position)
+                    dimension.end = dimension.end.rotate(delta, self.position)
+                elif isinstance(dimension, RadialDimension):
+                    dimension.center = dimension.center.rotate(delta, self.position)
+                    dimension.radius_point = dimension.radius_point.rotate(delta, self.position)
+                elif isinstance(dimension, CenterDimension):
+                    dimension.center = dimension.center.rotate(delta, self.position)
+                    dimension.end = dimension.end.rotate(delta, self.position)
+
+                dimension.text.position = dimension.text.position.rotate(delta, self.position)
+                dimension.text.attributes.angle += delta.degrees
             elif isinstance(item, Zone):
-                item.rotate(delta, self.position)
-                updated_items.append(item)
+                # Zone outlines inside a footprint definition are stored in the footprint's
+                # local coordinate frame but any filled polys are in the board frame
+                for polygons in item.filled_polygons.values():
+                    for polygon in polygons:
+                        polygon.rotate(delta, self.position)
             elif isinstance(item, BoardShape):
                 shape = to_concrete_board_shape(item)
                 assert shape
@@ -2803,7 +2873,9 @@ class FootprintInstance(BoardItem):
                     shape = BoardPolygon.from_rectangle(shape)
 
                 shape.rotate(delta, self.position)
-                updated_items.append(shape)
+                item = shape
+
+            updated_items.append(item)
 
         self.definition.items = updated_items
 
