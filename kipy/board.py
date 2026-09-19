@@ -1939,7 +1939,10 @@ class Board(EditorCommandsHandler["BoardItem"], VariantsCommandHandler):
         orientation: Angle | None = None,
         layer: board_types_pb2.BoardLayer.ValueType = board_types_pb2.BoardLayer.BL_F_Cu,
     ) -> FootprintInstance:
-        """Places a footprint from a library onto the board
+        """Places a footprint from a library onto the board.
+
+        Requires that libraries be loaded, which will not be the case in headless mode until
+        :meth:`~kipy.KiCad.load_all_libraries` has been called.
 
         :param lib_id: The footprint to place, either as a :class:`LibraryIdentifier` or a
             string such as ``"Resistor_SMD:R_0603_1608Metric"``.

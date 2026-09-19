@@ -586,7 +586,10 @@ class Schematic(EditorCommandsHandler["SchematicItem"], VariantsCommandHandler):
         reference: str | None = None,
         sheet_path: SheetPath | SheetInstance | None = None,
     ) -> SchematicSymbolInstance:
-        """Places a symbol from a library onto the schematic
+        """Places a symbol from a library onto the schematic.
+
+        Requires that libraries be loaded, which will not be the case in headless mode until
+        :meth:`~kipy.KiCad.load_all_libraries` has been called.
 
         If ``reference`` is not given, KiCad will either leave the symbol unannotated or
         automatically annotate it depending on the user's current auto-annotation
