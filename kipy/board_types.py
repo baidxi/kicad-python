@@ -3707,13 +3707,17 @@ class Dimension(BoardItem):
 
 
 class AlignedDimension(Dimension):
-    def __init__(self, proto: board_types_pb2.Dimension | None = None):
-        self._proto = board_types_pb2.Dimension()
+    def __init__(
+        self,
+        proto: board_types_pb2.Dimension | None = None,
+        proto_ref: board_types_pb2.Dimension | None = None,
+    ):
+        self._proto = proto_ref if proto_ref is not None else board_types_pb2.Dimension()
 
         if proto is not None:
             assert proto.WhichOneof("dimension_style") == "aligned"
             self._proto.CopyFrom(proto)
-        else:
+        elif proto_ref is None:
             self._proto.aligned.SetInParent()
 
     def __repr__(self) -> str:
@@ -3756,13 +3760,17 @@ class AlignedDimension(Dimension):
 
 
 class OrthogonalDimension(Dimension):
-    def __init__(self, proto: board_types_pb2.Dimension | None = None):
-        self._proto = board_types_pb2.Dimension()
+    def __init__(
+        self,
+        proto: board_types_pb2.Dimension | None = None,
+        proto_ref: board_types_pb2.Dimension | None = None,
+    ):
+        self._proto = proto_ref if proto_ref is not None else board_types_pb2.Dimension()
 
         if proto is not None:
             assert proto.WhichOneof("dimension_style") == "orthogonal"
             self._proto.CopyFrom(proto)
-        else:
+        elif proto_ref is None:
             self._proto.orthogonal.SetInParent()
 
     def __repr__(self) -> str:
@@ -3812,13 +3820,17 @@ class OrthogonalDimension(Dimension):
 
 
 class RadialDimension(Dimension):
-    def __init__(self, proto: board_types_pb2.Dimension | None = None):
-        self._proto = board_types_pb2.Dimension()
+    def __init__(
+        self,
+        proto: board_types_pb2.Dimension | None = None,
+        proto_ref: board_types_pb2.Dimension | None = None,
+    ):
+        self._proto = proto_ref if proto_ref is not None else board_types_pb2.Dimension()
 
         if proto is not None:
             assert proto.WhichOneof("dimension_style") == "radial"
             self._proto.CopyFrom(proto)
-        else:
+        elif proto_ref is None:
             self._proto.radial.SetInParent()
 
     def __repr__(self) -> str:
@@ -3853,13 +3865,17 @@ class RadialDimension(Dimension):
 
 
 class LeaderDimension(Dimension):
-    def __init__(self, proto: board_types_pb2.Dimension | None = None):
-        self._proto = board_types_pb2.Dimension()
+    def __init__(
+        self,
+        proto: board_types_pb2.Dimension | None = None,
+        proto_ref: board_types_pb2.Dimension | None = None,
+    ):
+        self._proto = proto_ref if proto_ref is not None else board_types_pb2.Dimension()
 
         if proto is not None:
             assert proto.WhichOneof("dimension_style") == "leader"
             self._proto.CopyFrom(proto)
-        else:
+        elif proto_ref is None:
             self._proto.leader.SetInParent()
 
     def __repr__(self) -> str:
@@ -3894,13 +3910,17 @@ class LeaderDimension(Dimension):
 
 
 class CenterDimension(Dimension):
-    def __init__(self, proto: board_types_pb2.Dimension | None = None):
-        self._proto = board_types_pb2.Dimension()
+    def __init__(
+        self,
+        proto: board_types_pb2.Dimension | None = None,
+        proto_ref: board_types_pb2.Dimension | None = None,
+    ):
+        self._proto = proto_ref if proto_ref is not None else board_types_pb2.Dimension()
 
         if proto is not None:
             assert proto.WhichOneof("dimension_style") == "center"
             self._proto.CopyFrom(proto)
-        else:
+        elif proto_ref is None:
             self._proto.center.SetInParent()
 
     def __repr__(self) -> str:
@@ -3933,7 +3953,7 @@ def to_concrete_dimension(dimension: Dimension) -> Dimension:
         None: None,
     }.get(dimension._proto.WhichOneof("dimension_style"), None)
 
-    return cls(dimension._proto) if cls is not None else dimension
+    return cls(proto_ref=dimension._proto) if cls is not None else dimension
 
 
 class BoardEditorAppearanceSettings(Wrapper):
