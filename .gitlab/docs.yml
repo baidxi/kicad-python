@@ -2,7 +2,7 @@ test-docs:
   image: python:3.9-alpine
   stage: test
   script:
-  - pip install -U sphinx furo
+  - pip install sphinx==7.4.7 furo==2024.8.6
   - sphinx-build -b html docs docs/_build
   rules:
     - if: $CI_COMMIT_REF_NAME != $CI_DEFAULT_BRANCH
@@ -22,3 +22,33 @@ build-docs:
     - docker push "${CI_REGISTRY_IMAGE}/kicad-python-docs:main"
   rules:
     - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
+
+# Builds docs for released tags listed in docs/versions.txt
+build-docs-versions:
+  image: docker:stable
+  services:
+    - docker:28-dind
+  stage: build
+  tags:
+    - gitlab-org-docker
+  before_script:
+    - docker info
+    - docker login -u gitlab-ci-token -p "$CI_JOB_TOKEN" "$CI_REGISTRY"
+  script:
+    - |
+      VERSIONS="${DOCS_VERSIONS:-$(grep -v -e '^\s*#' -e '^\s*$' docs/versions.txt | tr '\n' ' ')}"
+      echo "Building docs for versions: ${VERSIONS}"
+      for tag in ${VERSIONS}; do
+        echo "=== ${tag} ==="
+        workdir="$(mktemp -d)"
+        git clone --depth 1 --branch "${tag}" \
+          --recurse-submodules --shallow-submodules \
+          "${CI_REPOSITORY_URL}" "${workdir}"
+        docker build -t "${CI_REGISTRY_IMAGE}/kicad-python-docs:${tag}" -f "${workdir}/docs/Dockerfile" "${workdir}"
+        docker push "${CI_REGISTRY_IMAGE}/kicad-python-docs:${tag}"
+        rm -rf "${workdir}"
+      done
+  rules:
+    - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
+      when: manual
+    - if: $CI_PIPELINE_SOURCE == "schedule" && $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH

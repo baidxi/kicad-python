@@ -1,0 +1,5 @@
+# Released tags to build versioned docs for, newest first.
+# Used by the build-docs-versions CI job; override a run with the
+# DOCS_VERSIONS variable (space-separated). One tag per line.
+0.8.0
+0.7.1

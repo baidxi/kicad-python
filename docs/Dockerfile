@@ -5,7 +5,7 @@ WORKDIR /src
 COPY . ./
 
 RUN git submodule update --init --depth=1
-RUN pip install -U sphinx furo
+RUN pip install sphinx==7.4.7 furo==2024.8.6
 RUN pip install -e .
 RUN sphinx-build -b html docs docs/_build
 
