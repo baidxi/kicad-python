@@ -55,6 +55,7 @@ from kipy.proto.schematic.schematic_commands_pb2 import (
     SchematicNetlistResponse,
 )
 from kipy.schematic_jobs import (  # noqa
+    BOM_FORMAT_CSV,
     BOMFieldSettings,
     BOMFilterScope,
     BOMFormatSettings,
@@ -307,8 +308,8 @@ class Schematic(EditorCommandsHandler["SchematicItem"], VariantsCommandHandler):
     def export_bom(
         self,
         output_file: str,
-        format_settings: BOMFormatSettings | None = None,
-        field_settings: BOMFieldSettings | None = None,
+        field_settings: BOMFieldSettings,
+        format_settings: BOMFormatSettings = BOM_FORMAT_CSV,
         exclude_dnp: bool = False,
         group_symbols: bool = False,
         variant_name: str = "",
@@ -317,18 +318,18 @@ class Schematic(EditorCommandsHandler["SchematicItem"], VariantsCommandHandler):
 
         :param output_file: Sets the filename of the export. Relative paths are resolved from
             the project directory.
-        :param format_settings: Controls the format of the BOM (see
-            :class:`~kipy.schematic_jobs.BOMFormatSettings`)
         :param field_settings: Controls which symbol fields to export (see
             :class:`~kipy.schematic_jobs.BOMFieldSettings`)
+        :param format_settings: Controls the format of the BOM (see
+            :class:`~kipy.schematic_jobs.BOMFormatSettings`); defaults to
+            :data:`~kipy.schematic_jobs.BOM_FORMAT_CSV` (KiCad's built-in CSV preset)
         :param exclude_dnp: Excludes symbols marked as do not populate (DNP) from the BOM.
         :param group_symbols: Groups symbols together into a single BOM row when their fields
             match one of the :class:`~kipy.schematic_jobs.BOMField` where
             :attr:`~kipy.schematic_jobs.BOMField.group_by` is True.
         """
         command = schematic_jobs_pb2.RunSchematicJobExportBOM()
-        if format_settings is not None:
-            command.format.CopyFrom(format_settings.proto)
+        command.format.CopyFrom(format_settings.proto)
         if field_settings is not None:
             command.fields.CopyFrom(field_settings.proto)
         command.exclude_dnp = exclude_dnp

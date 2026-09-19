@@ -34,6 +34,9 @@ from kipy.proto.schematic.schematic_jobs_pb2 import (
 from kipy.wrapper import Wrapper
 
 __all__ = (
+    "BOM_FORMAT_CSV",
+    "BOM_FORMAT_SEMICOLONS",
+    "BOM_FORMAT_TSV",
     "BOMField",
     "BOMFieldSettings",
     "BOMFilterScope",
@@ -354,3 +357,21 @@ class BOMFieldSettings(Wrapper):
     @filter_scope.setter
     def filter_scope(self, value: schematic_jobs_pb2.BOMFilterScope.ValueType):
         self._proto.filter_scope = value
+
+
+BOM_FORMAT_CSV = BOMFormatSettings()
+BOM_FORMAT_CSV.field_delimiter = ","
+BOM_FORMAT_CSV.string_delimiter = '"'
+BOM_FORMAT_CSV.ref_delimiter = ","
+"""Matches the built-in KiCad ``CSV`` BOM format preset."""
+
+BOM_FORMAT_TSV = BOMFormatSettings()
+BOM_FORMAT_TSV.field_delimiter = "\t"
+BOM_FORMAT_TSV.ref_delimiter = ","
+"""Matches the built-in KiCad ``TSV`` BOM format preset."""
+
+BOM_FORMAT_SEMICOLONS = BOMFormatSettings()
+BOM_FORMAT_SEMICOLONS.field_delimiter = ";"
+BOM_FORMAT_SEMICOLONS.string_delimiter = "'"
+BOM_FORMAT_SEMICOLONS.ref_delimiter = ","
+"""Matches the built-in KiCad ``Semicolons`` BOM format preset."""
