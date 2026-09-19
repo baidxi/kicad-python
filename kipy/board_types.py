@@ -2976,6 +2976,22 @@ class FootprintInstance(BoardItem):
         return SheetPath(self._proto.symbol_path)
 
     @property
+    def symbol_sheet_name(self) -> str:
+        """The name of the hierarchical sheet the associated symbol for this footprint exists on,
+        or the empty string if there is no associated symbol.
+
+        ..versionadded:: 0.9.0 (KiCad 9.0.7)"""
+        return self._proto.symbol_sheet_name
+
+    @property
+    def symbol_sheet_filename(self) -> str:
+        """The filename of the hierarchical sheet the associated symbol for this footprint exists,
+        on, or the empty string if there is no associated symbol.
+
+        ..versionadded:: 0.9.0 (KiCad 9.0.7)"""
+        return self._proto.symbol_sheet_filename
+
+    @property
     def embedded_files(self) -> EmbeddedFiles | None:
         """Files embedded in this footprint instance
 
