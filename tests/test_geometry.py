@@ -26,6 +26,7 @@ from kipy.common_types import Circle
 from kipy.geometry import (
     Angle,
     Box2,
+    PolygonWithHoles,
     PolyLine,
     PolyLineNode,
     Vector2,
@@ -298,6 +299,42 @@ def test_padstack_layer_custom_shapes_round_trip():
     layer.custom_shapes = [seg]
     assert type(layer._proto.custom_shapes[0]) is board_types_pb2.BoardGraphicShape
     assert layer.custom_shapes[0].start == seg.start
+
+
+def test_board_polygon_polygons_append_writes_through():
+    """Polygon.polygons must be a write-through view over the wire proto."""
+    from kipy.board_types import BoardPolygon, PadStackLayer
+    from kipy.common_types import Polygon
+
+    poly = PolygonWithHoles()
+    outline = PolyLine()
+    outline.append(PolyLineNode.from_xy(0, 0))
+    outline.append(PolyLineNode.from_xy(1_000_000, 0))
+    outline.append(PolyLineNode.from_xy(0, 1_000_000))
+    outline.closed = True
+    poly.outline = outline
+
+    # Plain Polygon: append hits the inner GraphicShape proto immediately
+    shape = Polygon()
+    shape.polygons.append(poly)
+    assert len(shape._graphic_proto.polygon.polygons) == 1
+
+    # BoardPolygon: append hits the outer BoardGraphicShape proto immediately
+    board_poly = BoardPolygon()
+    board_poly.polygons.append(poly)
+    assert len(board_poly._proto.shape.polygon.polygons) == 1
+
+    # The custom_shapes setter path (wire serialization consumer) sees it
+    layer = PadStackLayer()
+    layer.custom_shapes = [board_poly]
+    restored = layer.custom_shapes[0]
+    assert len(restored.polygons) == 1
+    assert len(restored.polygons[0].outline) == 3
+
+    # Construction from proto and in-place mutation stay consistent
+    copy = Polygon(proto=shape.proto)
+    copy.polygons[0].outline.append(PolyLineNode.from_xy(9, 9))
+    assert len(copy._graphic_proto.polygon.polygons[0].outline.nodes) == 4
 
 
 def test_graphic_shape_proto_is_inner_message():

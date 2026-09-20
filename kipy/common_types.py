@@ -872,17 +872,11 @@ class Polygon(GraphicShape):
             self._graphic_proto.polygon.SetInParent()
 
         assert self._graphic_proto.WhichOneof("geometry") == "polygon"
-        self._polygons = [
-            PolygonWithHoles(proto_ref=p) for p in self._graphic_proto.polygon.polygons
-        ]
-
-    def _pack(self):
-        self._graphic_proto.polygon.ClearField("polygons")
-        self._graphic_proto.polygon.polygons.extend([polygon.proto for polygon in self._polygons])
 
     @property
-    def polygons(self) -> list[PolygonWithHoles]:
-        return self._polygons
+    def polygons(self) -> MutableWrapperSequence[PolygonWithHoles]:
+        """The polygons of this shape as a live view"""
+        return MutableWrapperSequence(self._graphic_proto.polygon.polygons, PolygonWithHoles)
 
     def __repr__(self) -> str:
         return f"Polygon(polygons={self.polygons})"
