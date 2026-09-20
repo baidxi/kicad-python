@@ -18,10 +18,15 @@
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from typing import Union
 
-from google.protobuf.json_format import MessageToJson, Parse, ParseError
+from google.protobuf.json_format import (
+    MessageToJson,
+    ParseDict,
+    ParseError,
+)
 
 from kipy.proto.common import types
 
@@ -776,7 +781,7 @@ class WizardBase:
 
         try:
             footprint = self.build_generated_content(parameters)
-        except (WizardError, NotImplementedError) as ex:
+        except (WizardError, NotImplementedError, ValueError, TypeError) as ex:
             generated.status = types.WizardGenerationStatus.WGS_ERROR
             generated.error_message = f"Generation failed: {ex!s}"
             return generated
@@ -794,7 +799,7 @@ class WizardBase:
 
         try:
             container = types.WizardParameterList()
-            Parse(args.params, container)
+            ParseDict(json.loads(args.params), container, ignore_unknown_fields=True)
         except ParseError as ex:
             return None, f"Invalid --params protobuf JSON: {ex!s}"
         except (ValueError, TypeError) as ex:
