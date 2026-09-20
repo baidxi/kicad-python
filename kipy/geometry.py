@@ -550,7 +550,7 @@ class PolyLineNode(Wrapper):
 
     @property
     def arc(self) -> ArcStartMidEnd:
-        return ArcStartMidEnd(self._proto.arc)
+        return ArcStartMidEnd(proto_ref=self._proto.arc)
 
     @arc.setter
     def arc(self, val: ArcStartMidEnd):
