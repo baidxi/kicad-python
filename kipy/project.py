@@ -25,7 +25,13 @@ from typing import overload
 from google.protobuf.empty_pb2 import Empty
 
 from kipy.client import KiCadClient
-from kipy.project_types import NetClass, TextVariables
+from kipy.project_types import (
+    NetClass,
+    NetClassAssignment,
+    NetClassAssignments,
+    NetClassPatternAssignment,
+    TextVariables,
+)
 from kipy.proto.common.commands import project_commands_pb2
 from kipy.proto.common.types import (
     DocumentSpecifier,
@@ -63,6 +69,7 @@ class Project:
 
     def get_net_classes(self) -> list[NetClass]:
         command = project_commands_pb2.GetNetClasses()
+        command.project.CopyFrom(self._doc.project)
         response = self._kicad.send(command, project_commands_pb2.NetClassesResponse)
         return [NetClass(p) for p in response.net_classes]
 
@@ -79,8 +86,49 @@ class Project:
 
         .. versionadded:: 0.9.0"""
         command = project_commands_pb2.SetNetClasses()
+        command.project.CopyFrom(self._doc.project)
         command.merge_mode = merge_mode
         command.net_classes.extend([nc.proto for nc in net_classes])
+        self._kicad.send(command, Empty)
+
+    def get_net_class_assignments(self) -> NetClassAssignments:
+        """Returns the netclass membership assignments stored in the project settings.
+        Note that the effective netclass assignments for a project consist of
+
+        .. versionadded:: 0.x.0 (KiCad 11)"""
+        command = project_commands_pb2.GetNetClassAssignments()
+        command.project.CopyFrom(self._doc.project)
+        response = self._kicad.send(command, project_commands_pb2.NetClassAssignmentsResponse)
+        return NetClassAssignments(
+            [NetClassAssignment(a) for a in response.assignments],
+            [NetClassPatternAssignment(p) for p in response.pattern_assignments],
+        )
+
+    def set_net_class_assignments(
+        self,
+        assignments: NetClassAssignments,
+        merge_mode: MapMergeMode.ValueType = MapMergeMode.MMM_MERGE,
+    ):
+        """Sets the project netclass membership assignments, merging with existing
+        assignments by default
+
+        In ``MMM_MERGE`` mode, each given direct assignment replaces the full set of
+        netclasses for that net (an assignment with an empty netclasses list removes all
+        assignments for that net), and each given pattern assignment replaces the netclass
+        for that pattern (an assignment with an empty netclass name removes the pattern).
+        In ``MMM_REPLACE`` mode, the given assignments represent the complete desired state:
+        any existing assignments or patterns not present in the request are removed.
+
+        :param assignments: the netclass assignments to set
+        :param merge_mode: ``MMM_MERGE`` merges the given assignments into the existing set,
+                           ``MMM_REPLACE`` replaces the existing set of assignments
+
+        .. versionadded:: 0.x.0 (KiCad 11)"""
+        command = project_commands_pb2.SetNetClassAssignments()
+        command.project.CopyFrom(self._doc.project)
+        command.merge_mode = merge_mode
+        command.assignments.extend([a.proto for a in assignments.assignments])
+        command.pattern_assignments.extend([p.proto for p in assignments.pattern_assignments])
         self._kicad.send(command, Empty)
 
     @overload

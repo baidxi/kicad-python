@@ -20,6 +20,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Sequence
+
 from kipy.common_types import Color
 from kipy.proto.common.types import project_settings_pb2
 from kipy.wrapper import Wrapper
@@ -246,6 +248,95 @@ class NetClass(Wrapper):
             self._proto.schematic.ClearField("color")
         else:
             self._proto.schematic.color.CopyFrom(color.proto)
+
+
+class NetClassAssignment(Wrapper):
+    """A direct assignment of a net to a netclass
+
+    .. versionadded:: 0.x.0 (KiCad 11)"""
+
+    def __init__(self, proto: project_settings_pb2.NetClassAssignment | None = None):
+        self._proto = proto if proto is not None else project_settings_pb2.NetClassAssignment()
+
+    def __repr__(self) -> str:
+        return f"NetClassAssignment(net={self.net!r}, netclasses={self.netclasses!r})"
+
+    @property
+    def net(self) -> str:
+        """Full net path (e.g. "/sheet1/net1"). May refer to a net that does not exist yet."""
+        return self._proto.net
+
+    @net.setter
+    def net(self, net: str):
+        self._proto.net = net
+
+    @property
+    def netclasses(self) -> list[str]:
+        """Names of netclasses assigned to the net.
+        In ``MMM_MERGE`` mode, an empty list removes all assignments for this net."""
+        return list(self._proto.netclasses)
+
+    @netclasses.setter
+    def netclasses(self, netclasses: list[str]):
+        self._proto.netclasses[:] = netclasses
+
+
+class NetClassPatternAssignment(Wrapper):
+    """A pattern that assigns any matching nets to a netclass
+
+    .. versionadded:: 0.x.0 (KiCad 11)"""
+
+    def __init__(self, proto: project_settings_pb2.NetClassPatternAssignment | None = None):
+        self._proto = (
+            proto if proto is not None else project_settings_pb2.NetClassPatternAssignment()
+        )
+
+    def __repr__(self) -> str:
+        return f"NetClassPatternAssignment(pattern={self.pattern!r}, netclass={self.netclass!r})"
+
+    @property
+    def pattern(self) -> str:
+        """Wildcard pattern matched against full net paths (e.g. "/power/*")."""
+        return self._proto.pattern
+
+    @pattern.setter
+    def pattern(self, pattern: str):
+        self._proto.pattern = pattern
+
+    @property
+    def netclass(self) -> str:
+        """Name of the netclass assigned to matching nets.
+        In ``MMM_MERGE`` mode, an empty string removes the pattern."""
+        return self._proto.netclass
+
+    @netclass.setter
+    def netclass(self, netclass: str):
+        self._proto.netclass = netclass
+
+
+class NetClassAssignments:
+    """A container for project netclass assignment settings (direct and pattern).
+
+    Note that these are the explicit assignments configured in the KiCad schematic/board setup
+    dialogs.  Users may also assign netclasses by placing directive labels in the schematic;
+    these assignments will not be reflected in the data returned by
+    :meth:`~kipy.project.Project.get_net_class_assignments`
+
+    .. versionadded:: 0.x.0 (KiCad 11)"""
+
+    def __init__(
+        self,
+        assignments: Sequence[NetClassAssignment] = (),
+        pattern_assignments: Sequence[NetClassPatternAssignment] = (),
+    ):
+        self.assignments = list(assignments)
+        self.pattern_assignments = list(pattern_assignments)
+
+    def __repr__(self) -> str:
+        return (
+            f"NetClassAssignments(assignments={self.assignments!r}, "
+            f"pattern_assignments={self.pattern_assignments!r})"
+        )
 
 
 class TextVariables(Wrapper):
