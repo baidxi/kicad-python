@@ -1563,14 +1563,11 @@ class PadStackLayer(Wrapper):
         self._proto.trapezoid_delta.CopyFrom(delta.proto)
 
     @property
-    def custom_shapes(self) -> Sequence[BoardShape]:
-        return [
-            item
-            for item in (
-                to_concrete_board_shape(BoardShape(shape)) for shape in self._proto.custom_shapes
-            )
-            if item is not None
-        ]
+    def custom_shapes(self) -> MutableWrapperSequence[BoardShape]:
+        """The shapes that make up a custom-shape pad on this layer"""
+        return MutableWrapperSequence(
+            self._proto.custom_shapes, BoardShape, to_concrete_board_shape
+        )
 
     @custom_shapes.setter
     def custom_shapes(self, shapes: Sequence[BoardShape]):

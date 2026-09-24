@@ -1083,7 +1083,7 @@ def to_concrete_shape(shape: GraphicShape) -> GraphicShape | None:
         None: None,
     }.get(shape._graphic_proto.WhichOneof("geometry"), None)
 
-    return cls(shape._graphic_proto) if cls is not None else None
+    return cls(proto_ref=shape._graphic_proto) if cls is not None else None
 
 
 class CompoundShape(Wrapper):
@@ -1096,33 +1096,8 @@ class CompoundShape(Wrapper):
             self._proto.CopyFrom(proto)
 
     @property
-    def shapes(self) -> Sequence[GraphicShape]:
-        return [
-            shape
-            for shape in (
-                to_concrete_shape(GraphicShape(subshape)) for subshape in self._proto.shapes
-            )
-            if shape is not None
-        ]
-
-    def __iter__(self):
-        return iter(self.shapes)
-
-    def __len__(self):
-        return len(self._proto.shapes)
-
-    def __getitem__(self, index):
-        return self.shapes[index]
-
-    def __setitem__(self, index, shape: GraphicShape):
-        self._proto.shapes[index].CopyFrom(shape._graphic_proto)
-
-    def __delitem__(self, index):
-        del self._proto.shapes[index]
-
-    def append(self, shape: GraphicShape):
-        new_shape = self._proto.shapes.add()
-        new_shape.CopyFrom(shape.proto)
+    def shapes(self) -> MutableWrapperSequence[GraphicShape]:
+        return MutableWrapperSequence(self._proto.shapes, GraphicShape, to_concrete_shape)
 
 
 class TitleBlockInfo(Wrapper):

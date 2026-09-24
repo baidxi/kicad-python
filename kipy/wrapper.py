@@ -22,7 +22,7 @@ from __future__ import annotations
 
 import sys
 from abc import ABC, abstractmethod
-from collections.abc import Iterable, MutableSequence
+from collections.abc import Callable, Iterable, MutableSequence
 from typing import TypeVar
 
 if sys.version_info >= (3, 11):
@@ -45,22 +45,34 @@ class MutableWrapperSequence(MutableSequence[T]):
     This is used to provide a list-like container that can be extended without
     having to make a copy first.
 
+    By default every element is wrapped with ``wrapper_type``.  A
+    ``concrete_factory`` may be supplied for repeated fields whose
+    elements must be dispatched to a concrete subclass (e.g. shapes);
+    it receives a ``wrapper_type`` view of the element and returns the
+    wrapper to expose, or ``None`` to expose the ``wrapper_type`` view unchanged.
+
     Note: slice assignment and reordering in place are not supported.  Make a
     new copy of the sequence and assign via a property setter if you need to
     do one of those operations.
     """
 
-    def __init__(self, container: RepeatedCompositeFieldContainer, wrapper_type: type[T]):
+    def __init__(
+        self,
+        container: RepeatedCompositeFieldContainer,
+        wrapper_type: type[T],
+        concrete_factory: Callable[[T], T | None] | None = None,
+    ):
         self._container = container
         self._wrapper_type = wrapper_type
+        self._concrete_factory = concrete_factory
 
     def __len__(self) -> int:
         return len(self._container)
 
     def __getitem__(self, index):
         if isinstance(index, slice):
-            return [self._wrapper_type(proto_ref=item) for item in self._container[index]]
-        return self._wrapper_type(proto_ref=self._container[index])
+            return [self._wrap(item) for item in self._container[index]]
+        return self._wrap(self._container[index])
 
     def __setitem__(self, index, value):
         if isinstance(index, slice):
@@ -84,6 +96,12 @@ class MutableWrapperSequence(MutableSequence[T]):
 
     def __repr__(self) -> str:
         return repr(list(self))
+
+    def _wrap(self, item: Message) -> T:
+        base = self._wrapper_type(proto_ref=item)
+        if self._concrete_factory is not None:
+            return self._concrete_factory(base) or base
+        return base
 
     def insert(self, index: int, value: T):
         self._container.insert(index, type(value.proto)())
