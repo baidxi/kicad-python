@@ -800,7 +800,7 @@ class BoardText(BoardItem):
             self._proto.CopyFrom(proto)
 
     def __repr__(self) -> str:
-        return f"BoardText(value={self.value}, position={self.position}, layer={BoardLayer.Name(self.layer)})"
+        return f"BoardText(value={self.value!r}, position={self.position}, layer={BoardLayer.Name(self.layer)})"
 
     def as_text(self) -> Text:
         """Returns a base Text object using the same data as this BoardText"""
@@ -878,7 +878,7 @@ class BoardTextBox(BoardItem):
 
     def __repr__(self) -> str:
         return (
-            f"BoardTextBox(value={self.value}, top_left={self.top_left}, "
+            f"BoardTextBox(value={self.value!r}, top_left={self.top_left}, "
             f"bottom_right={self.bottom_right}, layer={BoardLayer.Name(self.layer)})"
         )
 
@@ -2767,7 +2767,7 @@ class FootprintInstance(BoardItem):
         return self.__dict__["_proto"]
 
     def __repr__(self) -> str:
-        return f"FootprintInstance(id={self.id}, pos={self.position}, layer={BoardLayer.Name(self.layer)})"
+        return f'FootprintInstance(id="{self.id.value}", pos={self.position}, layer={BoardLayer.Name(self.layer)})'
 
     @property
     def id(self) -> KIID:
