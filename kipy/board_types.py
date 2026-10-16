@@ -3113,7 +3113,9 @@ class FootprintInstance(BoardItem):
 
     def move(self, delta: Vector2):
         """Moves the footprint by the given delta vector"""
-        self.position += delta
+        # Here we can't do: self.position += delta
+        # The getter returns a reference and the vector is mutable, so the setter gets an alreay updated position
+        self.position = self.position + delta
 
 
 class ZoneFilledPolygons(Wrapper):
