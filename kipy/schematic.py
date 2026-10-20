@@ -585,7 +585,8 @@ class Schematic(EditorCommandsHandler["SchematicItem"], VariantsCommandHandler):
         unit: int | None = None,
         reference: str | None = None,
         sheet_path: SheetPath | SheetInstance | None = None,
-    ) -> SchematicSymbolInstance:
+        interactive: bool = False,
+    ) -> SchematicSymbolInstance | None:
         """Places a symbol from a library onto the schematic.
 
         Requires that libraries be loaded, which will not be the case in headless mode until
@@ -612,12 +613,20 @@ class Schematic(EditorCommandsHandler["SchematicItem"], VariantsCommandHandler):
             active in KiCad if this object is not bound to a sheet).  Use :meth:`for_sheet`
             or pass an explicit ``sheet_path`` to place symbols on a subsheet if this
             object holds the root sheet.
-        :return: The newly-placed symbol instance.
+        :param interactive: If true, hand the symbol to the interactive placement tool:
+            it follows the mouse and is committed where the user clicks.  ``position``
+            and ``orientation`` are ignored in this mode.  Requires the schematic editor
+            GUI.  Returns None in this case as no symbol has been placed yet.
+
+        :return: The newly-placed symbol instance, or None when ``interactive`` is true.
 
         .. versionadded:: 0.x.y (KiCad 11)
         """
         command = PlaceSymbolFromLibrary()
         command.header.document.CopyFrom(self._spec(sheet_path))
+
+        if interactive:
+            command.interactive = True
 
         if isinstance(lib_id, str):
             library, _, name = lib_id.partition(":")
@@ -642,5 +651,9 @@ class Schematic(EditorCommandsHandler["SchematicItem"], VariantsCommandHandler):
             command.reference = reference
 
         response = self._kicad.send(command, PlaceFromLibraryResponse)
+
+        if interactive:
+            return None      # The symbol exists once the user clicks
+
         item = cast(SchematicSymbolInstance, unwrap(response.item))
         return item

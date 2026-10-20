@@ -25,8 +25,12 @@ def from_mm(value_mm: float) -> int:
     64-bit nanometers
     :param value_mm: a quantity in millimeters
     :return: the quantity in KiCad API units
+
+    ⚠️ 必须四舍五入而非 ``int()`` 截断：浮点乘法的 89842518.999… 会被
+    截成 89842518，与引脚真实位置差 1nm —— KiCad 连通性引擎按 nm
+    严格匹配，1nm 即断线（导线端点永远连不上引脚）。
     """
-    return int(value_mm * 1_000_000)
+    return round(value_mm * 1_000_000)
 
 
 def to_mm(value_nm: int) -> float:
