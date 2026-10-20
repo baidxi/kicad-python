@@ -1,4 +1,4 @@
 [submodule "kicad"]
 	path = kicad
-	url = https://gitlab.com/kicad/code/kicad.git
+	url = https://github.com/baidxi/kicad.git
 	shallow = true
